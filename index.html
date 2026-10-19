@@ -1,0 +1,67 @@
+<!DOCTYPE html>     <!-- tells the browser: modern HTML -->
+<html lang="en">    <!-- language, for screen readers -->
+    <head>          <!-- info ABOUT the page, not shown -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>          <!-- everything visible goes here -->
+        <header class="site-header">
+            <a href="index.html" class="logo">People</a>
+            <nav aria-label="Main">
+                <ul class="nav-links">
+                    <li><a href="index.html" aria-current="page">Directory</a></li>
+                    <li><a href="onboarding.html">Onboarding</a></li>
+                    <li><a href="#">Payroll</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h1>Employee Directory</h1>
+            <p>All the employees at ACME.</p>
+
+            <section aria-labelledby="team-heading">
+                <h2 id="team-heading">Team</h2>
+                <!-- employee cards -->
+                
+                <article class="card">
+                    <img src="https://i.pravatar.cc/150?img=56" alt="Portrait of Ben Reilly">
+                    <h3>Ben Reilly</h3>
+                    <p class="role">Senior Software Engineer</p>
+                    <p class="dept">Engineering · San Francisco</p>
+                    <a href="mailto:ben.reilly@acme.com">ben.reilly@acme.com</a>
+                </article>
+                
+                <article class="card">
+                    <img src="https://i.pravatar.cc/150?img=10" alt="Portrait of Haley Stardew">
+                    <h3>Haley Stardew</h3>
+                    <p class="role">Software Engineer II</p>
+                    <p class="dept">Engineering · San Francisco</p>
+                    <a href="mailto:haley.stardew@acme.com">haley.stardew@acme.com</a>
+                </article>
+
+                <article class="card">
+                    <img src="https://i.pravatar.cc/150?img=44" alt="Portrait of Sleuth Lady">
+                    <h3>Sleuth Lady</h3>
+                    <p class="role">Senior Software Engineer I</p>
+                    <p class="dept">Engineering · San Francisco</p>
+                    <a href="mailto:sleuth.lady@acme.com">sleuth.lady@acme.com</a>
+                </article>
+            </section>
+
+            <aside class="upcoming-birthdays">
+                <h2 id="birthdays-heading">Upcoming Birthdays</h2>
+                <ul aria-labelledby="birthday-heading">
+                    <li><time datetime="2026-10-20">Oct 20</time> Ben Reilly</li>
+                    <li><time datetime="2026-11-15">Nov 15</time> Haley Stardew</li>
+                    <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
+                </ul>
+            </aside>
+        </main>
+
+        <footer class="site-footer">
+            <p>&copy; 2026 ACME, Inc.</p>
+        </footer>
+    </body>
+</html>
