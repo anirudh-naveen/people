@@ -4,7 +4,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
+
+         <!-- JavaScript -->
         <script src="app.js" defer></script>
+        <script src="onboarding.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
         <header class="site-header">
@@ -73,7 +76,8 @@
 
                     <div class="field">
                         <label for="notes">Anything we should know?</label>
-                        <textarea id="notes" name="notes" rows="4"></textarea>
+                        <textarea id="notes" name="notes" rows="4" maxlength="200" aria-describedby="notes-count"></textarea>
+                        <p id="notes_count">0/200</p>
                     </div>
 
                     <label class="checkbox">
@@ -88,34 +92,5 @@
             <p id="status" role="status"></p>
             <h2>Added this session</h2>
             <ul id="new-hires"></ul>
-
-            <!-- JavaScript -->
-            <script src="onboarding.js" defer>
-                const form = document.querySelector('.form');
-                const status = document.querySelector('#status')
-                const list = document.querySelector('#new-hires')
-
-                form.addEventListener('submit', (event) => {
-                    event.preventDefault(); // prevent default form submission
-
-                    const data = new FormData(form);
-                    const name = data.get('fullName').trim();
-                    const dept = data.get('department');
-
-                    if (name.length < 2) {
-                        status.textContent = 'Please enter a full name.'
-                        return;
-                    }
-
-                    const li = document.createElement('li');
-                    li.textContent = `${name} - ${dept}`;
-                    list.append(li);
-
-                    status.textContent = `Added ${name}.`;
-                    form.reset();
-                    form.querySelector('input').focus();
-                })
-            </script>
-    
         </main>
     </body>
