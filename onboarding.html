@@ -1,0 +1,121 @@
+<!DOCTYPE html>     <!-- tells the browser: modern HTML -->
+<html lang="en">    <!-- language, for screen readers -->
+    <head>          <!-- info ABOUT the page, not shown -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <script src="app.js" defer></script>
+    </head>
+    <body>          <!-- everything visible goes here -->
+        <header class="site-header">
+            <a href="index.html" class="logo">People</a>
+            <nav aria-label="Main">
+                <ul class="nav-links">
+                    <li><a href="index.html" aria-current="page">Directory</a></li>
+                    <li><a href="onboarding.html">Onboarding</a></li>
+                    <li><a href="#">Payroll</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <h1>New Hire Onboarding</h1>
+
+            <!-- 'action' designated the destination link after completing a form -->
+                <!-- # means it stays on the same page -->
+            <!-- 'method' defines how a form sends its data -->
+                <!-- GET: default; appends data to the URL -->
+                <!-- POST: sends data in the request body -->
+                <!-- DIALOG: opens a dialog box for user input -->
+            <form class="form" action="#" method="post">
+                <fieldset>
+                    <legend>Personal Details</legend>
+                    <div class="field">
+                        <label for="profile">Profile Picture</label>
+                        <input id="profile" name ="profile" type="file" accept="image/*" required/>
+                    </div>
+
+                    <div class="field">
+                        <label for="full-name">Full Name</label>
+                        <input id="full-name" name ="fullName" type="text" required autocomplete="name"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Work Email</label>
+                        <input id="email" name ="email" type="email" required autocomplete="you@acme.com"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="phone">Phone Number</label>
+                        <input id="phone" name ="phone" type="tel" required autocomplete="123-456-7890"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="start">Start Date</label>
+                        <input id="start" name ="startDate" type="date" required/>
+                    </div>
+
+                    <div class="field">
+                        <label for="salary">Salary</label>
+                        <input id="salary" name ="salary" type="number" 
+                            min="30000" max="500000" step="1000"
+                            required autocomplete="off"/>
+                    </div>
+                
+
+                    <fieldset class="radio-group">
+                        <legend>Employment Type</legend>
+
+                        <label><input type="radio" name="type" value="full-time" checked /> Full-time</label>
+                        <label><input type="radio" name="type" value="part-time" /> Part-time</label>
+                        <label><input type="radio" name="type" value="contractor" /> Contractor</label>
+                    </fieldset>
+
+                    <div class="field">
+                        <label for="notes">Anything we should know?</label>
+                        <textarea id="notes" name="notes" rows="4"></textarea>
+                    </div>
+
+                    <label class="checkbox">
+                        <input type="checkbox" name="agree" required /> I agree to the handbook policies.
+                    </label>
+                </fieldset>
+
+                <button type="submit" class="btn btn--primary">Submit</button>
+                <button type="reset" class="btn">Clear</button>
+            </form>
+
+            <p id="status" role="status"></p>
+            <h2>Added this session</h2>
+            <ul id="new-hires"></ul>
+
+            <!-- JavaScript -->
+            <script src="onboarding.js" defer>
+                const form = document.querySelector('.form');
+                const status = document.querySelector('#status')
+                const list = document.querySelector('#new-hires')
+
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault(); // prevent default form submission
+
+                    const data = new FormData(form);
+                    const name = data.get('fullName').trim();
+                    const dept = data.get('department');
+
+                    if (name.length < 2) {
+                        status.textContent = 'Please enter a full name.'
+                        return;
+                    }
+
+                    const li = document.createElement('li');
+                    li.textContent = `${name} - ${dept}`;
+                    list.append(li);
+
+                    status.textContent = `Added ${name}.`;
+                    form.reset();
+                    form.querySelector('input').focus();
+                })
+            </script>
+    
+        </main>
+    </body>
