@@ -1,0 +1,189 @@
+*,
+*::before,
+*::after {
+    /* With border-box, width includes padding and border */
+    /* Without border-box, width adds to padding and border */
+  box-sizing: border-box;
+}
+
+
+/* Main Styles */
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #1f2333;
+    background:#f6f7fb;
+}
+
+h1, h2, h3 {
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+}
+
+h2 {
+    margin-top: 2rem;
+}
+
+img {
+    max-width: 100%;    /* images never overflow their container */
+    display: block;
+}
+
+a {
+    color: #6b2fb3;
+}
+
+main {
+    max-width: 1100px;
+    margin: 0 auto; /* auto left/right margins = centered */
+    padding: 2rem 1rem;
+}
+
+
+
+/* Card Styles */
+.card {
+    background: white;
+    border: 1px solid #e3e5ee;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
+    text-align: center;
+}
+
+.card img {
+    border-radius: 50%; /* circle */
+    margin: 0 auto 1rem;
+}
+
+.card .role {
+    font-weight: 600;
+    margin: 0;
+}
+
+.card .dept {
+    color: #6b7085;
+    font-size: 0.875rem;
+    margin: 0 0 0.75rem;
+}
+
+
+
+/* Table Styles */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;   /* single borders between cells */
+    background: white;
+}
+
+.data-table caption {
+    text-align: left;
+    padding: 0.5rem 0;
+    color: #6b7085;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e3e5ee;
+}
+
+.data-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7085;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background: #fafbfd;    /* zebra stripes */
+}
+
+.data-table tbody tr:hover {
+    background: #f1ecfa;
+}
+
+.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;     /* digits line up */
+}
+
+
+
+
+/* Badge, Form Field, and Button Styles */
+.badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge--active { background: #e3f6ea; color: #1b7a3d; }
+.badge--leave { background: #fff4d6; color: #8a5a00; }
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.field label {
+    display: block;     /* label sits on its own line above */
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.form legend {
+    color: rgb(146, 146, 146, 0.5);    /* add transparent */
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    font: inherit;      /* inputs don't inherit fonts by default! */
+    border: 1px solid #c9ccd8;
+    border-radius: 8px;
+}
+
+fieldset {
+    border: 1px solid #e3e5ee;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.5rem;
+}
+
+.btn {
+    padding: 0.625em 1.25em;
+    font: inherit;
+    font-weight: 600;
+    border: 1px solid #c9ccd8;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.btn--primary {
+    background: #6b2fb3;
+    border-color: #6b2fb3;
+    color: #fff;
+}
+
+
+/* Header and Footer Styles */
+
+footer {
+    background: rgb(230, 230, 230);
+    border-top: 1px solid #6b2fb3;
+    text-align: center;
+    padding: 0.25rem;
+}

@@ -5,7 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
 
-         <!-- JavaScript -->
+        <!-- CSS -->
+        <link rel="stylesheet" href="styles.css">
+        <!-- JavaScript -->
         <script src="app.js" defer></script>
         <script src="onboarding.js" defer></script>
     </head>
@@ -65,28 +67,28 @@
                             required autocomplete="off"/>
                     </div>
                 
-
-                    <fieldset class="radio-group">
-                        <legend>Employment Type</legend>
-
-                        <label><input type="radio" name="type" value="full-time" checked /> Full-time</label>
-                        <label><input type="radio" name="type" value="part-time" /> Part-time</label>
-                        <label><input type="radio" name="type" value="contractor" /> Contractor</label>
-                    </fieldset>
-
+                    <div class="field">
+                        <label>Employment Type</label>
+                        <fieldset class="radio-group">
+                            <label><input type="radio" name="type" value="full-time" checked /> Full-time</label>
+                            <label><input type="radio" name="type" value="part-time" /> Part-time</label>
+                            <label><input type="radio" name="type" value="contractor" /> Contractor</label>
+                        </fieldset>
+                    </div>
+                    
                     <div class="field">
                         <label for="notes">Anything we should know?</label>
                         <textarea id="notes" name="notes" rows="4" maxlength="200" aria-describedby="notes-count"></textarea>
-                        <p id="notes_count">0/200</p>
+                        <p id="notes-count">0/200</p>
                     </div>
 
                     <label class="checkbox">
-                        <input type="checkbox" name="agree" required /> I agree to the handbook policies.
+                        <input id="agree" type="checkbox" name="agree" required /> I agree to the handbook policies.
                     </label>
                 </fieldset>
 
-                <button type="submit" class="btn btn--primary">Submit</button>
-                <button type="reset" class="btn">Clear</button>
+                <button id="submit-btn" type="submit" class="btn btn--primary" disabled>Submit</button>
+                <button id="reset" type="reset" class="btn">Clear</button>
             </form>
 
             <p id="status" role="status"></p>
