@@ -10,6 +10,7 @@
 
         <!-- JavaScript -->
         <script src="app.js" defer></script>
+        <script src="index.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
         <header class="site-header">
@@ -97,6 +98,13 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>
+                <p id="selected-count">Selected: 0</p>
+
+                <div class="progress">
+                    <div class="progress__fill"></div>
+                </div>
             </section>
 
             <aside class="upcoming-birthdays">

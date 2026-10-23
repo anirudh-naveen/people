@@ -98,19 +98,33 @@ main {
     color: #6b7085;
 }
 
-.data-table tbody tr:nth-child(even) {
-    background: #fafbfd;    /* zebra stripes */
-}
+.data-table tbody tr:nth-child(even) {background: #fafbfd; }
 
-.data-table tbody tr:hover {
-    background: #f1ecfa;
-}
+/* any body row with the label is-selected gets a purple background */
+.data-table tbody tr.is-selected { background: #e9ddfb; }
+
+.compact .data-table td { padding: 0.25rem 1rem; }
+
+.data-table tbody tr:hover {background: #f1ecfa;}
 
 .num {
     text-align: right;
     font-variant-numeric: tabular-nums;     /* digits line up */
 }
 
+.progress {
+    height: 8px;
+    background: #e3e5ee;     /* the empty track */
+    border-radius: 999px;
+    overflow: hidden;        /* keeps the fill inside the rounded corners */
+}
+
+.progress__fill {
+    height: 100%;
+    width: var(--progress, 0%);   /* ← the key line */
+    background: #6b2fb3;
+    transition: width 0.2s ease;
+}
 
 
 
