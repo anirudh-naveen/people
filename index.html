@@ -30,73 +30,52 @@
 
             <section aria-labelledby="team-heading">
                 <h2 id="team-heading">Team</h2>
-                <!-- employee cards -->
-                
-                <article class="card">
-                    <img src="https://i.pravatar.cc/150?img=56" alt="Portrait of Ben Reilly">
-                    <h3>Ben Reilly</h3>
-                    <p class="role">Senior Software Engineer</p>
-                    <p class="dept">Engineering · San Francisco</p>
-                    <a href="mailto:ben.reilly@acme.com">ben.reilly@acme.com</a>
-                </article>
-                
-                <article class="card">
-                    <img src="https://i.pravatar.cc/150?img=10" alt="Portrait of Haley Stardew">
-                    <h3>Haley Stardew</h3>
-                    <p class="role">Software Engineer II</p>
-                    <p class="dept">Engineering · San Francisco</p>
-                    <a href="mailto:haley.stardew@acme.com">haley.stardew@acme.com</a>
-                </article>
+                <!-- search & filters -->
+                <div class="toolbar">
+                    <label for="search" class="visually-hidden">Search Employees</label>
+                    <input type="search" id="search" placeholder="Search by name or role...">
+                    <select id="dept" aria-label="Filter by department">
+                        <option value="All">All Departments</option>
+                    </select>
+                    <button type="button" class="btn btn--primary">Add Employee</button>
+                    <p id="result-count" aria-live="polite"></p>
+                </div>
 
-                <article class="card">
-                    <img src="https://i.pravatar.cc/150?img=44" alt="Portrait of Sleuth Lady">
-                    <h3>Sleuth Lady</h3>
-                    <p class="role">Senior Software Engineer I</p>
-                    <p class="dept">Engineering · San Francisco</p>
-                    <a href="mailto:sleuth.lady@acme.com">sleuth.lady@acme.com</a>
-                </article>
+                <!-- employee cards -->
+                 <select id="sort" aria-label="Sort by">
+                    <option value="name">Name A-Z</option>
+                    <option value="newest">Newest Hire</option>
+                </select>
+                <div class="card-list"></div>
             </section>
 
+            <!-- employee bars -->
+             <div class="employee-row">
+                <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
+                <div class="employee-row__info">
+                    <p class="employee-row__name">Priya Shah</p>
+                    <p class="employee-row__title">Senior Engineer</p>
+                </div>
+                <span class="badge badge--active">Active</span>
+                <button type="button" class="btn" aria-label="More actions for Priya Shah">⋯</button>
+            </div>
+
+
+            <!-- payroll -->
             <section aria-labelledby="payroll-heading">
                 <h2 id="payroll-heading">Payroll</h2>
                 <table class="data-table">
                     <caption>October 2026 pay run</caption>
                     <thead>
                         <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Department</th>
-                            <th scope="col">Status</th>
-                            <th scope="col" class="num">Salary</th>
+                            <th scope="col" data-key="name"><button type="button">Name</button></th>
+                            <th scope="col" data-key="dept"><button type="button">Department</button></th>
+                            <th scope="col" data-key="status"><button type="button">Status</button></th>
+                            <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
                         </tr>
                     </thead>
 
-                    <tbody>
-                        <tr>
-                            <td>Ben Reilly</td>
-                            <td>Engineering</td>
-                            <td>Active</td>
-                            <td class="num">$120,000</td>
-                        </tr>
-                        <tr>
-                            <td>Haley Stardew</td>
-                            <td>Engineering</td>
-                            <td>Active</td>
-                            <td class="num">$110,000</td>
-                        </tr>
-                        <tr>
-                            <td>Sleuth Lady</td>
-                            <td>Engineering</td>
-                            <td>Active</td>
-                            <td class="num">$115,000</td>
-                        </tr>
-                        <!-- add 3 more rows -->
-                         <tr>
-                            <td>McSony Lad</td>
-                            <td>Engineering</td>
-                            <td>Terminated</td>
-                            <td class="num">$95,000</td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
 
                 <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>

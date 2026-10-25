@@ -37,14 +37,6 @@ function topEarners(list, n) {
     return [...list].sort((a, b) => b.salary - a.salary).slice(n-1, n);
 }
 
-
-console.log(averageSalary(employees)) // 156250
-console.log(byDept(employees)) // { Engineering: 2, Sales: 1, People: 1 }
-console.log(search(employees, 'Priya')) // [{ name: 'Priya Shah', dept: 'Engineering', salary: 120000 }]
-console.log(formatSalary(1234567)) // $1,234,567.00
-console.log(topEarners(employees, 1)) // top 2nd earner
-
-
 // other examples
 employees.map((e) => e.name); // ['Priya Shah', ...] transform each
 
