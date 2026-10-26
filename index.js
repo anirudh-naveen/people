@@ -472,7 +472,7 @@ function closeModal() {
 }
 
 openBtn.addEventListener('click', openModal);
-modal.querySelector('modal__close').addEventListener('click', closeModal);
+modal.querySelector('.modal__close').addEventListener('click', closeModal);
 modal.querySelector('.modal__actions .btn:not(.btn--primary)')
     .addEventListener('click', closeModal);
 
@@ -491,9 +491,11 @@ modalForm.addEventListener('submit'
         id: Date.now(),
         name: modal.querySelector('#m-name').value.trim(),
         role: modal.querySelector('#m-role').value.trim(),
-        dept: 'Engineering',
+        dept: modal.querySelector('#m-dept').value.trim(),
+        salary: Number(modal.querySelector('#m-salary').value),
         start: new Date().toISOString().slice(0, 10),
-        img: 20,
+        status: 'Active',
+        img: Math.max(...state.employees.map((emp) => emp.img)) + 1
     });
     render();
     closeModal();
@@ -505,6 +507,7 @@ modalForm.addEventListener('submit'
 
 // Add Employee button (hard-coded employee for practice; JS track 5
 // replaces this with a real form in a modal).
+/*
 const addBtn = document.querySelector('.toolbar .btn--primary');
 addBtn.addEventListener('click', (e) => {
     // A unique id: take every id (map), spread them into separate
@@ -517,6 +520,7 @@ addBtn.addEventListener('click', (e) => {
     )
     render()
 })
+*/
 
 
 // Payroll table header clicks → sort by that column.
@@ -558,6 +562,25 @@ document.querySelector('.data-table thead').addEventListener('click', (e) => {
 // · aria-selected in sync.
 // ---------------------------------------------------------------------
 
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+
+function selectTab(tab) {
+    tabs.forEach((t) => {
+        const selected = t === tab;
+        t.setAttribute('aria-selected', selected);
+        t.tabIndex = selected ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !selected;
+    });
+    tab.focus();
+}
+
+tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') selectTab(tabs[(i + 1) % tabs.length]);
+        if (e.key === 'ArrowLeft') selectTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+    });
+});
 
 // ---------------------------------------------------------------------
 // TODO · JS track 5, Part 3: ACCORDION
@@ -565,6 +588,19 @@ document.querySelector('.data-table thead').addEventListener('click', (e) => {
 // · Keep aria-expanded in sync.
 // ---------------------------------------------------------------------
 
+const questions = [...document.querySelectorAll('.accordion button')];
+
+function openQuestion(button) {
+    questions.forEach((q) => {
+        const open = q === button;
+        q.setAttribute('aria-expanded', open);
+        document.getElementById(q.getAttribute('aria-controls')).hidden = !open;
+    });
+}
+
+questions.forEach((q) => {
+    q.addEventListener('click', () => openQuestion(q));
+});
 
 // ---------------------------------------------------------------------
 // TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU

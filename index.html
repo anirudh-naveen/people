@@ -252,12 +252,48 @@
                      · roles and states so screen readers announce which
                      · tab is selected. -->
 
+               <div class="tabs">
+                    <div role="tablist" aria-label="Employee">
+                         <button role="tab" id="t1" aria-controls="p1" aria-selected="true">Profile</button>
+                         <button role="tab" id="t2" aria-controls="p2" aria-selected="false"tabindex="-1">Pay</button>
+                         <button role="tab" id="t3" aria-controls="p3" aria-selected="false"tabindex="-1">Documents</button>
+                    </div>
+
+                    <section role="tabpanel" id="p1" aria-labelledby="t1">Profile</section>
+                    <section role="tabpanel" id="p2" aria-labelledby="t2" hidden>Pay Content</section>
+                    <section role="tabpanel" id="p3" aria-labelledby="t3" hidden>Document Content</section>
+               </div>
+
                 <!--
                      TODO · JS track 5, Part 3: ACCORDION (FAQ)
                      · A few questions whose answers expand and collapse.
                      · First build it with no JS, then build your own
                      · version with buttons where only one answer is open
                      · at a time. -->
+                    <details>
+                         <summary>How do I request time off?</summary>
+                         <p>Go to Time off → New request.</p>
+                    </details>
+                    <details>
+                         <summary>When is payday?</summary>
+                         <p>The last business day of the month.</p>
+                    </details>
+                    <details>
+                         <summary>How do I update my direct deposit?</summary>
+                         <p>Open Payroll and choose Payment method.</p>
+                    </details>
+
+                    <div class="accordion">
+                         <button type="button" aria-expanded="true" aria-controls="a1">How do I request time off?</button>
+                         <p id="a1">Go to Time off → New request.</p>
+
+                         <button type="button" aria-expanded="false" aria-controls="a2">When is payday?</button>
+                         <p id="a2" hidden>The last business day of the month.</p>
+
+                         <button type="button" aria-expanded="false" aria-controls="a3">How do I update my direct deposit?</button>
+                         <p id="a3" hidden>Open Payroll and choose Payment method.</p>
+                    </div>
+
             </main>
         </div>
 
@@ -285,12 +321,20 @@
 
                     <form class="modal__body">
                          <div class="field">
-                              <label for="m-name">Full name</label>
+                              <label for="m-name">Full Name</label>
                               <input id="m-name" type="text" required />
                          </div>
                          <div class="field">
                               <label for="m-role">Role</label>
                               <input id="m-role" type="text" required />
+                         </div>
+                         <div class="field">
+                              <label for="m-dept">Department</label>
+                              <input id="m-dept" type="text" required />
+                         </div>
+                         <div class="field">
+                              <label for="m-salary">Salary</label>
+                              <input id="m-salary" type="number" required />
                          </div>
                          <div class="modal__actions">
                               <button type="button" class="btn">Cancel</button>
