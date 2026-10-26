@@ -13,89 +13,100 @@
         <script src="index.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
-        <header class="site-header">
-            <a href="index.html" class="logo">People</a>
-            <nav aria-label="Main">
-                <ul class="nav-links">
-                    <li><a href="index.html" aria-current="page">Directory</a></li>
-                    <li><a href="onboarding.html">Onboarding</a></li>
-                    <li><a href="#">Payroll</a></li>
-                </ul>
-            </nav>
-        </header>
+        <div class="app">
+            <header class="site-header">
+                <a href="index.html" class="logo">People</a>
+                <nav aria-label="Main">
+                    <ul class="nav-links">
+                        <li><a href="index.html" aria-current="page">Directory</a></li>
+                        <li><a href="onboarding.html">Onboarding</a></li>
+                        <li><a href="#">Payroll</a></li>
+                    </ul>
+                </nav>
+            </header>
 
-        <main>
-            <h1>Employee Directory</h1>
-            <p>All the employees at ACME.</p>
-
-            <section aria-labelledby="team-heading">
-                <h2 id="team-heading">Team</h2>
-                <!-- search & filters -->
-                <div class="toolbar">
-                    <label for="search" class="visually-hidden">Search Employees</label>
-                    <input type="search" id="search" placeholder="Search by name or role...">
-                    <select id="dept" aria-label="Filter by department">
-                        <option value="All">All Departments</option>
-                    </select>
-                    <button type="button" class="btn btn--primary">Add Employee</button>
-                    <p id="result-count" aria-live="polite"></p>
-                </div>
-
-                <!-- employee cards -->
-                 <select id="sort" aria-label="Sort by">
-                    <option value="name">Name A-Z</option>
-                    <option value="newest">Newest Hire</option>
-                </select>
-                <div class="card-list"></div>
-            </section>
-
-            <!-- employee bars -->
-             <div class="employee-row">
-                <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
-                <div class="employee-row__info">
-                    <p class="employee-row__name">Priya Shah</p>
-                    <p class="employee-row__title">Senior Engineer</p>
-                </div>
-                <span class="badge badge--active">Active</span>
-                <button type="button" class="btn" aria-label="More actions for Priya Shah">⋯</button>
-            </div>
-
-
-            <!-- payroll -->
-            <section aria-labelledby="payroll-heading">
-                <h2 id="payroll-heading">Payroll</h2>
-                <table class="data-table">
-                    <caption>October 2026 pay run</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col" data-key="name"><button type="button">Name</button></th>
-                            <th scope="col" data-key="dept"><button type="button">Department</button></th>
-                            <th scope="col" data-key="status"><button type="button">Status</button></th>
-                            <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
-                        </tr>
-                    </thead>
-
-                    <tbody></tbody>
-                </table>
-
-                <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>
-                <p id="selected-count">Selected: 0</p>
-
-                <div class="progress">
-                    <div class="progress__fill"></div>
-                </div>
-            </section>
-
-            <aside class="upcoming-birthdays">
-                <h2 id="birthdays-heading">Upcoming Birthdays</h2>
-                <ul aria-labelledby="birthdays-heading">
-                    <li><time datetime="2026-10-20">Oct 20</time> Ben Reilly</li>
-                    <li><time datetime="2026-11-15">Nov 15</time> Haley Stardew</li>
-                    <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
-                </ul>
+            <aside class="sidebar">
+                <nav aria-label="Sections">
+                    <a href="#">Overview</a>
+                    <a href="#" aria-current="page">People</a>
+                    <a href="#">Time off</a>
+                    <a href="#">Benefits</a>
+                </nav>
             </aside>
-        </main>
 
+            <main>
+                <h1>Employee Directory</h1>
+                <p>All the employees at ACME.</p>
+
+                <section aria-labelledby="team-heading">
+                    <h2 id="team-heading">Team</h2>
+                    <!-- search & filters -->
+                    <div class="toolbar">
+                        <label for="search" class="visually-hidden">Search Employees</label>
+                        <input type="search" id="search" placeholder="Search by name or role...">
+                        <select id="dept" aria-label="Filter by department">
+                            <option value="All">All Departments</option>
+                        </select>
+                        <button type="button" class="btn btn--primary">Add Employee</button>
+                        <p id="result-count" aria-live="polite"></p>
+                    </div>
+
+                    <!-- employee cards -->
+                    <select id="sort" aria-label="Sort by">
+                        <option value="name">Name A-Z</option>
+                        <option value="newest">Newest Hire</option>
+                    </select>
+                    <div class="card-list"></div>
+                </section>
+
+                <!-- employee bars -->
+                <div class="employee-row">
+                    <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
+                    <div class="employee-row__info">
+                        <p class="employee-row__name">Priya Shah</p>
+                        <p class="employee-row__title">Senior Engineer</p>
+                    </div>
+                    <span class="badge badge--active">Active</span>
+                    <button type="button" class="btn" aria-label="More actions for Priya Shah">⋯</button>
+                </div>
+
+
+                <!-- payroll -->
+                <section aria-labelledby="payroll-heading">
+                    <h2 id="payroll-heading">Payroll</h2>
+                    <table class="data-table">
+                        <caption>October 2026 pay run</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col" data-key="name"><button type="button">Name</button></th>
+                                <th scope="col" data-key="dept"><button type="button">Department</button></th>
+                                <th scope="col" data-key="status"><button type="button">Status</button></th>
+                                <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+                    </table>
+
+                    <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>
+                    <p id="selected-count">Selected: 0</p>
+
+                    <div class="progress">
+                        <div class="progress__fill"></div>
+                    </div>
+                </section>
+
+                <aside class="upcoming-birthdays">
+                    <h2 id="birthdays-heading">Upcoming Birthdays</h2>
+                    <ul aria-labelledby="birthdays-heading">
+                        <li><time datetime="2026-10-20">Oct 20</time> Ben Reilly</li>
+                        <li><time datetime="2026-11-15">Nov 15</time> Haley Stardew</li>
+                        <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
+                    </ul>
+                </aside>
+            </main>
+        </div>
+        
         <footer class="site-footer">
             <p>&copy; 2026 ACME, Inc.</p>
         </footer>

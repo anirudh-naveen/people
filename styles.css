@@ -6,6 +6,8 @@
   box-sizing: border-box;
 }
 
+/* display: flex is 1d while display: grid is 2d */
+
 
 /* Main Styles */
 body {
@@ -42,6 +44,45 @@ main {
 }
 
 
+/* App Styles */
+.app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+        "header  header"
+        "sidebar main";
+    min-height: 100vh
+}
+
+.site-header {grid-area: header;}
+.siderbar {grid-area: sidebar;}
+.app main { grid-area: main; max-width: none; margin: 0; }
+
+.sidebar {
+    background: #fff;
+    border-right: 1px solid #e3e5ee;
+    padding: 1rem 0.75rem;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.sidebar a {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    color: #3a3f55;
+    text-decoration: none;
+}
+
+.sidebar a[aria-current="page"] {
+    background: #f1ecfa;
+    color: #6b2fb3;
+    font-weight: 600;
+}
 
 /* Card Styles */
 .card {
