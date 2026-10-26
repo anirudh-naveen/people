@@ -1,145 +1,262 @@
 // =====================================================================
-// notes.js: search, topic filter and expand/collapse for notes.html
+// notes.js: tabs, search, "On this page" sidebar and expand/collapse
 // =====================================================================
 //
-// This uses the same STATE → RENDER pattern as index.js:
-//   - `state` holds what can change (the search text and the topic)
-//   - render() shows/hides notes based on state
-//   - listeners only update state, then call render()
+// Same STATE → RENDER pattern as index.js:
+//   - `state` holds what can change (which tab, what's typed in search)
+//   - render() updates the page from state
+//   - listeners only change state, then call render()
 //
-// Unlike index.js, the notes themselves are written in the HTML, not
-// generated from data. render() just decides which ones are visible
-// (using the `hidden` property), which is simpler for content that you
-// write and edit by hand.
+// The notes themselves are written in notes.html. render() only decides
+// which tab panel, sections and notes are visible.
 
 
 // ---------------------------------------------------------------------
 // Element handles
 // ---------------------------------------------------------------------
+// querySelectorAll gives a NodeList; spreading it makes a real array so
+// we can use filter/map/find.
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+const panels = [...document.querySelectorAll('[role="tabpanel"]')];
 const searchInput = document.querySelector('#note-search');
-// querySelectorAll returns a NodeList. Spreading it into an array gives
-// us array methods like filter (a NodeList only has forEach).
-const notes = [...document.querySelectorAll('.note')];
-const sections = [...document.querySelectorAll('.topic-section')];
-const topicButtons = [...document.querySelectorAll('.topics button')];
 const countEl = document.querySelector('#note-count');
 const noResults = document.querySelector('#no-results');
+const jumpList = document.querySelector('.jump ul');
+const toolbar = document.querySelector('.notes-toolbar');
+
+// The tab names ('html', 'css', 'js', 'interview'), read from data-tab.
+const tabNames = tabs.map((tab) => tab.dataset.tab);
+
+// Remember each summary's original text, so search highlighting can be
+// undone. (dataset values are strings stored as data-* attributes.)
+document.querySelectorAll('.note summary').forEach((summary) => {
+    summary.dataset.text = summary.textContent;
+});
 
 
 // ---------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------
 const state = {
-    // search box text ('' = no filter)
+    tab: 'html',
     query: '',
-    // matches a data-topic value, or 'all'
-    topic: 'all',
 };
 
 
 // ---------------------------------------------------------------------
-// Does one note match the current filters?
+// Helpers
 // ---------------------------------------------------------------------
-function matches(note) {
-    // Topic filter: 'all' lets everything through. Otherwise the note's
-    // data-topic="..." (read via dataset.topic) must equal the topic.
-    const topicOk = state.topic === 'all' || note.dataset.topic === state.topic;
 
-    // Search filter: case-insensitive match against ALL the text in the
-    // note (summary + body). textContent gives every bit of text inside
-    // the element, with the tags stripped out.
-    const q = state.query.trim().toLowerCase();
-    const textOk = note.textContent.toLowerCase().includes(q);
+// Which tab panel is an element inside? Returns e.g. 'css', or null.
+function tabOf(el) {
+    const panel = el.closest('[role="tabpanel"]');
+    return panel ? panel.id.replace('panel-', '') : null;
+}
 
-    return topicOk && textOk;
+// Rebuild a summary's text, wrapping the search match in <mark>.
+// Built with text nodes + createElement (not innerHTML), so the note
+// text can never be parsed as HTML.
+function highlight(summary, q) {
+    const text = summary.dataset.text;
+    const i = q ? text.toLowerCase().indexOf(q) : -1;
+    if (i === -1) {
+        summary.textContent = text;
+        return;
+    }
+    const mark = document.createElement('mark');
+    mark.textContent = text.slice(i, i + q.length);
+    summary.replaceChildren(text.slice(0, i), mark, text.slice(i + q.length));
+}
+
+// Fill the "On this page" list with links to the visible sections of
+// the current tab.
+function buildJumpList() {
+    const panel = document.querySelector(`#panel-${state.tab}`);
+    const headings = [...panel.querySelectorAll('.topic-section:not([hidden]) h2')];
+    const links = headings.map((h2) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${h2.id}`;
+        a.textContent = h2.textContent;
+        li.append(a);
+        return li;
+    });
+    jumpList.replaceChildren(...links);
+    watchSections(headings);
 }
 
 
 // ---------------------------------------------------------------------
-// render(): show/hide notes and sections from state
+// render(): update everything from state
 // ---------------------------------------------------------------------
 function render() {
-    // Search mode = something is typed in the box.
-    const searching = state.query.trim() !== '';
+    const q = state.query.trim().toLowerCase();
+    const searching = q !== '';
 
-    notes.forEach((note) => {
-        const ok = matches(note);
-        // The `hidden` property mirrors the HTML hidden attribute:
-        // true = not displayed (and hidden from screen readers too).
-        note.hidden = !ok;
-        // While searching, open the matching notes so you can see the
-        // match without clicking each one. (We don't close them again
-        // when the search is cleared, so notes you opened stay open.)
-        if (searching && ok) note.open = true;
+    // 1. Tabs: mark the selected one. Only the selected tab is in the Tab
+    //    order (tabindex 0); arrow keys reach the others ("roving tabindex",
+    //    the standard keyboard pattern for tabs).
+    tabs.forEach((tab) => {
+        const selected = tab.dataset.tab === state.tab;
+        tab.setAttribute('aria-selected', selected);
+        tab.tabIndex = selected ? 0 : -1;
     });
 
-    // Hide a whole section (and its heading) when none of its notes are
-    // visible. .some() is true if at least one note in the section
-    // passes the test.
-    sections.forEach((section) => {
-        const sectionNotes = [...section.querySelectorAll('.note')];
-        section.hidden = !sectionNotes.some((note) => !note.hidden);
+    // 2. Panels: show only the selected one.
+    panels.forEach((panel) => {
+        panel.hidden = panel.id !== `panel-${state.tab}`;
     });
 
-    // Count and empty state.
-    const visibleCount = notes.filter((note) => !note.hidden).length;
-    countEl.textContent = `${visibleCount} of ${notes.length} notes`;
-    noResults.hidden = visibleCount > 0;
-
-    // Mark which topic button is active. aria-pressed tells screen
-    // readers it's on; CSS uses the same attribute to style it
-    // ("JS sets state, CSS owns the visuals").
-    topicButtons.forEach((btn) => {
-        btn.setAttribute('aria-pressed', btn.dataset.topic === state.topic);
+    // 3. Search: filter notes in EVERY panel, so each tab can show its
+    //    number of matches.
+    const matchesPerTab = {};
+    panels.forEach((panel) => {
+        const notes = [...panel.querySelectorAll('.note')];
+        let visible = 0;
+        notes.forEach((note) => {
+            const ok = !searching || note.textContent.toLowerCase().includes(q);
+            note.hidden = !ok;
+            if (ok) visible++;
+            // open matches so you can see why they matched
+            if (searching && ok) note.open = true;
+            highlight(note.querySelector('summary'), q);
+        });
+        // hide a section heading when none of its notes are visible
+        panel.querySelectorAll('.topic-section').forEach((section) => {
+            const anyVisible = [...section.querySelectorAll('.note')].some((n) => !n.hidden);
+            section.hidden = !anyVisible;
+        });
+        matchesPerTab[tabOf(panel)] = { visible, total: notes.length };
     });
+
+    // 4. Match counts on the tabs (blank when not searching; CSS hides
+    //    an empty badge).
+    tabs.forEach((tab) => {
+        tab.querySelector('.tab-count').textContent = searching
+            ? matchesPerTab[tab.dataset.tab].visible
+            : '';
+    });
+
+    // 5. Count line and empty state for the current tab.
+    const current = matchesPerTab[state.tab];
+    countEl.textContent = searching
+        ? `${current.visible} of ${current.total} notes match`
+        : `${current.total} notes`;
+
+    if (current.visible === 0) {
+        // Point to the tabs that DO have matches.
+        const elsewhere = tabNames
+            .filter((name) => matchesPerTab[name].visible > 0)
+            .map((name) => `${name.toUpperCase()} (${matchesPerTab[name].visible})`);
+        noResults.textContent = elsewhere.length
+            ? `Nothing here. Matches in: ${elsewhere.join(', ')}.`
+            : 'No notes match.';
+    }
+    noResults.hidden = current.visible > 0;
+
+    // 6. Sidebar links for this tab.
+    buildJumpList();
 }
 
 
 // ---------------------------------------------------------------------
-// Listeners: update state → render()
+// Highlight the sidebar link for the section on screen.
+// IntersectionObserver calls us when a heading enters or leaves a band
+// near the top of the window; much cheaper than a scroll listener.
+// ---------------------------------------------------------------------
+let observer;
+function watchSections(headings) {
+    if (observer) observer.disconnect();
+    observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            jumpList.querySelectorAll('a').forEach((a) => {
+                a.setAttribute('aria-current', a.hash === `#${entry.target.id}`);
+            });
+        });
+    }, { rootMargin: '0px 0px -70% 0px' });
+    headings.forEach((h2) => observer.observe(h2));
+}
+
+
+// ---------------------------------------------------------------------
+// The URL hash remembers the tab (#css), so refresh keeps your place and
+// links like notes.html#js work. A section id (#css-flex) also works:
+// we switch to the tab that contains it.
+// ---------------------------------------------------------------------
+function applyHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (tabNames.includes(id)) {
+        state.tab = id;
+        render();
+        return;
+    }
+    const target = id && document.getElementById(id);
+    if (target && tabOf(target)) {
+        state.tab = tabOf(target);
+        render();
+        target.scrollIntoView();
+    }
+}
+
+function selectTab(name, { focus = false } = {}) {
+    state.tab = name;
+    // replaceState changes the URL without adding history entries or
+    // jumping the page.
+    history.replaceState(null, '', `#${name}`);
+    render();
+    window.scrollTo({ top: 0 });
+    if (focus) document.querySelector(`#tab-${name}`).focus();
+}
+
+
+// ---------------------------------------------------------------------
+// Listeners
 // ---------------------------------------------------------------------
 
-// 'input' fires on every keystroke.
+// Tab clicks (one delegated listener on the tab list).
+document.querySelector('[role="tablist"]').addEventListener('click', (e) => {
+    const tab = e.target.closest('[role="tab"]');
+    if (tab) selectTab(tab.dataset.tab);
+});
+
+// Arrow keys / Home / End move between tabs (expected for role="tab").
+document.querySelector('[role="tablist"]').addEventListener('keydown', (e) => {
+    const i = tabNames.indexOf(state.tab);
+    const moves = {
+        ArrowRight: (i + 1) % tabNames.length,
+        ArrowLeft: (i - 1 + tabNames.length) % tabNames.length,
+        Home: 0,
+        End: tabNames.length - 1,
+    };
+    if (!(e.key in moves)) return;
+    e.preventDefault();
+    selectTab(tabNames[moves[e.key]], { focus: true });
+});
+
 searchInput.addEventListener('input', (e) => {
     state.query = e.target.value;
     render();
 });
 
-// EVENT DELEGATION: one listener on the button group handles all the
-// topic buttons.
-document.querySelector('.topics').addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    state.topic = btn.dataset.topic;
-    render();
-});
-
-// Expand / collapse every VISIBLE note. A <details> element has an
-// `open` property: true = expanded.
+// Expand / collapse the visible notes in the current tab.
 document.querySelector('#expand-all').addEventListener('click', () => {
-    notes.forEach((note) => {
-        if (!note.hidden) note.open = true;
-    });
+    document.querySelectorAll(`#panel-${state.tab} .note:not([hidden])`)
+        .forEach((note) => { note.open = true; });
 });
 
 document.querySelector('#collapse-all').addEventListener('click', () => {
-    notes.forEach((note) => {
-        note.open = false;
-    });
+    document.querySelectorAll(`#panel-${state.tab} .note`)
+        .forEach((note) => { note.open = false; });
 });
 
-// Keyboard shortcut: press "/" anywhere to jump to the search box.
-// keydown on the whole document; e.key is the key's character.
-// Skip it if you're already typing in a field, so "/" can still be
-// typed normally there.
+// "/" jumps to search (unless you're already typing); Escape clears it.
 document.addEventListener('keydown', (e) => {
     const typing = e.target.matches('input, textarea');
     if (e.key === '/' && !typing) {
-        // stop the "/" from being typed into the box
         e.preventDefault();
         searchInput.focus();
     }
-    // Escape inside the search box clears it.
     if (e.key === 'Escape' && e.target === searchInput) {
         searchInput.value = '';
         state.query = '';
@@ -147,6 +264,18 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Sidebar links and other #links (back/forward buttons too).
+window.addEventListener('hashchange', applyHash);
 
-// First draw.
+// Keep --toolbar-h equal to the toolbar's real height, so the sidebar and
+// anchor jumps sit just below it (it gets taller when it wraps on phones).
+new ResizeObserver(() => {
+    document.documentElement.style.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
+}).observe(toolbar);
+
+
+// ---------------------------------------------------------------------
+// First draw
+// ---------------------------------------------------------------------
 render();
+applyHash();

@@ -2,607 +2,2266 @@
 <html lang="en">
     <head>
         <!-- ============================================================
-             notes.html: my bootcamp study notes
-             Each note is a <details> element (click the summary to open
-             or close it, no JS needed). data-topic="..." is what the topic
-             filter buttons in notes.js match against.
-             To add a note: copy any <details class="note"> block, change
-             the data-topic, the <summary> and the content.
-             Inside <pre><code>, write < as &lt; and > as &gt; or the
-             browser will treat them as real tags.
+             notes.html: HTML / CSS / JS reference + interview prep
+             Four tabs (role="tab"), each controlling a panel
+             (role="tabpanel"). notes.js handles switching tabs, search,
+             the "Jump to" links and expand/collapse.
+             Each note is a <details class="note">; the <summary> is its
+             title. <p class="say"> = a one-line answer to say out loud.
+             To add a note: copy any <details class="note"> block into the
+             right section. Inside <pre><code>, write < as &lt;, > as
+             &gt; and & as &amp;.
              ============================================================ -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bootcamp Notes</title>
+        <title>Web Notes</title>
         <link rel="stylesheet" href="notes.css">
         <script src="notes.js" defer></script>
     </head>
     <body>
         <header class="notes-header">
             <a href="index.html" class="back-link">← Directory</a>
-            <h1>Bootcamp Notes</h1>
-            <p class="subtitle">Everything I've learned building the HR dashboard, plus the bugs I hit along the way.</p>
+            <h1>Web Notes</h1>
+            <p class="subtitle">HTML, CSS and JavaScript reference, plus interview prep.</p>
         </header>
 
-        <!-- Search + topic filters + expand/collapse. Wired up in notes.js. -->
+        <!-- Sticky bar: tabs + search. The inner div keeps it aligned with
+             the page column while the bar's background spans full width. -->
         <div class="notes-toolbar">
-            <label for="note-search" class="visually-hidden">Search notes</label>
-            <input type="search" id="note-search" placeholder="Search notes… (press / to focus)">
-
-            <!-- aria-pressed marks which topic is active. The buttons are
-                 grouped and named for screen readers by role="group" +
-                 aria-label. -->
-            <div class="topics" role="group" aria-label="Filter by topic">
-                <button type="button" data-topic="all" aria-pressed="true">All</button>
-                <button type="button" data-topic="html" aria-pressed="false">HTML</button>
-                <button type="button" data-topic="css" aria-pressed="false">CSS</button>
-                <button type="button" data-topic="js" aria-pressed="false">JS basics</button>
-                <button type="button" data-topic="dom" aria-pressed="false">DOM &amp; events</button>
-                <button type="button" data-topic="patterns" aria-pressed="false">Patterns</button>
-                <button type="button" data-topic="debug" aria-pressed="false">Debugging</button>
+          <div class="toolbar-inner">
+            <!-- Tabs. Arrow keys move between them (notes.js). The
+                 number in each tab shows search matches while searching. -->
+            <div class="tabs" role="tablist" aria-label="Notes sections">
+                <button type="button" role="tab" id="tab-html" aria-controls="panel-html" aria-selected="true" data-tab="html">HTML <span class="tab-count"></span></button>
+                <button type="button" role="tab" id="tab-css" aria-controls="panel-css" aria-selected="false" tabindex="-1" data-tab="css">CSS <span class="tab-count"></span></button>
+                <button type="button" role="tab" id="tab-js" aria-controls="panel-js" aria-selected="false" tabindex="-1" data-tab="js">JS <span class="tab-count"></span></button>
+                <button type="button" role="tab" id="tab-interview" aria-controls="panel-interview" aria-selected="false" tabindex="-1" data-tab="interview">Interview <span class="tab-count"></span></button>
             </div>
 
             <div class="toolbar-row">
+                <label for="note-search" class="visually-hidden">Search all notes</label>
+                <input type="search" id="note-search" placeholder="Search all tabs… (press / to focus)">
                 <p id="note-count" aria-live="polite"></p>
                 <button type="button" id="expand-all" class="link-btn">Expand all</button>
                 <button type="button" id="collapse-all" class="link-btn">Collapse all</button>
             </div>
+          </div>
         </div>
+
+        <!-- Two columns on wide screens: the "On this page" list, then the
+             notes. On phones the list sits above the notes. -->
+        <div class="layout">
+        <!-- Filled by notes.js with links to this tab's sections. -->
+        <nav class="jump" aria-label="On this page">
+            <p class="jump-title">On this page</p>
+            <ul></ul>
+        </nav>
 
         <main class="notes">
 
-            <!-- ======================================================
-                 HTML
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-html">
-                <h2 id="h-html">HTML</h2>
+<!-- ==================================================================
+     HTML TAB
+     ================================================================== -->
+<div class="panel" role="tabpanel" id="panel-html" aria-labelledby="tab-html" tabindex="0">
 
-                <details class="note" data-topic="html">
-                    <summary>Page skeleton &amp; loading scripts</summary>
-                    <pre><code>&lt;!DOCTYPE html&gt;
+    <section class="topic-section" aria-labelledby="html-doc">
+        <h2 id="html-doc">Document basics</h2>
+
+        <details class="note" open>
+            <summary>Page skeleton</summary>
+            <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
   &lt;head&gt;
     &lt;meta charset="UTF-8"&gt;
     &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
     &lt;title&gt;Page name&lt;/title&gt;
+    &lt;meta name="description" content="Shown in search results"&gt;
     &lt;link rel="stylesheet" href="styles.css"&gt;
     &lt;script src="app.js" defer&gt;&lt;/script&gt;
   &lt;/head&gt;
-  &lt;body&gt;…&lt;/body&gt;
+  &lt;body&gt; …visible content… &lt;/body&gt;
 &lt;/html&gt;</code></pre>
-                    <ul>
-                        <li><code>lang</code> tells screen readers which language to pronounce.</li>
-                        <li><code>viewport</code> makes phones use their real width instead of zooming out.</li>
-                        <li><strong><code>defer</code></strong> downloads the script now but runs it after the HTML is parsed, so <code>querySelector</code> can find elements. Deferred scripts run in the order they're listed.</li>
-                        <li>A <code>&lt;script src="…"&gt;</code> <strong>ignores</strong> any code written between its tags.</li>
-                        <li>CSS is not loaded unless there's a <code>&lt;link rel="stylesheet"&gt;</code> in the <code>&lt;head&gt;</code>.</li>
-                    </ul>
-                </details>
+            <ul>
+                <li><code>&lt;!DOCTYPE html&gt;</code>: use modern standards mode (without it, browsers use "quirks mode").</li>
+                <li><code>lang</code>: the page language, so screen readers pronounce it correctly and translators know what it is.</li>
+                <li><code>charset</code>: UTF-8 covers every language and symbol.</li>
+                <li><code>viewport</code>: makes phones use their real width instead of a zoomed-out 980px desktop view.</li>
+                <li><code>&lt;head&gt;</code> = information <em>about</em> the page (not shown). <code>&lt;body&gt;</code> = everything visible.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="html">
-                    <summary>Semantic landmarks &amp; headings</summary>
-                    <ul>
-                        <li><code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code> (one per page), <code>&lt;aside&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;footer&gt;</code>. Screen readers can jump between them; <code>&lt;div&gt;</code>/<code>&lt;span&gt;</code> mean nothing.</li>
-                        <li>Two <code>&lt;nav&gt;</code>s on a page? Give each an <code>aria-label</code> ("Main", "Sections").</li>
-                        <li>Name a section with <code>aria-labelledby="id-of-its-heading"</code>. The id must match exactly.</li>
-                        <li>One <code>&lt;h1&gt;</code>; then h2 → h3 in order, no skipping levels.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Loading scripts: plain vs defer vs async vs module</summary>
+            <table>
+                <thead><tr><th scope="col">Tag</th><th scope="col">Downloads</th><th scope="col">Runs</th></tr></thead>
+                <tbody>
+                    <tr><td><code>&lt;script src&gt;</code></td><td>blocks parsing</td><td>immediately, before the rest of the HTML exists</td></tr>
+                    <tr><td><code>defer</code></td><td>in parallel</td><td>after the HTML is parsed, in order</td></tr>
+                    <tr><td><code>async</code></td><td>in parallel</td><td>as soon as it's downloaded, in any order</td></tr>
+                    <tr><td><code>type="module"</code></td><td>in parallel</td><td>deferred by default; allows <code>import</code>/<code>export</code></td></tr>
+                </tbody>
+            </table>
+            <ul>
+                <li>A script with <code>src</code> <strong>ignores</strong> any code between its tags.</li>
+                <li>Without <code>defer</code>, put scripts at the end of <code>&lt;body&gt;</code> or <code>querySelector</code> returns <code>null</code>.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="html">
-                    <summary>Forms</summary>
-                    <ul>
-                        <li><code>&lt;label for="x"&gt;</code> ↔ <code>&lt;input id="x"&gt;</code> links them. Clicking the label focuses the input. Or wrap: <code>&lt;label&gt;&lt;input&gt; Text&lt;/label&gt;</code>.</li>
-                        <li>A <code>placeholder</code> is <strong>not</strong> a label (it vanishes when typing). If there's no visible label, use a <code>.visually-hidden</code> one.</li>
-                        <li><code>name="…"</code> is the key <code>FormData</code> uses: <code>new FormData(form).get('fullName')</code>.</li>
-                        <li>Built-in validation: <code>required</code>, <code>type="email"</code>, <code>min</code>/<code>max</code>/<code>step</code>, <code>maxlength</code>. The browser blocks submit until they pass.</li>
-                        <li>Radios with the same <code>name</code> form one group. Name the group with <code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code>.</li>
-                        <li><code>autocomplete</code> takes tokens (<code>name</code>, <code>email</code>, <code>tel</code>, <code>off</code>), not example values.</li>
-                        <li><code>method</code>: GET puts data in the URL, POST in the request body. <code>action="#"</code> stays on the page.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Three ways to add CSS</summary>
+            <ul>
+                <li><strong>External</strong> (best): <code>&lt;link rel="stylesheet" href="styles.css"&gt;</code> in the head. Cached and shared between pages.</li>
+                <li><strong>Internal</strong>: a <code>&lt;style&gt;</code> block in the head. Fine for one page.</li>
+                <li><strong>Inline</strong>: <code>style="color: red"</code> on an element. Highest specificity, hard to maintain; avoid.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="html">
-                    <summary>Buttons: always set type</summary>
-                    <ul>
-                        <li>A <code>&lt;button&gt;</code> defaults to <code>type="submit"</code>. Any non-submit button should be <code>type="button"</code>.</li>
-                        <li><code>type="reset"</code> clears the whole form.</li>
-                        <li><code>disabled</code> blocks clicks. It's a UX nicety, not security (anyone can re-enable it in DevTools).</li>
-                        <li>⚠️ Never give a form control <code>id</code>/<code>name</code> of <code>"submit"</code> or <code>"reset"</code>. It <strong>replaces</strong> <code>form.submit()</code>/<code>form.reset()</code>, causing "form.reset is not a function".</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Elements, tags, attributes, nesting</summary>
+            <ul>
+                <li>An <strong>element</strong> = opening tag + content + closing tag: <code>&lt;p&gt;Hello&lt;/p&gt;</code>.</li>
+                <li><strong>Void</strong> (self-closing) elements have no content or closing tag: <code>img</code>, <code>input</code>, <code>br</code>, <code>hr</code>, <code>meta</code>, <code>link</code>.</li>
+                <li><strong>Attributes</strong> go in the opening tag, separated by spaces: <code>&lt;a href="/" class="logo"&gt;</code>.</li>
+                <li><strong>Boolean attributes</strong> are on just by being present: <code>required</code>, <code>disabled</code>, <code>checked</code>, <code>hidden</code>. (<code>disabled="false"</code> is still disabled!)</li>
+                <li>Close tags in reverse order of opening. A missing <code>&gt;</code> swallows the next tag.</li>
+                <li>Comments: <code>&lt;!-- like this --&gt;</code>.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="html">
-                    <summary>Tables</summary>
-                    <pre><code>&lt;table&gt;
-  &lt;caption&gt;October 2026 pay run&lt;/caption&gt;
-  &lt;thead&gt;&lt;tr&gt;&lt;th scope="col"&gt;Name&lt;/th&gt;…&lt;/tr&gt;&lt;/thead&gt;
-  &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Priya&lt;/td&gt;…&lt;/tr&gt;&lt;/tbody&gt;
+        <details class="note" open>
+            <summary>HTML entities (special characters)</summary>
+            <table>
+                <thead><tr><th scope="col">Write</th><th scope="col">Shows</th><th scope="col">Why</th></tr></thead>
+                <tbody>
+                    <tr><td><code>&amp;lt;</code> <code>&amp;gt;</code></td><td>&lt; &gt;</td><td>so they aren't read as tags</td></tr>
+                    <tr><td><code>&amp;amp;</code></td><td>&amp;</td><td>starts every entity</td></tr>
+                    <tr><td><code>&amp;quot;</code></td><td>"</td><td>inside attribute values</td></tr>
+                    <tr><td><code>&amp;nbsp;</code></td><td>(space)</td><td>non-breaking space: keeps two words on one line</td></tr>
+                    <tr><td><code>&amp;copy;</code></td><td>&copy;</td><td>symbols</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>id vs class</summary>
+            <p class="say">An id is unique on the page (one element); a class can be reused on many elements, and an element can have several classes.</p>
+            <ul>
+                <li>Use ids for things that must be found exactly once: <code>for=""</code> labels, <code>aria-labelledby</code>, anchor links (<code>#section</code>), <code>getElementById</code>.</li>
+                <li>Use classes for styling and for groups of elements.</li>
+                <li>CSS: <code>#id</code> has much higher specificity than <code>.class</code>, which is one reason to style with classes.</li>
+                <li>An <code>id</code> or <code>name</code> on a form control becomes a property of the form, so <code>id="reset"</code> breaks <code>form.reset()</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Global attributes worth knowing</summary>
+            <ul>
+                <li><code>id</code>, <code>class</code>, <code>style</code>, <code>title</code> (tooltip; not reliable for accessibility).</li>
+                <li><code>hidden</code>: not displayed and hidden from screen readers.</li>
+                <li><code>data-*</code>: your own data, read in JS with <code>el.dataset</code>.</li>
+                <li><code>tabindex</code>: <code>0</code> = focusable in normal order, <code>-1</code> = focusable only by JS, positive = avoid.</li>
+                <li><code>lang</code>, <code>dir</code> (text direction), <code>contenteditable</code>, <code>draggable</code>.</li>
+                <li><code>aria-*</code> and <code>role</code>: accessibility information.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-display">
+        <h2 id="html-display">Block vs inline</h2>
+
+        <details class="note" open>
+            <summary>Block vs inline elements</summary>
+            <table>
+                <thead><tr><th scope="col"></th><th scope="col">Block</th><th scope="col">Inline</th></tr></thead>
+                <tbody>
+                    <tr><td>Starts a new line?</td><td>Yes</td><td>No, flows inside text</td></tr>
+                    <tr><td>Default width</td><td>Full width of its parent</td><td>Just its content</td></tr>
+                    <tr><td>width / height</td><td>Respected</td><td>Ignored</td></tr>
+                    <tr><td>Vertical margin</td><td>Respected</td><td>Ignored</td></tr>
+                    <tr><td>Examples</td><td><code>div p h1–h6 ul ol li section article header footer nav main aside form table</code></td><td><code>span a strong em code img input button label</code></td></tr>
+                </tbody>
+            </table>
+            <p>CSS can change this with <code>display</code>. <code>img</code>, <code>input</code> and <code>button</code> are technically inline but accept width/height (they're "replaced"/inline-block-like).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>div vs span</summary>
+            <p class="say">Both have no meaning. div is a block container; span is an inline container for a bit of text.</p>
+            <p>Use them only when no semantic element fits, usually as hooks for styling or layout.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-semantic">
+        <h2 id="html-semantic">Semantic layout elements</h2>
+
+        <details class="note" open>
+            <summary>Landmarks at a glance</summary>
+            <table>
+                <thead><tr><th scope="col">Element</th><th scope="col">Meaning</th><th scope="col">Rules of thumb</th></tr></thead>
+                <tbody>
+                    <tr><td><code>&lt;header&gt;</code></td><td>Introductory content: logo, title, top nav</td><td>Can be used for the page or inside an article/section</td></tr>
+                    <tr><td><code>&lt;nav&gt;</code></td><td>Major navigation links</td><td>Not every group of links. Label it if there's more than one</td></tr>
+                    <tr><td><code>&lt;main&gt;</code></td><td>The main content of the page</td><td>Exactly one, not inside header/footer/aside</td></tr>
+                    <tr><td><code>&lt;section&gt;</code></td><td>A themed group of content</td><td>Should have a heading</td></tr>
+                    <tr><td><code>&lt;article&gt;</code></td><td>Self-contained, makes sense on its own</td><td>Blog post, card, comment, product</td></tr>
+                    <tr><td><code>&lt;aside&gt;</code></td><td>Related but secondary content</td><td>Sidebar, callout, "related links"</td></tr>
+                    <tr><td><code>&lt;footer&gt;</code></td><td>Closing info: copyright, contact, links</td><td>For the page or for an article/section</td></tr>
+                    <tr><td><code>&lt;div&gt;</code></td><td>Nothing</td><td>Styling/layout hook only</td></tr>
+                </tbody>
+            </table>
+            <p>Screen reader users can list and jump between landmarks, so the right element is navigation for them.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>div vs section vs article</summary>
+            <p class="say">article is self-contained and would make sense on its own; section groups related content under a heading; div means nothing and is just for styling.</p>
+            <p>Test: could you share this piece on another site and it still makes sense? Then it's an <code>article</code>. Does it have a natural heading? <code>section</code>. Only need a wrapper for CSS? <code>div</code>.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>div vs aside</summary>
+            <p class="say">aside is content related to the page but not essential to it (a sidebar, tip or related links), and it's a landmark screen readers can jump to. A div has no meaning.</p>
+            <p>If you deleted it and the main content still made complete sense, it's probably an <code>aside</code>.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>section vs main</summary>
+            <p class="say">main is the single primary content area of the page; sections are the parts inside it (or elsewhere).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>header vs head vs h1</summary>
+            <ul>
+                <li><code>&lt;head&gt;</code>: the invisible metadata part of the document.</li>
+                <li><code>&lt;header&gt;</code>: a visible introductory area (often the site banner).</li>
+                <li><code>&lt;h1&gt;</code>: the main heading text.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>figure, figcaption, time, address</summary>
+            <ul>
+                <li><code>&lt;figure&gt;</code> + <code>&lt;figcaption&gt;</code>: an image, chart or code sample with a caption.</li>
+                <li><code>&lt;time datetime="2026-10-20"&gt;Oct 20&lt;/time&gt;</code>: a human date with a machine-readable value.</li>
+                <li><code>&lt;address&gt;</code>: contact information for the page or article author.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-text">
+        <h2 id="html-text">Text</h2>
+
+        <details class="note" open>
+            <summary>Headings</summary>
+            <ul>
+                <li><code>h1</code>–<code>h6</code> describe structure, not size. Style the size with CSS.</li>
+                <li>One <code>h1</code> per page, then don't skip levels (h2 → h4).</li>
+                <li>Screen reader users navigate by headings more than anything else.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>strong vs b, em vs i</summary>
+            <p class="say">strong and em add meaning (importance and emphasis, which screen readers can convey); b and i are only visual styling with no extra meaning.</p>
+            <p><code>&lt;i&gt;</code> is still fine for things like foreign words or ship names; <code>&lt;b&gt;</code> for keywords that should stand out without being "important".</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Other text elements</summary>
+            <table>
+                <thead><tr><th scope="col">Element</th><th scope="col">Use</th></tr></thead>
+                <tbody>
+                    <tr><td><code>p</code></td><td>A paragraph</td></tr>
+                    <tr><td><code>br</code></td><td>A line break inside content (addresses, poems). Not for spacing</td></tr>
+                    <tr><td><code>hr</code></td><td>A thematic break between sections</td></tr>
+                    <tr><td><code>small</code></td><td>Side comments, fine print</td></tr>
+                    <tr><td><code>mark</code></td><td>Highlighted text (e.g. search matches)</td></tr>
+                    <tr><td><code>code</code> / <code>pre</code></td><td>Inline code / preformatted block that keeps whitespace</td></tr>
+                    <tr><td><code>kbd</code></td><td>Keyboard keys</td></tr>
+                    <tr><td><code>blockquote</code> / <code>q</code> / <code>cite</code></td><td>Block quote / inline quote / title of a work</td></tr>
+                    <tr><td><code>abbr title="…"</code></td><td>Abbreviation with its expansion</td></tr>
+                    <tr><td><code>sub</code> / <code>sup</code></td><td>Subscript (H₂O) / superscript (x²)</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>Lists: ul vs ol vs dl</summary>
+            <ul>
+                <li><code>&lt;ul&gt;</code>: unordered (order doesn't matter). Navigation menus are usually a <code>ul</code>.</li>
+                <li><code>&lt;ol&gt;</code>: ordered (steps, rankings). Attributes: <code>start</code>, <code>reversed</code>.</li>
+                <li><code>&lt;dl&gt;</code> with <code>&lt;dt&gt;</code> (term) and <code>&lt;dd&gt;</code> (description): glossaries, key/value details.</li>
+                <li>Only <code>&lt;li&gt;</code> can be a direct child of <code>ul</code>/<code>ol</code>.</li>
+                <li>Screen readers announce "list, 3 items", which helps users.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-media">
+        <h2 id="html-media">Links &amp; media</h2>
+
+        <details class="note" open>
+            <summary>Links</summary>
+            <ul>
+                <li>Absolute <code>href="https://site.com/page"</code>, relative <code>href="about.html"</code> / <code>"../img/x.png"</code>, root-relative <code>href="/about"</code>.</li>
+                <li>Same page: <code>href="#payroll"</code> jumps to <code>id="payroll"</code>.</li>
+                <li><code>mailto:</code> and <code>tel:</code> open email/phone apps.</li>
+                <li><code>target="_blank"</code> opens a new tab. Add <code>rel="noopener"</code> for older browsers, and warn users.</li>
+                <li>Link text should make sense on its own. Avoid "click here".</li>
+                <li><code>download</code> attribute makes the link download the file.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>button vs a (link)</summary>
+            <p class="say">A link goes somewhere (navigation); a button does something on the page (an action).</p>
+            <p>They behave differently for keyboards (Enter only vs Enter and Space) and screen readers announce them differently.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Images</summary>
+            <pre><code>&lt;img src="photo.jpg" alt="Priya smiling at her desk"
+     width="120" height="120" loading="lazy"&gt;</code></pre>
+            <ul>
+                <li><code>alt</code> is required. Describe what matters in context; <code>alt=""</code> for decorative images.</li>
+                <li><code>width</code>/<code>height</code> reserve space so the page doesn't jump while loading.</li>
+                <li><code>loading="lazy"</code>: only load when near the screen.</li>
+                <li><code>srcset</code>/<code>sizes</code> or <code>&lt;picture&gt;</code>: different files for different screen sizes/formats.</li>
+                <li>Decorative images are often better as CSS <code>background-image</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Video, audio, iframe</summary>
+            <ul>
+                <li><code>&lt;video src controls&gt;</code> / <code>&lt;audio src controls&gt;</code>. <code>controls</code> shows play buttons. Add <code>&lt;track kind="captions"&gt;</code> for captions.</li>
+                <li><code>&lt;iframe src title="…"&gt;</code> embeds another page (maps, YouTube). Always give it a <code>title</code>.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-tables">
+        <h2 id="html-tables">Tables</h2>
+
+        <details class="note" open>
+            <summary>Table structure</summary>
+            <pre><code>&lt;table&gt;
+  &lt;caption&gt;October pay run&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th scope="col"&gt;Name&lt;/th&gt;&lt;th scope="col"&gt;Salary&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;Priya&lt;/th&gt;&lt;td&gt;$115,000&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt; …totals… &lt;/tfoot&gt;
 &lt;/table&gt;</code></pre>
-                    <ul>
-                        <li><code>&lt;caption&gt;</code> is the table's title.</li>
-                        <li><code>&lt;th scope="col"&gt;</code> is a <strong>header</strong> cell for its column. <code>&lt;td&gt;</code> is a <strong>data</strong> cell. Don't use <code>th</code> for data.</li>
-                        <li>Render rows into the <code>&lt;tbody&gt;</code> only, so the caption and header survive.</li>
-                        <li>Clickable header? Put a <code>&lt;button&gt;</code> <em>inside</em> the <code>&lt;th&gt;</code> so keyboards can reach it.</li>
-                    </ul>
-                </details>
+            <ul>
+                <li><code>caption</code> = title. <code>thead</code>/<code>tbody</code>/<code>tfoot</code> = header, body, footer row groups.</li>
+                <li><code>th</code> = header cell (with <code>scope="col"</code> or <code>"row"</code>); <code>td</code> = data cell.</li>
+                <li><code>colspan="2"</code> / <code>rowspan="2"</code> merge cells.</li>
+                <li>Tables are for <strong>tabular data only</strong>, never for page layout (use grid/flex).</li>
+            </ul>
+        </details>
+    </section>
 
-                <details class="note" data-topic="html">
-                    <summary>Accessibility attributes cheat sheet</summary>
-                    <table>
-                        <thead><tr><th scope="col">Attribute</th><th scope="col">Use it for</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>alt="…"</code></td><td>Describe an image. <code>alt=""</code> when it's decorative (e.g. the name is right next to it).</td></tr>
-                            <tr><td><code>aria-label</code></td><td>Name an element with no visible text (icon buttons like ⋯), or make repeated buttons unique ("Remove Priya").</td></tr>
-                            <tr><td><code>aria-labelledby</code></td><td>Name it using another element's text, by id.</td></tr>
-                            <tr><td><code>aria-describedby</code></td><td>Extra description read after the name (counter, error message).</td></tr>
-                            <tr><td><code>role="status"</code> / <code>aria-live="polite"</code></td><td>Announce text changes without moving focus.</td></tr>
-                            <tr><td><code>aria-current="page"</code></td><td>The link to the page you're on.</td></tr>
-                            <tr><td><code>aria-pressed</code></td><td>A toggle button's on/off state.</td></tr>
-                            <tr><td><code>aria-sort</code></td><td>On the sorted <code>&lt;th&gt;</code>: <code>ascending</code> / <code>descending</code>. Only one at a time.</td></tr>
-                            <tr><td><code>.visually-hidden</code></td><td>Hide visually, keep for screen readers. (<code>display:none</code> hides from both.)</td></tr>
-                        </tbody>
-                    </table>
-                </details>
-            </section>
+    <section class="topic-section" aria-labelledby="html-forms">
+        <h2 id="html-forms">Forms</h2>
 
-            <!-- ======================================================
-                 CSS
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-css">
-                <h2 id="h-css">CSS</h2>
+        <details class="note" open>
+            <summary>The form element</summary>
+            <ul>
+                <li><code>action</code>: where to send the data (default: the current page).</li>
+                <li><code>method</code>: <code>get</code> (data in the URL; for searches) or <code>post</code> (data in the body; for creating/changing things).</li>
+                <li>Submitting reloads the page unless JS calls <code>event.preventDefault()</code>.</li>
+                <li><code>novalidate</code> turns off built-in validation.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Selectors</summary>
-                    <table>
-                        <thead><tr><th scope="col">Selector</th><th scope="col">Matches</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>tbody</code></td><td>every <code>&lt;tbody&gt;</code> element (tag, no symbol)</td></tr>
-                            <tr><td><code>.card</code></td><td>elements with <code>class="card"</code></td></tr>
-                            <tr><td><code>#search</code></td><td>the element with <code>id="search"</code></td></tr>
-                            <tr><td><code>.card img</code></td><td><code>img</code> anywhere inside <code>.card</code> (descendant)</td></tr>
-                            <tr><td><code>main &gt; *</code></td><td>direct children only</td></tr>
-                            <tr><td><code>.a + .a</code></td><td>an <code>.a</code> right after another <code>.a</code> (spacing <em>between</em> items)</td></tr>
-                            <tr><td><code>input[type="search"]</code></td><td>attribute selector</td></tr>
-                            <tr><td><code>tr.is-selected</code></td><td>a <code>tr</code> that also has that class (no space!)</td></tr>
-                            <tr><td><code>:hover</code>, <code>:focus-visible</code>, <code>:nth-child(even)</code></td><td>states (pseudo-classes)</td></tr>
-                            <tr><td><code>::after</code> + <code>content</code></td><td>generated content (pseudo-element)</td></tr>
-                        </tbody>
-                    </table>
-                </details>
+        <details class="note" open>
+            <summary>Input types</summary>
+            <table>
+                <thead><tr><th scope="col">type</th><th scope="col">Gives you</th></tr></thead>
+                <tbody>
+                    <tr><td><code>text</code></td><td>Plain text (default)</td></tr>
+                    <tr><td><code>email</code>, <code>url</code>, <code>tel</code></td><td>Validation (email/url) and the right phone keyboard</td></tr>
+                    <tr><td><code>number</code></td><td>Number spinner; <code>min</code>, <code>max</code>, <code>step</code></td></tr>
+                    <tr><td><code>password</code></td><td>Hidden characters</td></tr>
+                    <tr><td><code>search</code></td><td>Clear (×) button, search keyboard</td></tr>
+                    <tr><td><code>date</code>, <code>time</code>, <code>datetime-local</code></td><td>Pickers; value is always <code>YYYY-MM-DD</code></td></tr>
+                    <tr><td><code>checkbox</code>, <code>radio</code></td><td>On/off; one-of-many (same <code>name</code> = one group)</td></tr>
+                    <tr><td><code>range</code>, <code>color</code>, <code>file</code></td><td>Slider, colour picker, file chooser (<code>accept="image/*"</code>)</td></tr>
+                    <tr><td><code>hidden</code></td><td>A value sent with the form but not shown</td></tr>
+                </tbody>
+            </table>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>The cascade &amp; specificity</summary>
-                    <ul>
-                        <li>When two rules set the same property: higher <strong>specificity</strong> wins. <code>#id</code> &gt; <code>.class / [attr] / :pseudo</code> &gt; <code>tag</code>.</li>
-                        <li>Equal specificity → the rule <strong>later</strong> in the file wins. That's why <code>h2 { margin-top: 2rem }</code> must come <em>after</em> <code>h1, h2, h3 { margin: 0 0 .5rem }</code>.</li>
-                        <li>Shorthands reset everything they cover: <code>margin: 0 0 1rem</code> also sets top to 0.</li>
-                        <li>In DevTools → Styles, a losing declaration is shown crossed out.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Labels</summary>
+            <pre><code>&lt;label for="email"&gt;Work email&lt;/label&gt;
+&lt;input id="email" name="email" type="email"&gt;
 
-                <details class="note" data-topic="css">
-                    <summary>Box model &amp; box-sizing</summary>
-                    <p>Content → padding → border → margin (margin is outside and doesn't count toward width).</p>
-                    <p><code>width: 300px; padding: 20px; border: 2px solid;</code></p>
-                    <ul>
-                        <li><strong>content-box</strong> (default): width = content only → <strong>344px</strong> rendered (300 + 40 + 4).</li>
-                        <li><strong>border-box</strong>: width includes padding + border → <strong>300px</strong> rendered, content shrinks to 256.</li>
-                    </ul>
-                    <pre><code>*, *::before, *::after { box-sizing: border-box; }</code></pre>
-                    <p>Check with DevTools → Computed (the box diagram) or <code>el.offsetWidth</code>.</p>
-                </details>
+&lt;label&gt;&lt;input type="checkbox" name="agree"&gt; I agree&lt;/label&gt;</code></pre>
+            <ul>
+                <li>Every input needs a label: <code>for</code> matches the input's <code>id</code>, or wrap the input.</li>
+                <li>Clicking the label focuses/toggles the input (bigger click target).</li>
+                <li>A <code>placeholder</code> is not a label.</li>
+                <li><code>name</code> is the key the data is submitted (and read by <code>FormData</code>) under.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Units: rem, em, px, %, vh, fr</summary>
-                    <ul>
-                        <li><strong>rem</strong> is relative to the root (<code>&lt;html&gt;</code>) font size, 16px by default. <code>1.5rem</code> = 24px. Scales with the user's browser font setting (accessibility).</li>
-                        <li><strong>em</strong> is relative to the element's <em>own</em> font size. Good for button padding that should grow with its text.</li>
-                        <li><strong>%</strong> is relative to the parent. <strong>vh</strong> = 1% of the window height. <strong>fr</strong> = a share of the leftover grid space.</li>
-                        <li>Rule of thumb: rem for most spacing, em for things that should scale with their own text.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>select, textarea, fieldset, datalist</summary>
+            <ul>
+                <li><code>&lt;select&gt;</code> with <code>&lt;option value="x"&gt;</code>; group options with <code>&lt;optgroup label&gt;</code>; <code>multiple</code> allows several.</li>
+                <li>An <code>option</code> without <code>value</code> uses its text as the value.</li>
+                <li><code>&lt;textarea rows="4" maxlength="200"&gt;</code>: multi-line text.</li>
+                <li><code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code>: group related fields (radio groups especially).</li>
+                <li><code>&lt;datalist&gt;</code>: suggestions for a text input (<code>list="id"</code>).</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Margins: defaults &amp; collapsing</summary>
-                    <ul>
-                        <li>Browsers give <code>body</code>, <code>p</code>, <code>h1</code>–<code>h6</code>, <code>ul</code> default margins. A <code>&lt;p&gt;</code> inside a padded footer adds its own 1em above and below.</li>
-                        <li><strong>Vertical margins collapse</strong>: between two stacked siblings, the bigger margin wins. They don't add up.</li>
-                        <li>Space <em>outside</em> = margin. Space <em>inside</em> (where the background shows) = padding.</li>
-                        <li>Margin <code>0 auto</code> centres a block that has a width.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Buttons</summary>
+            <ul>
+                <li><code>type="submit"</code> (the <strong>default</strong>!), <code>type="reset"</code>, <code>type="button"</code>.</li>
+                <li>Always write the type. A plain button inside a form will otherwise submit it.</li>
+                <li><code>&lt;button&gt;</code> can contain HTML (icons); <code>&lt;input type="submit" value&gt;</code> can't.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Invalid CSS fails silently</summary>
-                    <ul>
-                        <li><code>font-weight: 1500</code> is out of range (1–1000), so the whole line is ignored.</li>
-                        <li><code>rgb(146, 146, 146 / 0.5)</code> mixes comma and slash syntax, so it's ignored. Use <code>rgb(146 146 146 / 0.5)</code> (modern) or <code>rgba(146, 146, 146, 0.5)</code>.</li>
-                        <li><code>outline: 1px</code> has no style, so it's invisible. You need <code>outline: 2px solid color</code>.</li>
-                        <li>A typo in a selector (<code>.siderbar</code>) just matches nothing.</li>
-                        <li>Always check DevTools → Styles for crossed-out lines with ⚠️.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Built-in validation attributes</summary>
+            <ul>
+                <li><code>required</code>, <code>min</code>/<code>max</code>, <code>step</code>, <code>minlength</code>/<code>maxlength</code>, <code>pattern="[A-Z]{3}"</code> (regex), and the input <code>type</code>.</li>
+                <li>The browser blocks submit and shows a message; the <code>submit</code> event only fires once everything passes.</li>
+                <li>CSS hooks: <code>:invalid</code>, <code>:valid</code>, <code>:required</code>, <code>:user-invalid</code>.</li>
+                <li>Client-side validation is for UX. Servers must check again.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Colour contrast</summary>
-                    <ul>
-                        <li>WCAG minimum: <strong>4.5:1</strong> for normal text, <strong>3:1</strong> for large text.</li>
-                        <li>Semi-transparent grey text usually fails. Prefer a solid mid-grey like <code>#6b7085</code>.</li>
-                        <li>DevTools: click the colour swatch next to <code>color</code> to see the ratio.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>autocomplete</summary>
+            <p>Takes tokens that tell the browser what to auto-fill: <code>name</code>, <code>email</code>, <code>tel</code>, <code>street-address</code>, <code>new-password</code>, <code>current-password</code>, <code>off</code>. Not example values (those go in <code>placeholder</code>).</p>
+        </details>
+    </section>
 
-                <details class="note" data-topic="css">
-                    <summary>Flexbox (one direction)</summary>
-                    <pre><code>.toolbar { display: flex; align-items: center; gap: .75rem; }</code></pre>
-                    <ul>
-                        <li><strong>On the container:</strong> <code>flex-direction</code> (row/column), <code>justify-content</code> (main axis: <code>space-between</code>…), <code>align-items</code> (cross axis: <code>center</code>), <code>gap</code>, <code>flex-wrap: wrap</code>.</li>
-                        <li><strong>On items:</strong> <code>flex: 1</code> = take all spare room. <code>flex: 1 1 240px</code> = grow, shrink, aim for 240px (with wrap → responsive cards with no media queries). <code>flex-shrink: 0</code> = never squash (avatars).</li>
-                        <li><code>margin-left: auto</code> pushes an item to the far right.</li>
-                        <li><code>margin-top: auto</code> inside a column pushes the item to the bottom.</li>
-                        <li>⚠️ <strong>Famous gotcha:</strong> flex items default to <code>min-width: auto</code> (never narrower than their content). To truncate text inside a flex child, give that child <code>min-width: 0</code>.</li>
-                    </ul>
-                </details>
+    <section class="topic-section" aria-labelledby="html-a11y">
+        <h2 id="html-a11y">Accessibility</h2>
 
-                <details class="note" data-topic="css">
-                    <summary>Truncate with an ellipsis (…)</summary>
-                    <pre><code>.name {
+        <details class="note" open>
+            <summary>The basics checklist</summary>
+            <ul>
+                <li>Semantic elements and landmarks; one h1; headings in order.</li>
+                <li>Every image has <code>alt</code>; every input has a label.</li>
+                <li>Real <code>button</code>s and links, never clickable divs.</li>
+                <li>Everything works with a keyboard, with a visible focus style.</li>
+                <li>Colour contrast at least 4.5:1 (3:1 for large text); don't rely on colour alone.</li>
+                <li><code>lang</code> on <code>&lt;html&gt;</code>; descriptive link text; captions for video.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>ARIA cheat sheet</summary>
+            <table>
+                <thead><tr><th scope="col">Attribute</th><th scope="col">Use it for</th></tr></thead>
+                <tbody>
+                    <tr><td><code>aria-label</code></td><td>A name as a string, for elements with no visible text (icon buttons) or to make repeated buttons unique</td></tr>
+                    <tr><td><code>aria-labelledby</code></td><td>A name taken from another element's text, by id</td></tr>
+                    <tr><td><code>aria-describedby</code></td><td>Extra description read after the name (hints, counters, errors)</td></tr>
+                    <tr><td><code>aria-live="polite"</code> / <code>role="status"</code></td><td>Announce text changes without moving focus</td></tr>
+                    <tr><td><code>role="alert"</code></td><td>Announce urgent errors immediately</td></tr>
+                    <tr><td><code>aria-current="page"</code></td><td>The link to the current page</td></tr>
+                    <tr><td><code>aria-pressed</code></td><td>Toggle button state</td></tr>
+                    <tr><td><code>aria-expanded</code></td><td>Whether a menu/accordion it controls is open</td></tr>
+                    <tr><td><code>aria-controls</code></td><td>Which element this one controls (by id)</td></tr>
+                    <tr><td><code>aria-selected</code></td><td>The chosen tab/option</td></tr>
+                    <tr><td><code>aria-sort</code></td><td>Sorted table column: <code>ascending</code>/<code>descending</code></td></tr>
+                    <tr><td><code>aria-hidden="true"</code></td><td>Hide decorative things from screen readers (never on focusable elements)</td></tr>
+                    <tr><td><code>aria-invalid</code></td><td>A field that failed validation</td></tr>
+                </tbody>
+            </table>
+            <p><strong>First rule of ARIA:</strong> if a native element does the job, use it. ARIA changes what's announced, not how it behaves.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Focus and tabindex</summary>
+            <ul>
+                <li>Links, buttons and form fields are focusable automatically.</li>
+                <li><code>tabindex="0"</code>: add a custom element to the Tab order. <code>tabindex="-1"</code>: focusable only with <code>el.focus()</code> (e.g. moving focus to a heading or dialog).</li>
+                <li>Never use positive tabindex; it breaks the natural order.</li>
+                <li>Use <code>:focus-visible</code> to style keyboard focus without showing it on mouse clicks.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Visually hidden vs hidden</summary>
+            <ul>
+                <li><code>.visually-hidden</code> class: invisible but still read by screen readers (e.g. a label for a search box).</li>
+                <li><code>hidden</code> / <code>display: none</code>: hidden from everyone.</li>
+                <li><code>aria-hidden="true"</code>: visible but ignored by screen readers.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="html-interactive">
+        <h2 id="html-interactive">Built-in interactive elements</h2>
+
+        <details class="note" open>
+            <summary>details / summary</summary>
+            <p>A disclosure widget (accordion) with no JS: clicking the <code>summary</code> opens and closes it. <code>open</code> attribute = expanded. These notes are built with it.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>dialog</summary>
+            <pre><code>&lt;dialog id="modal"&gt; … &lt;/dialog&gt;
+modal.showModal();   // opens as a modal: traps focus, Escape closes
+modal.close();</code></pre>
+            <p><code>::backdrop</code> styles the dimmed background.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>progress and meter</summary>
+            <p><code>&lt;progress value="40" max="100"&gt;</code> for task progress; <code>&lt;meter&gt;</code> for a measurement in a range (disk usage). Both are accessible out of the box.</p>
+        </details>
+    </section>
+</div>
+
+<!-- ==================================================================
+     CSS TAB
+     ================================================================== -->
+<div class="panel" role="tabpanel" id="panel-css" aria-labelledby="tab-css" tabindex="0" hidden>
+
+    <section class="topic-section" aria-labelledby="css-basics">
+        <h2 id="css-basics">Basics</h2>
+
+        <details class="note" open>
+            <summary>Rule syntax</summary>
+            <pre><code>selector {
+  property: value;   /* a declaration */
+}</code></pre>
+            <ul>
+                <li>Several selectors share a rule with commas: <code>h1, h2 { … }</code>.</li>
+                <li>Invalid declarations are silently ignored. DevTools shows them crossed out with ⚠️.</li>
+                <li>Comments: <code>/* like this */</code> (no <code>//</code> in CSS).</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Selectors</summary>
+            <table>
+                <thead><tr><th scope="col">Selector</th><th scope="col">Matches</th></tr></thead>
+                <tbody>
+                    <tr><td><code>*</code></td><td>everything</td></tr>
+                    <tr><td><code>p</code></td><td>every <code>&lt;p&gt;</code> (type)</td></tr>
+                    <tr><td><code>.card</code></td><td><code>class="card"</code></td></tr>
+                    <tr><td><code>#search</code></td><td><code>id="search"</code></td></tr>
+                    <tr><td><code>tr.is-selected</code></td><td>a tr that <em>also</em> has the class (no space)</td></tr>
+                    <tr><td><code>[type="search"]</code></td><td>attribute equals. Also <code>^=</code> starts with, <code>$=</code> ends with, <code>*=</code> contains</td></tr>
+                    <tr><td><code>.card img</code></td><td>descendant: img anywhere inside .card</td></tr>
+                    <tr><td><code>ul &gt; li</code></td><td>child: direct children only</td></tr>
+                    <tr><td><code>h2 + p</code></td><td>adjacent sibling: the p right after an h2</td></tr>
+                    <tr><td><code>h2 ~ p</code></td><td>general sibling: every p after an h2</td></tr>
+                    <tr><td><code>a, button</code></td><td>either (a selector list)</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>Pseudo-classes (states)</summary>
+            <ul>
+                <li>Interaction: <code>:hover</code>, <code>:active</code>, <code>:focus</code>, <code>:focus-visible</code> (keyboard focus), <code>:focus-within</code> (a child has focus).</li>
+                <li>Position: <code>:first-child</code>, <code>:last-child</code>, <code>:nth-child(even)</code>, <code>:nth-child(3n+1)</code>, <code>:only-child</code>.</li>
+                <li>Forms: <code>:checked</code>, <code>:disabled</code>, <code>:required</code>, <code>:invalid</code>, <code>:placeholder-shown</code>.</li>
+                <li>Logic: <code>:not(.x)</code>, <code>:is(h1, h2)</code>, <code>:where()</code> (zero specificity), <code>:has(img)</code> (parent selector).</li>
+                <li>Links: <code>:link</code>, <code>:visited</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Pseudo-elements</summary>
+            <ul>
+                <li><code>::before</code> / <code>::after</code>: generated content (needs <code>content: ""</code>). Used for icons, arrows, decorations.</li>
+                <li><code>::placeholder</code>, <code>::selection</code>, <code>::first-line</code>, <code>::first-letter</code>, <code>::marker</code> (list bullets), <code>::backdrop</code> (behind a dialog).</li>
+                <li>Pseudo-class = one colon, a state. Pseudo-element = two colons, a part.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>BEM naming</summary>
+            <pre><code>.card              /* Block */
+.card__title       /* Element: a part of the block */
+.card--featured    /* Modifier: a variant */</code></pre>
+            <p>Keeps class names predictable and specificity low (just one class each).</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-cascade">
+        <h2 id="css-cascade">Cascade, specificity, inheritance</h2>
+
+        <details class="note" open>
+            <summary>How conflicts are decided</summary>
+            <ol>
+                <li><strong>Importance</strong>: <code>!important</code> wins (avoid it).</li>
+                <li><strong>Specificity</strong>: inline style &gt; <code>#id</code> &gt; <code>.class</code> / <code>[attr]</code> / <code>:pseudo-class</code> &gt; <code>element</code> / <code>::pseudo-element</code>.</li>
+                <li><strong>Order</strong>: equal specificity → the later rule wins.</li>
+            </ol>
+            <p>Count specificity as (ids, classes, elements): <code>#nav .link a</code> = (1, 1, 1) beats <code>.nav .link a</code> = (0, 2, 1). <code>*</code> and combinators add nothing.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Inheritance</summary>
+            <ul>
+                <li>Text properties inherit to children: <code>color</code>, <code>font-*</code>, <code>line-height</code>, <code>text-align</code>, <code>letter-spacing</code>, <code>visibility</code>, <code>cursor</code>, <code>list-style</code>.</li>
+                <li>Box properties don't: <code>margin</code>, <code>padding</code>, <code>border</code>, <code>width</code>, <code>background</code>, <code>display</code>, <code>position</code>.</li>
+                <li>Form controls don't inherit fonts by default, so add <code>font: inherit</code>.</li>
+                <li>Keywords: <code>inherit</code> (take the parent's value), <code>initial</code> (the spec default), <code>unset</code> (inherit if inheritable, else initial), <code>all: unset</code> (reset everything).</li>
+                <li>A direct rule always beats an inherited value, whatever the specificity of the parent's rule.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Shorthands</summary>
+            <ul>
+                <li><code>margin: 10px</code> (all) · <code>10px 20px</code> (top/bottom, left/right) · <code>10px 20px 30px</code> (top, sides, bottom) · <code>10px 20px 30px 40px</code> (top, right, bottom, left: clockwise).</li>
+                <li>Same pattern for <code>padding</code>, <code>border-width</code>, <code>inset</code>.</li>
+                <li><code>border: 1px solid #ccc</code>, <code>font: 600 1rem/1.5 system-ui</code>, <code>background</code>, <code>flex</code>, <code>grid-area</code>.</li>
+                <li>A shorthand resets every sub-property it covers, even ones you didn't write.</li>
+                <li>Logical properties: <code>margin-inline</code> (left+right), <code>margin-block</code> (top+bottom).</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-box">
+        <h2 id="css-box">Box model</h2>
+
+        <details class="note" open>
+            <summary>The box model and box-sizing</summary>
+            <p>Every element: <strong>content</strong> → <strong>padding</strong> (inside, shows the background) → <strong>border</strong> → <strong>margin</strong> (outside, transparent).</p>
+            <p><code>width: 300px; padding: 20px; border: 2px solid</code></p>
+            <ul>
+                <li><code>content-box</code> (default): width = content only → <strong>344px</strong> on screen.</li>
+                <li><code>border-box</code>: width includes padding and border → <strong>300px</strong> on screen (content shrinks to 256).</li>
+            </ul>
+            <pre><code>*, *::before, *::after { box-sizing: border-box; }</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>margin vs padding</summary>
+            <p class="say">Padding is space inside the border (it gets the background and is part of the click area); margin is space outside the border that pushes other elements away.</p>
+            <ul>
+                <li>Margins can be negative and <code>auto</code>; padding can't.</li>
+                <li>Vertical margins collapse; padding never does.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Margin collapsing</summary>
+            <ul>
+                <li>When two block elements stack, the gap is the <strong>larger</strong> of the bottom and top margins, not the sum.</li>
+                <li>A child's top margin can "leak" out through a parent with no padding/border.</li>
+                <li>Doesn't happen with padding/borders in between, inside flex or grid containers, or horizontally.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>border vs outline</summary>
+            <p>A border takes up space and affects layout; an outline is drawn outside the box without taking space (used for focus rings). Both need a style: <code>outline: 2px solid</code>, not just <code>outline: 2px</code>.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>width, height, min/max</summary>
+            <ul>
+                <li><code>max-width: 1100px; margin: 0 auto</code>: a centred container that shrinks on small screens.</li>
+                <li><code>min-height: 100vh</code>: at least the window's height but can grow.</li>
+                <li>Avoid fixed <code>height</code> on text containers; content overflows.</li>
+                <li><code>aspect-ratio: 16 / 9</code> keeps proportions.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>overflow</summary>
+            <ul>
+                <li><code>visible</code> (default: spills out), <code>hidden</code> (clipped), <code>scroll</code> (always scrollbars), <code>auto</code> (scrollbars only when needed).</li>
+                <li><code>overflow-x: auto</code> on wide tables/code so the page doesn't scroll sideways on phones.</li>
+                <li><code>overflow: hidden</code> on a rounded parent clips its children to the corners.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-display">
+        <h2 id="css-display">Display</h2>
+
+        <details class="note" open>
+            <summary>display values</summary>
+            <table>
+                <thead><tr><th scope="col">Value</th><th scope="col">Behaviour</th></tr></thead>
+                <tbody>
+                    <tr><td><code>block</code></td><td>New line, full width, respects width/height/margins</td></tr>
+                    <tr><td><code>inline</code></td><td>Flows in text, ignores width/height and vertical margins</td></tr>
+                    <tr><td><code>inline-block</code></td><td>Flows in text but respects width/height/padding (badges, buttons)</td></tr>
+                    <tr><td><code>flex</code> / <code>inline-flex</code></td><td>Flexbox container</td></tr>
+                    <tr><td><code>grid</code> / <code>inline-grid</code></td><td>Grid container</td></tr>
+                    <tr><td><code>none</code></td><td>Removed completely</td></tr>
+                    <tr><td><code>contents</code></td><td>The box disappears but its children stay (careful: can break accessibility)</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>Ways to hide things</summary>
+            <table>
+                <thead><tr><th scope="col"></th><th scope="col">Takes space?</th><th scope="col">Clickable?</th><th scope="col">Screen readers?</th></tr></thead>
+                <tbody>
+                    <tr><td><code>display: none</code></td><td>No</td><td>No</td><td>Hidden</td></tr>
+                    <tr><td><code>visibility: hidden</code></td><td>Yes</td><td>No</td><td>Hidden</td></tr>
+                    <tr><td><code>opacity: 0</code></td><td>Yes</td><td>Yes</td><td>Read</td></tr>
+                    <tr><td><code>.visually-hidden</code></td><td>No</td><td>No</td><td>Read</td></tr>
+                </tbody>
+            </table>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-units">
+        <h2 id="css-units">Units, colours, functions</h2>
+
+        <details class="note" open>
+            <summary>Units</summary>
+            <table>
+                <thead><tr><th scope="col">Unit</th><th scope="col">Relative to</th><th scope="col">Good for</th></tr></thead>
+                <tbody>
+                    <tr><td><code>px</code></td><td>Fixed</td><td>Borders, shadows, small details</td></tr>
+                    <tr><td><code>rem</code></td><td>Root (<code>html</code>) font size, 16px default</td><td>Font sizes, most spacing</td></tr>
+                    <tr><td><code>em</code></td><td>The element's own font size</td><td>Padding that scales with a component's text</td></tr>
+                    <tr><td><code>%</code></td><td>The parent</td><td>Fluid widths</td></tr>
+                    <tr><td><code>vw</code> / <code>vh</code></td><td>1% of the viewport width/height</td><td>Full-screen sections</td></tr>
+                    <tr><td><code>fr</code></td><td>A share of leftover grid space</td><td>Grid columns</td></tr>
+                    <tr><td><code>ch</code></td><td>Width of the "0" character</td><td>Readable line length (<code>max-width: 65ch</code>)</td></tr>
+                </tbody>
+            </table>
+            <p>rem respects the user's browser font setting, which is why it's preferred for accessibility. Unitless <code>line-height: 1.5</code> scales with the font.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Colours</summary>
+            <pre><code>#6b2fb3              /* hex */
+#6b2fb380            /* hex with alpha */
+rgb(107 47 179)      /* modern: spaces */
+rgb(107 47 179 / 50%)
+rgba(107, 47, 179, 0.5)   /* legacy: commas */
+hsl(270 59% 44%)     /* hue saturation lightness */
+currentColor         /* the element's text colour */</code></pre>
+            <p>Don't mix comma and slash syntax. Check contrast: at least 4.5:1 for normal text.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Useful functions</summary>
+            <ul>
+                <li><code>calc(100% - 2rem)</code>: math with mixed units.</li>
+                <li><code>min(860px, 100%)</code>, <code>max(…)</code>: the smaller/larger value.</li>
+                <li><code>clamp(1rem, 2.5vw, 2rem)</code>: fluid between a min and a max (responsive font sizes).</li>
+                <li><code>var(--name, fallback)</code>: custom properties.</li>
+                <li><code>repeat()</code>, <code>minmax()</code>: grid.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Custom properties (CSS variables)</summary>
+            <pre><code>:root { --accent: #6b2fb3; }
+.btn { background: var(--accent); }
+.fill { width: var(--progress, 0%); }   /* 0% = fallback */
+
+el.style.setProperty('--progress', '60%');   // set from JS</code></pre>
+            <ul>
+                <li>Names start with <code>--</code>; they inherit and cascade like normal properties.</li>
+                <li>Live: change one and everything using it updates. That's why they're great for themes and dark mode.</li>
+                <li>The clean way to pass numbers from JS to CSS.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-type">
+        <h2 id="css-type">Text &amp; decoration</h2>
+
+        <details class="note" open>
+            <summary>Typography properties</summary>
+            <ul>
+                <li><code>font-family: system-ui, sans-serif</code> (a stack: first available wins; end with a generic family).</li>
+                <li><code>font-size</code>, <code>font-weight</code> (100–900 typical; 400 normal, 700 bold; valid range 1–1000), <code>font-style: italic</code>.</li>
+                <li><code>line-height: 1.5</code> (unitless), <code>letter-spacing</code>, <code>text-transform: uppercase</code>.</li>
+                <li><code>text-align</code>, <code>text-decoration: none</code> (remove link underline), <code>text-indent</code>.</li>
+                <li><code>font-variant-numeric: tabular-nums</code>: equal-width digits for tables.</li>
+                <li>Load web fonts with Google Fonts <code>&lt;link&gt;</code> or <code>@font-face</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>white-space and truncation</summary>
+            <pre><code>.name {
   white-space: nowrap;      /* one line */
-  overflow: hidden;         /* hide the rest */
+  overflow: hidden;         /* clip the rest */
   text-overflow: ellipsis;  /* show … */
-}
-/* + min-width: 0 on the flex child that contains it */</code></pre>
-                    <p>All three lines are needed. Text-overflow only works on one line with hidden overflow.</p>
-                </details>
+}</code></pre>
+            <ul>
+                <li>All three are needed. Inside a flex child, that child also needs <code>min-width: 0</code>.</li>
+                <li>Multi-line: <code>-webkit-line-clamp: 2</code> with <code>display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden</code>.</li>
+                <li><code>overflow-wrap: anywhere</code> breaks very long words/URLs.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Grid (rows and columns)</summary>
-                    <pre><code>.app {
+        <details class="note" open>
+            <summary>Backgrounds, borders, shadows</summary>
+            <ul>
+                <li><code>background-color</code>, <code>background-image: url() / linear-gradient(…)</code>, <code>background-size: cover</code>, <code>background-position: center</code>.</li>
+                <li><code>border-radius: 12px</code>; <code>50%</code> on a square = circle; <code>999px</code> = pill.</li>
+                <li><code>box-shadow: x y blur spread color</code>, e.g. <code>0 1px 3px rgb(0 0 0 / 10%)</code>; <code>inset</code> for inner shadows.</li>
+                <li><code>text-shadow</code> for text.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-flex">
+        <h2 id="css-flex">Flexbox</h2>
+
+        <details class="note" open>
+            <summary>Flexbox container properties</summary>
+            <ul>
+                <li><code>display: flex</code>: children become flex items in a row.</li>
+                <li><code>flex-direction</code>: <code>row</code> (default) or <code>column</code>. This sets the <strong>main axis</strong>; the other one is the <strong>cross axis</strong>.</li>
+                <li><code>justify-content</code> (main axis): <code>flex-start</code>, <code>center</code>, <code>flex-end</code>, <code>space-between</code>, <code>space-around</code>, <code>space-evenly</code>.</li>
+                <li><code>align-items</code> (cross axis): <code>stretch</code> (default), <code>center</code>, <code>flex-start</code>, <code>flex-end</code>, <code>baseline</code>.</li>
+                <li><code>flex-wrap: wrap</code>: let items move to new lines. <code>align-content</code> spaces those lines.</li>
+                <li><code>gap: 1rem</code>: space between items only.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Flexbox item properties</summary>
+            <ul>
+                <li><code>flex: grow shrink basis</code>. <code>flex: 1</code> = take an equal share of spare space. <code>flex: 1 1 240px</code> = aim for 240px, grow and shrink.</li>
+                <li><code>flex-shrink: 0</code>: never shrink (avatars, icons).</li>
+                <li><code>align-self</code>: override <code>align-items</code> for one item.</li>
+                <li><code>order</code>: visual order (doesn't change tab/reading order, so use carefully).</li>
+                <li><code>margin-left: auto</code>: push this item (and everything after it) to the end.</li>
+                <li>⚠️ Items default to <code>min-width: auto</code> (never narrower than their content). Text truncation inside needs <code>min-width: 0</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Common flex recipes</summary>
+            <pre><code>/* navbar: logo left, links right */
+.header { display: flex; justify-content: space-between; align-items: center; }
+
+/* toolbar: search grows, button pushed right */
+.toolbar { display: flex; gap: .75rem; }
+.toolbar input { flex: 1; }
+.toolbar .btn { margin-left: auto; }
+
+/* responsive card row, no media queries */
+.cards { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.card { flex: 1 1 240px; }
+
+/* card with button pinned to the bottom */
+.card { display: flex; flex-direction: column; }
+.card .btn { margin-top: auto; }</code></pre>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-grid">
+        <h2 id="css-grid">Grid</h2>
+
+        <details class="note" open>
+            <summary>Grid basics</summary>
+            <pre><code>.app {
   display: grid;
   grid-template-columns: 220px 1fr;
   grid-template-rows: 64px 1fr;
   grid-template-areas:
     "header  header"
     "sidebar main";
-  min-height: 100vh;
+  gap: 1rem;
 }
 .site-header { grid-area: header; }</code></pre>
-                    <ul>
-                        <li>Flex = one direction. Grid = two directions.</li>
-                        <li><code>1fr</code> = one share of the leftover space.</li>
-                        <li>Items without a <code>grid-area</code> get auto-placed into the next empty cell.</li>
-                    </ul>
-                </details>
+            <ul>
+                <li><code>fr</code> = one share of the leftover space.</li>
+                <li><code>grid-template-areas</code> draws the layout with names; place items with <code>grid-area</code>.</li>
+                <li>Or place by line numbers: <code>grid-column: 1 / 3</code> or <code>grid-column: span 2</code>.</li>
+                <li>Items without a placement are auto-placed into the next empty cell.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="css">
-                    <summary>Custom properties (CSS variables)</summary>
-                    <pre><code>.progress__fill { width: var(--progress, 0%); }   /* 0% = fallback */</code></pre>
-                    <pre><code>fill.style.setProperty('--progress', `${percent}%`);  // JS sets it</code></pre>
-                    <ul>
-                        <li>Names start with <code>--</code>. Read with <code>var()</code>.</li>
-                        <li>The clean way to pass a <em>number</em> from JS to CSS. Remember the unit (<code>%</code>).</li>
-                        <li><code>transition: width .2s ease</code> animates the change.</li>
-                    </ul>
-                </details>
-            </section>
+        <details class="note" open>
+            <summary>repeat, minmax, auto-fit</summary>
+            <pre><code>grid-template-columns: repeat(3, 1fr);                        /* 3 equal columns */
+grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));  /* as many as fit */</code></pre>
+            <p>The <code>auto-fit</code> + <code>minmax</code> line makes a responsive card grid with no media queries.</p>
+        </details>
 
-            <!-- ======================================================
-                 JS BASICS
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-js">
-                <h2 id="h-js">JavaScript basics</h2>
+        <details class="note" open>
+            <summary>Alignment in grid</summary>
+            <ul>
+                <li><code>justify-items</code> (inline/row axis) and <code>align-items</code> (block/column axis) align items inside their cells.</li>
+                <li><code>place-items: center</code> = both at once.</li>
+                <li><code>justify-content</code> / <code>align-content</code> align the whole grid inside its container.</li>
+                <li><code>justify-self</code> / <code>align-self</code> for one item.</li>
+            </ul>
+        </details>
+    </section>
 
-                <details class="note" data-topic="js">
-                    <summary>let, const &amp; block scope</summary>
-                    <ul>
-                        <li><code>const</code> can't be reassigned (but an object's contents can change). <code>let</code> can be reassigned. Avoid <code>var</code>.</li>
-                        <li>Both are <strong>block-scoped</strong>: they only exist inside the <code>{ }</code> where they're declared. A variable made inside a submit handler doesn't exist outside it.</li>
-                        <li>Assigning without <code>const</code>/<code>let</code> (<code>total = 0</code>) creates an accidental <strong>global</strong>. Always declare.</li>
-                        <li>Reassigning a const → <code>TypeError: Assignment to constant variable</code>. Make a new variable with a new name instead.</li>
-                    </ul>
-                </details>
+    <section class="topic-section" aria-labelledby="css-vs">
+        <h2 id="css-vs">Flex vs grid</h2>
 
-                <details class="note" data-topic="js">
-                    <summary>= vs ===</summary>
-                    <pre><code>dir = 'desc';     // ASSIGNS: makes dir 'desc'
-dir === 'desc';   // COMPARES: true/false, changes nothing</code></pre>
-                    <p>A line like <code>state.dir === 'desc';</code> on its own does nothing at all.</p>
-                </details>
+        <details class="note" open>
+            <summary>Flexbox vs Grid</summary>
+            <table>
+                <thead><tr><th scope="col"></th><th scope="col">Flexbox</th><th scope="col">Grid</th></tr></thead>
+                <tbody>
+                    <tr><td>Dimensions</td><td>One: a row <em>or</em> a column</td><td>Two: rows <em>and</em> columns</td></tr>
+                    <tr><td>Driven by</td><td>Content (items size themselves)</td><td>Layout (you define the tracks)</td></tr>
+                    <tr><td>Alignment across rows</td><td>Each wrapped line is independent</td><td>Columns line up across rows</td></tr>
+                    <tr><td>Best for</td><td>Navbars, toolbars, button groups, a single row of cards, centring</td><td>Page layouts, dashboards, galleries, forms that line up</td></tr>
+                </tbody>
+            </table>
+            <p class="say">Flexbox for laying things out in one direction; grid when you need rows and columns to line up. They're often combined: grid for the page, flex inside the pieces.</p>
+        </details>
 
-                <details class="note" data-topic="js">
-                    <summary>for...of vs for...in</summary>
-                    <pre><code>for (const e of employees) { … }  // e = each ITEM (employee object)
-for (const i in employees) { … }  // i = each KEY ('0', '1', '2' as strings)</code></pre>
-                    <ul>
-                        <li><strong>of</strong> → items of an iterable: arrays, Sets, strings.</li>
-                        <li><strong>in</strong> → keys of an object.</li>
-                        <li><code>for...of</code> does <strong>not</strong> work on plain objects ("is not iterable").</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Centring, every way</summary>
+            <pre><code>.parent { display: grid; place-items: center; }
 
-                <details class="note" data-topic="js">
-                    <summary>Handy syntax: template literals, ternary, destructuring</summary>
-                    <pre><code>`Selected: ${count}`                       // template literal
-dir === 'asc' ? 'desc' : 'asc'             // ternary = one-line if/else
-const { key, dir } = state.tableSort;      // destructuring
-a[key]                                     // bracket notation: property named by a variable
-!checked                                   // flip a boolean
-value || 0                                 // default if value is falsy</code></pre>
-                    <p>Falsy values: <code>false</code>, <code>0</code>, <code>''</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. Everything else is truthy.</p>
-                </details>
+.parent { display: flex; justify-content: center; align-items: center; }
 
-                <details class="note" data-topic="js">
-                    <summary>Spread ... (unpack a collection)</summary>
-                    <pre><code>[...employees]                 // copy an array
-[...new Set(list)]             // Set → array (unique values)
-Math.max(...ids)               // array → separate arguments
-{ ...emp, salary: 190000 }     // copy an object, change one field
-el.replaceChildren(...nodes)   // array of elements → arguments</code></pre>
-                    <ul>
-                        <li><code>Array(mySet)</code> does <strong>not</strong> unpack. It makes <code>[Set]</code>, one item.</li>
-                        <li><code>Math.max([1,2,3])</code> is <code>NaN</code>. <code>Math.max(...[1,2,3])</code> is <code>3</code>.</li>
-                    </ul>
-                </details>
+.child { margin: 0 auto; width: 600px; }      /* horizontal, block */
 
-                <details class="note" data-topic="js">
-                    <summary>Array methods cheat sheet</summary>
-                    <table>
-                        <thead><tr><th scope="col">Method</th><th scope="col">Returns</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>map(fn)</code></td><td>new array, each item transformed. <code>fn</code> must be a <em>function</em>: <code>map((e) =&gt; e.id)</code>, not <code>map(id)</code>.</td></tr>
-                            <tr><td><code>filter(fn)</code></td><td>new array of items where fn returns true</td></tr>
-                            <tr><td><code>find(fn)</code></td><td>first match, or <code>undefined</code></td></tr>
-                            <tr><td><code>some(fn)</code></td><td><code>true</code> if any item matches</td></tr>
-                            <tr><td><code>reduce(fn, start)</code></td><td>one value built up step by step (fn must return the accumulator)</td></tr>
-                            <tr><td><code>sort(fn)</code></td><td>⚠️ <strong>changes the original</strong>. Sort a copy: <code>[...arr].sort()</code></td></tr>
-                            <tr><td><code>slice(a, b)</code></td><td>copy of a portion (end b is excluded)</td></tr>
-                            <tr><td><code>join('')</code></td><td>one string. Without <code>''</code> you get commas.</td></tr>
-                            <tr><td><code>push(x)</code></td><td>adds to the end, changing the original (arrays have no <code>.append</code>)</td></tr>
-                            <tr><td><code>includes(x)</code></td><td><code>true</code>/<code>false</code>. Case-sensitive on strings. <code>'abc'.includes('')</code> is <code>true</code>.</td></tr>
-                        </tbody>
-                    </table>
-                </details>
+.parent { text-align: center; }               /* inline content */
 
-                <details class="note" data-topic="js">
-                    <summary>Sorting: compare functions</summary>
-                    <pre><code>(a, b) =&gt; a.name.localeCompare(b.name)    // strings, A–Z
-(a, b) =&gt; a.salary - b.salary             // numbers, low → high
-(a, b) =&gt; b.salary - a.salary             // swapped = high → low
-return dir === 'asc' ? result : -result;  // flip sign = reverse</code></pre>
-                    <ul>
-                        <li>Return negative → <code>a</code> first; positive → <code>b</code> first; 0 → equal.</li>
-                        <li>Store numbers as numbers. As strings, <code>'$80,000'</code> sorts after <code>'$145,000'</code>.</li>
-                        <li><code>'YYYY-MM-DD'</code> date strings sort correctly as strings.</li>
-                        <li><code>typeof x === 'number'</code> to choose between the two.</li>
-                    </ul>
-                </details>
+.child { position: absolute; top: 50%; left: 50%;
+         transform: translate(-50%, -50%); }  /* over something */</code></pre>
+        </details>
+    </section>
 
-                <details class="note" data-topic="js">
-                    <summary>Set: unique values</summary>
-                    <pre><code>const depts = new Set();
-for (const e of employees) depts.add(e.dept);   // duplicates ignored
-const sorted = [...depts].sort();               // Set has no .sort()</code></pre>
-                </details>
+    <section class="topic-section" aria-labelledby="css-position">
+        <h2 id="css-position">Positioning &amp; layering</h2>
 
-                <details class="note" data-topic="js">
-                    <summary>Closures</summary>
-                    <p>A function "remembers" the variables from where it was created. Each Remove button's listener, created inside the submit handler, remembers <em>its own</em> <code>li</code>:</p>
-                    <pre><code>const li = document.createElement('li');
-removeBtn.addEventListener('click', () =&gt; li.remove());</code></pre>
-                </details>
-            </section>
+        <details class="note" open>
+            <summary>position values</summary>
+            <table>
+                <thead><tr><th scope="col">Value</th><th scope="col">In normal flow?</th><th scope="col">Positioned relative to</th></tr></thead>
+                <tbody>
+                    <tr><td><code>static</code></td><td>Yes</td><td>Not positioned (default; top/left ignored)</td></tr>
+                    <tr><td><code>relative</code></td><td>Yes (space kept)</td><td>Its own normal spot. Also becomes the anchor for absolute children</td></tr>
+                    <tr><td><code>absolute</code></td><td>No</td><td>Nearest positioned (non-static) ancestor</td></tr>
+                    <tr><td><code>fixed</code></td><td>No</td><td>The viewport (stays when scrolling)</td></tr>
+                    <tr><td><code>sticky</code></td><td>Yes</td><td>Normal until it hits e.g. <code>top: 0</code>, then sticks inside its parent</td></tr>
+                </tbody>
+            </table>
+            <p>Classic pattern: parent <code>position: relative</code>, child <code>position: absolute; top: 0; right: 0</code> for a badge in a corner. <code>inset: 0</code> = all four sides 0.</p>
+        </details>
 
-            <!-- ======================================================
-                 DOM & EVENTS
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-dom">
-                <h2 id="h-dom">DOM &amp; events</h2>
+        <details class="note" open>
+            <summary>z-index and stacking contexts</summary>
+            <ul>
+                <li><code>z-index</code> only works on positioned elements (and flex/grid items). Higher = in front.</li>
+                <li>A <strong>stacking context</strong> is a separate layer group. Created by e.g. <code>position</code> + <code>z-index</code>, <code>opacity &lt; 1</code>, <code>transform</code>, <code>filter</code>.</li>
+                <li>A child can never appear above something outside its parent's stacking context, no matter how big its z-index.</li>
+                <li>Sticky toolbars need a background, or content shows through.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="dom">
-                    <summary>Finding elements</summary>
-                    <pre><code>document.querySelector('#agree')        // first match, or null
-document.querySelectorAll('.card')      // all matches (has forEach)
-el.closest('tbody tr')                  // walk UP to the nearest match, or null</code></pre>
-                    <ul>
-                        <li>It takes a <strong>CSS selector</strong>: <code>'agree'</code> looks for an <code>&lt;agree&gt;</code> tag, <code>'.dept'</code> for a class, <code>'#dept'</code> for an id.</li>
-                        <li>Wrong selector → <code>null</code> → "Cannot read properties of null" on the next line.</li>
-                        <li>Call it on an element to search only inside it: <code>form.querySelector('input')</code>.</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Modal overlay recipe</summary>
+            <pre><code>.overlay {
+  position: fixed; inset: 0;
+  background: rgb(0 0 0 / 50%);
+  display: grid; place-items: center;
+  z-index: 100;
+}</code></pre>
+            <p>Or use <code>&lt;dialog&gt;</code> + <code>showModal()</code>, which handles focus and Escape for you.</p>
+        </details>
+    </section>
 
-                <details class="note" data-topic="dom">
-                    <summary>textContent vs innerHTML (XSS)</summary>
-                    <ul>
-                        <li><code>textContent</code> = plain text, never parsed. Safe by default.</li>
-                        <li><code>innerHTML</code> = parses the string as HTML. Putting user data in it without escaping = <strong>XSS</strong> (a name like <code>&lt;img src=x onerror=alert(1)&gt;</code> would run code).</li>
-                        <li>With innerHTML, run every piece of data through <code>escapeHTML()</code>.</li>
-                        <li>Setting <code>textContent</code> replaces everything inside, child elements too. Set text <em>before</em> appending children.</li>
-                    </ul>
-                </details>
+    <section class="topic-section" aria-labelledby="css-responsive">
+        <h2 id="css-responsive">Responsive design</h2>
 
-                <details class="note" data-topic="dom">
-                    <summary>Creating &amp; changing elements</summary>
-                    <pre><code>const li = document.createElement('li');  // create (in memory)
-li.textContent = 'New hire';              // fill
-list.append(li);                          // put on the page (at the end)
-li.remove();                              // take it off
-listEl.replaceChildren(...cards);         // clear + insert in one go</code></pre>
-                    <ul>
-                        <li>A string like <code>`&lt;option&gt;…&lt;/option&gt;`</code> is <strong>not</strong> an element. <code>append</code> would add it as text.</li>
-                        <li>You can't assign elements to <code>innerHTML</code> (you'd see <code>[object HTMLElement]</code>).</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Media queries &amp; mobile-first</summary>
+            <pre><code>/* base styles = phones */
+.cards { display: grid; gap: 1rem; }
 
-                <details class="note" data-topic="dom">
-                    <summary>classList, attributes &amp; dataset</summary>
-                    <pre><code>el.classList.add('x')     el.classList.remove('x')
-el.classList.toggle('x')  // returns true if now present
-el.classList.contains('x')
-el.setAttribute('aria-sort', 'ascending');  el.removeAttribute('aria-sort');
-el.dataset.id      // reads data-id="…" (always a STRING, so use Number())
-el.dataset.id = 5  // writes data-id="5"
-input.value  checkbox.checked  button.disabled</code></pre>
-                    <ul>
-                        <li><code>classList</code> = only that element's <em>own</em> classes ("sticky notes" on it), not its parents'.</li>
-                        <li><code>el.className = 'x'</code> replaces <em>all</em> classes; <code>classList</code> changes one.</li>
-                    </ul>
-                </details>
+/* add layout as screens get wider */
+@media (min-width: 768px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+}</code></pre>
+            <ul>
+                <li><strong>Mobile-first</strong>: base CSS for small screens, <code>min-width</code> queries add complexity. Simpler than undoing desktop styles.</li>
+                <li>Common breakpoints: 640, 768, 1024, 1280px. Choose them where your layout breaks, not by device.</li>
+                <li>Other queries: <code>prefers-color-scheme: dark</code>, <code>prefers-reduced-motion: reduce</code>, <code>hover: hover</code>, <code>orientation</code>.</li>
+            </ul>
+        </details>
 
-                <details class="note" data-topic="dom">
-                    <summary>The DOM vs the HTML file</summary>
-                    <ul>
-                        <li>The browser builds a live copy of the page in memory (the <strong>DOM</strong>). JS changes the DOM, never your file.</li>
-                        <li>DevTools → Elements = live DOM (shows <code>is-selected</code>, generated cards). View Source (<kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>U</kbd>) = the original file.</li>
-                        <li>Refreshing rebuilds the DOM from the file, so all JS changes are lost (use <code>localStorage</code> to remember things).</li>
-                    </ul>
-                </details>
+        <details class="note" open>
+            <summary>Responsive checklist</summary>
+            <ul>
+                <li>The viewport meta tag.</li>
+                <li>Fluid widths (<code>%</code>, <code>fr</code>, <code>max-width</code>) instead of fixed pixel widths.</li>
+                <li><code>img { max-width: 100%; }</code>.</li>
+                <li><code>flex-wrap</code> / <code>auto-fit</code> grids.</li>
+                <li><code>overflow-x: auto</code> on tables and code.</li>
+                <li><code>clamp()</code> for fluid font sizes.</li>
+                <li>Test with DevTools device mode (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>) at 375px.</li>
+                <li>Touch targets at least about 44×44px.</li>
+            </ul>
+        </details>
+    </section>
 
-                <details class="note" data-topic="dom">
-                    <summary>Events you'll use</summary>
-                    <table>
-                        <thead><tr><th scope="col">Event</th><th scope="col">Fires when</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>click</code></td><td>clicked (or Enter/Space on a button)</td></tr>
-                            <tr><td><code>input</code></td><td>every keystroke/paste/delete</td></tr>
-                            <tr><td><code>change</code></td><td>select picked, checkbox ticked, text field loses focus</td></tr>
-                            <tr><td><code>submit</code></td><td>form submitted, <em>after</em> built-in validation passes</td></tr>
-                            <tr><td><code>reset</code></td><td>form reset. Fires <em>before</em> the fields clear.</td></tr>
-                            <tr><td><code>keydown</code></td><td>a key is pressed (<code>event.key</code>)</td></tr>
-                        </tbody>
-                    </table>
-                    <ul>
-                        <li>The first argument is an <strong>event name</strong>. There's no <code>'checkbox'</code> event; it silently never fires.</li>
-                        <li><code>form.reset()</code> does <strong>not</strong> fire <code>input</code>/<code>change</code>, so reset counters and buttons in a <code>reset</code> listener.</li>
-                        <li><code>event.preventDefault()</code> on submit stops the page reload.</li>
-                    </ul>
-                </details>
+    <section class="topic-section" aria-labelledby="css-motion">
+        <h2 id="css-motion">Transforms &amp; animation</h2>
 
-                <details class="note" data-topic="dom">
-                    <summary>Bubbling &amp; event delegation</summary>
-                    <p>A click starts at the innermost element and <strong>bubbles</strong> up: <code>td → tr → tbody → table</code>. Every ancestor's click listener runs.</p>
-                    <pre><code>list.addEventListener('click', (e) =&gt; {
-  const btn = e.target.closest('[data-action="remove"]');
-  if (!btn) return;            // click wasn't on a Remove button
-  …
+        <details class="note" open>
+            <summary>transform</summary>
+            <p><code>translate(x, y)</code>, <code>scale(1.05)</code>, <code>rotate(90deg)</code>, <code>skew()</code>. Doesn't affect layout (other elements don't move), and it's cheap to animate.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>transition vs animation</summary>
+            <pre><code>.btn { transition: background 0.2s ease, transform 0.2s; }
+.btn:hover { transform: translateY(-2px); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { animation: spin 1s linear infinite; }</code></pre>
+            <ul>
+                <li><strong>Transition</strong>: animates between two states when a property changes (hover, class toggle).</li>
+                <li><strong>Animation</strong>: runs keyframes on its own, can loop.</li>
+                <li>Animate <code>transform</code> and <code>opacity</code> for smoothness; avoid animating <code>width</code>/<code>top</code> in big lists.</li>
+                <li>Respect <code>@media (prefers-reduced-motion: reduce)</code>.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="css-recipes">
+        <h2 id="css-recipes">Recipes</h2>
+
+        <details class="note" open>
+            <summary>Small reset</summary>
+            <pre><code>*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; line-height: 1.5; font-family: system-ui, sans-serif; }
+img { max-width: 100%; display: block; }
+input, button, select, textarea { font: inherit; }</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Sticky footer (footer at the bottom on short pages)</summary>
+            <pre><code>body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Visually hidden</summary>
+            <pre><code>.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Dark mode with variables</summary>
+            <pre><code>:root { --bg: #fff; --text: #111; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111; --text: #eee; }
+}
+body { background: var(--bg); color: var(--text); }</code></pre>
+        </details>
+    </section>
+</div>
+
+<!-- ==================================================================
+     JS TAB
+     ================================================================== -->
+<div class="panel" role="tabpanel" id="panel-js" aria-labelledby="tab-js" tabindex="0" hidden>
+
+    <section class="topic-section" aria-labelledby="js-vars">
+        <h2 id="js-vars">Variables &amp; scope</h2>
+
+        <details class="note" open>
+            <summary>var vs let vs const</summary>
+            <table>
+                <thead><tr><th scope="col"></th><th scope="col">var</th><th scope="col">let</th><th scope="col">const</th></tr></thead>
+                <tbody>
+                    <tr><td>Scope</td><td>Function</td><td>Block <code>{ }</code></td><td>Block <code>{ }</code></td></tr>
+                    <tr><td>Reassign</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+                    <tr><td>Redeclare</td><td>Yes</td><td>No</td><td>No</td></tr>
+                    <tr><td>Before its line</td><td><code>undefined</code></td><td>ReferenceError (TDZ)</td><td>ReferenceError (TDZ)</td></tr>
+                </tbody>
+            </table>
+            <p>Default to <code>const</code>, use <code>let</code> when you need to reassign, avoid <code>var</code>. A <code>const</code> object can still have its contents changed.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Scope</summary>
+            <ul>
+                <li><strong>Global</strong>: top level of a classic script; visible to every script on the page.</li>
+                <li><strong>Function</strong>: inside a function.</li>
+                <li><strong>Block</strong>: inside any <code>{ }</code> (if, for, a handler) for <code>let</code>/<code>const</code>.</li>
+                <li>Inner scopes can see outer variables, not the other way round.</li>
+                <li>Assigning to an undeclared name creates an accidental global (or throws in strict mode/modules).</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Hoisting</summary>
+            <ul>
+                <li>Function <strong>declarations</strong> are hoisted fully, so you can call them before they appear.</li>
+                <li><code>var</code> is hoisted as <code>undefined</code>.</li>
+                <li><code>let</code>/<code>const</code> and function <em>expressions</em>/arrows are not usable before their line (temporal dead zone).</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-types">
+        <h2 id="js-types">Types</h2>
+
+        <details class="note" open>
+            <summary>Primitive vs reference types</summary>
+            <ul>
+                <li><strong>Primitives</strong> (copied by value): <code>string</code>, <code>number</code>, <code>boolean</code>, <code>null</code>, <code>undefined</code>, <code>bigint</code>, <code>symbol</code>.</li>
+                <li><strong>Objects</strong> (copied by reference): objects, arrays, functions, Sets, Maps, DOM elements.</li>
+            </ul>
+            <pre><code>const a = { x: 1 }; const b = a; b.x = 2;  // a.x is 2 too
+[1] === [1]                                // false: different objects
+const copy = { ...a };                     // shallow copy
+const deep = structuredClone(a);           // deep copy</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>typeof</summary>
+            <pre><code>typeof 'hi'        // 'string'
+typeof 42          // 'number'   (NaN too!)
+typeof true        // 'boolean'
+typeof undefined   // 'undefined'
+typeof null        // 'object'   (famous bug)
+typeof {}          // 'object'
+typeof []          // 'object'   → use Array.isArray(x)
+typeof (() =&gt; {})  // 'function'</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>null vs undefined vs NaN</summary>
+            <ul>
+                <li><code>undefined</code>: never assigned (missing property, no return value, missing argument).</li>
+                <li><code>null</code>: deliberately empty. <code>querySelector</code> returns it when nothing matches.</li>
+                <li><code>NaN</code>: "not a number" from bad math (<code>Math.max([1,2])</code>, <code>Number('abc')</code>). <code>NaN === NaN</code> is false; use <code>Number.isNaN(x)</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Type conversion</summary>
+            <pre><code>Number('42')        // 42      Number('') → 0, Number('4a') → NaN
+parseInt('42px')    // 42      parseFloat('3.5rem') → 3.5
+String(42)          // '42'    or `${42}`
+Boolean('')         // false
+'5' + 1             // '51'    + with a string concatenates
+'5' - 1             // 4       other math converts to numbers</code></pre>
+            <p>Form values and <code>dataset</code> values are always <strong>strings</strong>.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-ops">
+        <h2 id="js-ops">Operators</h2>
+
+        <details class="note" open>
+            <summary>= vs == vs ===</summary>
+            <ul>
+                <li><code>=</code> assigns.</li>
+                <li><code>===</code> compares value and type with no conversion. Always use this.</li>
+                <li><code>==</code> converts types first: <code>0 == ''</code> and <code>null == undefined</code> are true.</li>
+                <li><code>!==</code> is "not equal" (strict).</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Truthy and falsy</summary>
+            <p><strong>Falsy</strong>: <code>false</code>, <code>0</code>, <code>-0</code>, <code>''</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. <strong>Everything else is truthy</strong>, including <code>[]</code>, <code>{}</code> and <code>'0'</code>.</p>
+            <p><code>if (!el) return;</code> works because <code>null</code> is falsy.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Logical operators: || &amp;&amp; ?? ?.</summary>
+            <pre><code>name || 'Anonymous'     // fallback for ANY falsy value
+count ?? 0              // fallback only for null/undefined (keeps 0 and '')
+isAdmin &amp;&amp; showPanel()  // run the right side only if the left is truthy
+user?.address?.city     // undefined instead of crashing on null
+list?.length            // optional chaining
+x ||= 5;  x ??= 5;      // assign only if falsy / nullish</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Ternary</summary>
+            <pre><code>const label = dir === 'asc' ? 'ascending' : 'descending';</code></pre>
+            <p>A one-line if/else that <em>returns a value</em>. Don't nest them deeply.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Spread and rest (...)</summary>
+            <pre><code>// spread: unpack
+[...arr]                       // copy array
+[...a, ...b]                   // merge arrays
+{ ...obj, name: 'Ana' }        // copy object, override one field
+Math.max(...nums)              // array → separate arguments
+[...new Set(list)]             // Set → array
+
+// rest: collect
+function sum(...nums) { }      // all arguments as an array
+const [first, ...others] = list;
+const { id, ...rest } = obj;</code></pre>
+            <p>Copies are <strong>shallow</strong>: nested objects are still shared.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-strings">
+        <h2 id="js-strings">Strings &amp; numbers</h2>
+
+        <details class="note" open>
+            <summary>String methods</summary>
+            <pre><code>`Hi ${name}`              // template literal
+s.length
+s.trim()                  // remove spaces at both ends
+s.toLowerCase() / toUpperCase()
+s.includes('x')           // true/false (case-sensitive)
+s.startsWith('M') / endsWith('@acme.com')
+s.indexOf('x')            // position or -1
+s.slice(0, 3)             // part of the string
+s.split(',')              // → array
+arr.join(', ')            // array → string
+s.replace('a', 'b') / replaceAll('a', 'b')
+s.padStart(2, '0')        // '7' → '07'
+a.localeCompare(b)        // for sorting</code></pre>
+            <p>Strings are immutable: methods return a <em>new</em> string.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Numbers and Math</summary>
+            <pre><code>Math.round / floor / ceil (x)
+Math.max(...nums) / Math.min(...nums)
+Math.random()                       // 0 to &lt;1
+(3.14159).toFixed(2)                // '3.14' (a string)
+Number.isInteger(x)
+0.1 + 0.2                           // 0.30000000000000004 (floating point)
+new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(1234)
+                                    // '$1,234.00'</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Dates</summary>
+            <pre><code>new Date()                          // now
+new Date('2026-10-20')
+date.toISOString().slice(0, 10)     // 'YYYY-MM-DD'
+date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })  // 'Oct 20'
+Date.now()                          // milliseconds since 1970</code></pre>
+            <p>Months are 0-based in <code>new Date(2026, 9, 20)</code> (9 = October). ISO strings (<code>YYYY-MM-DD</code>) sort correctly as text.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-arrays">
+        <h2 id="js-arrays">Arrays</h2>
+
+        <details class="note" open>
+            <summary>Array methods: non-mutating (return something new)</summary>
+            <table>
+                <thead><tr><th scope="col">Method</th><th scope="col">Returns</th></tr></thead>
+                <tbody>
+                    <tr><td><code>map(fn)</code></td><td>New array, each item transformed (same length)</td></tr>
+                    <tr><td><code>filter(fn)</code></td><td>New array of items where fn returns true</td></tr>
+                    <tr><td><code>find(fn)</code> / <code>findIndex(fn)</code></td><td>First match (or <code>undefined</code>) / its index (or -1)</td></tr>
+                    <tr><td><code>some(fn)</code> / <code>every(fn)</code></td><td>true if any / all match</td></tr>
+                    <tr><td><code>reduce(fn, start)</code></td><td>One value built up step by step</td></tr>
+                    <tr><td><code>includes(x)</code> / <code>indexOf(x)</code></td><td>true/false / position or -1</td></tr>
+                    <tr><td><code>slice(a, b)</code></td><td>Copy of a portion (b excluded)</td></tr>
+                    <tr><td><code>concat()</code>, <code>[...a, ...b]</code></td><td>Merged array</td></tr>
+                    <tr><td><code>join(sep)</code></td><td>A string (default separator is a comma)</td></tr>
+                    <tr><td><code>flat()</code>, <code>flatMap()</code></td><td>Flattened nested arrays</td></tr>
+                    <tr><td><code>toSorted()</code>, <code>toReversed()</code></td><td>Sorted/reversed copies (newer browsers)</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>Array methods: mutating (change the original)</summary>
+            <table>
+                <thead><tr><th scope="col">Method</th><th scope="col">Does</th></tr></thead>
+                <tbody>
+                    <tr><td><code>push(x)</code> / <code>pop()</code></td><td>Add / remove at the end</td></tr>
+                    <tr><td><code>unshift(x)</code> / <code>shift()</code></td><td>Add / remove at the start</td></tr>
+                    <tr><td><code>splice(i, n, …items)</code></td><td>Remove/insert in the middle</td></tr>
+                    <tr><td><code>sort(fn)</code></td><td>Sorts in place (copy first!)</td></tr>
+                    <tr><td><code>reverse()</code></td><td>Reverses in place</td></tr>
+                    <tr><td><code>fill()</code></td><td>Overwrites values</td></tr>
+                </tbody>
+            </table>
+            <p>Arrays have <code>push</code>, not <code>append</code> (that's for DOM elements).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Sorting</summary>
+            <pre><code>[10, 9, 1].sort()                              // [1, 10, 9]  ← sorts as STRINGS
+[...nums].sort((a, b) =&gt; a - b)                // numbers ascending
+[...nums].sort((a, b) =&gt; b - a)                // descending
+[...people].sort((a, b) =&gt; a.name.localeCompare(b.name))
+// any column, either direction:
+const r = typeof a[key] === 'number' ? a[key] - b[key] : a[key].localeCompare(b[key]);
+return dir === 'asc' ? r : -r;</code></pre>
+            <p>Compare function: negative → a first, positive → b first, 0 → keep order.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>reduce</summary>
+            <pre><code>const total = items.reduce((sum, i) =&gt; sum + i.salary, 0);
+
+const counts = items.reduce((acc, i) =&gt; {
+  acc[i.dept] = (acc[i.dept] || 0) + 1;
+  return acc;                     // always return the accumulator
+}, {});</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Loops</summary>
+            <pre><code>for (let i = 0; i &lt; arr.length; i++) { }   // classic, with index
+for (const item of arr) { }                 // values of an iterable
+for (const key in obj) { }                  // keys of an object
+arr.forEach((item, i) =&gt; { });              // can't break out of it
+while (cond) { }
+break;     // leave the loop
+continue;  // skip to the next iteration</code></pre>
+            <p><code>for...of</code> on a plain object throws "not iterable"; use <code>Object.entries(obj)</code>.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-objects">
+        <h2 id="js-objects">Objects, Set &amp; Map</h2>
+
+        <details class="note" open>
+            <summary>Objects</summary>
+            <pre><code>const emp = { id: 1, name: 'Priya', 'start-date': '2022-03-01' };
+emp.name                 // dot notation
+emp['start-date']        // brackets: odd names
+emp[key]                 // brackets: name stored in a variable
+emp.salary = 115000      // add/change
+delete emp.salary
+'name' in emp            // true
+Object.keys(emp)         // ['id', 'name', ...]
+Object.values(emp)
+Object.entries(emp)      // [['id', 1], ['name', 'Priya'], ...]
+const { name, id } = emp;    // destructuring
+const short = { name };      // shorthand for { name: name }</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>JSON</summary>
+            <pre><code>JSON.stringify(obj)        // object → string (for storage/sending)
+JSON.parse(text)           // string → object</code></pre>
+            <p>JSON keys must be double-quoted; no functions, <code>undefined</code> or comments. Used with <code>localStorage</code> and APIs.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Set and Map</summary>
+            <pre><code>const s = new Set([1, 2, 2]);   // {1, 2}: unique values
+s.add(3); s.has(2); s.delete(1); s.size;
+[...s]                          // back to an array
+
+const m = new Map();
+m.set('Engineering', 3); m.get('Engineering'); m.has(k); m.size;
+for (const [key, value] of m) { }</code></pre>
+            <p>Set = dedupe / fast "seen it?" checks. Map = key/value with any key type and insertion order.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Classes (brief)</summary>
+            <pre><code>class Employee {
+  #salary;                       // private field
+  constructor(name, salary) { this.name = name; this.#salary = salary; }
+  get monthly() { return this.#salary / 12; }
+  greet() { return `Hi, ${this.name}`; }
+}
+const e = new Employee('Priya', 120000);</code></pre>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-functions">
+        <h2 id="js-functions">Functions</h2>
+
+        <details class="note" open>
+            <summary>Declaration vs expression vs arrow</summary>
+            <pre><code>function add(a, b) { return a + b; }       // declaration (hoisted)
+const add = function (a, b) { return a + b; };  // expression
+const add = (a, b) =&gt; a + b;               // arrow (implicit return)
+const make = () =&gt; ({ id: 1 });            // returning an object needs ( )</code></pre>
+            <ul>
+                <li>Arrow functions have no own <code>this</code> (they use the surrounding one) and no <code>arguments</code>.</li>
+                <li>Default parameters: <code>function greet(name = 'there') { }</code>.</li>
+                <li>A function without <code>return</code> returns <code>undefined</code>.</li>
+                <li>Functions are values: pass them as arguments (callbacks) and return them.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Callbacks and higher-order functions</summary>
+            <p>A <strong>callback</strong> is a function you pass to another function to call later: <code>addEventListener('click', handleClick)</code>, <code>arr.map(toCard)</code>. A <strong>higher-order function</strong> takes or returns functions.</p>
+            <p>Pass the function itself (<code>map(cardEl)</code>), don't call it (<code>map(cardEl())</code>).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Closures</summary>
+            <pre><code>function counter() {
+  let count = 0;
+  return () =&gt; ++count;       // remembers count
+}
+const next = counter();
+next(); next();               // 1, 2</code></pre>
+            <p>A function remembers the variables from where it was created. Used in event handlers, debounce, and private state.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>this (brief)</summary>
+            <ul>
+                <li>In a method call <code>obj.fn()</code>, <code>this</code> is <code>obj</code>.</li>
+                <li>In a regular-function event listener, <code>this</code> is the element (same as <code>event.currentTarget</code>).</li>
+                <li>Arrow functions take <code>this</code> from the surrounding code.</li>
+                <li>A plain function call: <code>undefined</code> in strict mode.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-dom">
+        <h2 id="js-dom">The DOM</h2>
+
+        <details class="note" open>
+            <summary>What the DOM is</summary>
+            <p>The browser's live tree of objects built from your HTML. JS reads and changes the DOM, never your file. DevTools → Elements shows the live DOM; View Source shows the original file. Refreshing rebuilds it from the file.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Selecting elements</summary>
+            <pre><code>document.querySelector('#id / .class / tag / [attr]')  // first match or null
+document.querySelectorAll('.card')     // static NodeList (has forEach)
+[...document.querySelectorAll('.card')]  // → real array (map/filter)
+document.getElementById('search')      // id only, no #
+el.querySelector('input')              // search inside el only
+el.closest('tr')                       // nearest ancestor (or itself) that matches
+el.parentElement / el.children / el.nextElementSibling</code></pre>
+            <p>Wrong selector → <code>null</code> → "Cannot read properties of null" on the next line.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Reading and writing content</summary>
+            <table>
+                <thead><tr><th scope="col">Property</th><th scope="col">What it does</th></tr></thead>
+                <tbody>
+                    <tr><td><code>textContent</code></td><td>Plain text. Safe. Setting it replaces all children</td></tr>
+                    <tr><td><code>innerHTML</code></td><td>Parses a string as HTML. XSS risk with user data</td></tr>
+                    <tr><td><code>innerText</code></td><td>Like textContent but layout-aware (skips hidden text), slower</td></tr>
+                    <tr><td><code>value</code></td><td>What's in an input/select/textarea (always a string)</td></tr>
+                    <tr><td><code>checked</code></td><td>Checkbox/radio state (true/false)</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>Creating, inserting, removing</summary>
+            <pre><code>const li = document.createElement('li');
+li.textContent = 'New hire';
+list.append(li, otherEl);          // add at the end (several at once)
+list.prepend(li);                  // add at the start
+ref.before(li); ref.after(li);     // next to an element
+li.remove();
+list.replaceChildren(...items);    // clear + insert
+el.insertAdjacentHTML('beforeend', html);  // add HTML without wiping</code></pre>
+            <p>A string that looks like HTML is not an element; <code>append</code> would add it as text.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Attributes, properties, dataset, classes, styles</summary>
+            <pre><code>el.setAttribute('aria-sort', 'ascending');
+el.getAttribute('href'); el.removeAttribute('hidden'); el.hasAttribute('x');
+img.src = '…'; input.disabled = true; el.hidden = true; el.id = 'x';
+el.dataset.id              // reads data-id (string)
+el.dataset.action = 'remove'   // writes data-action
+el.classList.add / remove / toggle / contains ('is-selected')
+el.className = 'card'      // replaces ALL classes
+el.style.setProperty('--progress', '40%');
+el.style.color = 'red';    // inline style (prefer classes)</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Forms in JS</summary>
+            <pre><code>const data = new FormData(form);
+data.get('fullName')           // by name="…"
+Object.fromEntries(data)       // { fullName: '…', email: '…' }
+form.reset();
+form.elements.email            // a field by name
+input.focus();
+form.checkValidity();          // run built-in validation</code></pre>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-events">
+        <h2 id="js-events">Events</h2>
+
+        <details class="note" open>
+            <summary>addEventListener</summary>
+            <pre><code>btn.addEventListener('click', (event) =&gt; { … });
+btn.addEventListener('click', handler, { once: true });   // runs once
+btn.removeEventListener('click', handler);                // needs the same function</code></pre>
+            <p>The first argument is an <strong>event name</strong>. A made-up name (like <code>'checkbox'</code>) silently never fires.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Common events</summary>
+            <table>
+                <thead><tr><th scope="col">Event</th><th scope="col">Fires when</th></tr></thead>
+                <tbody>
+                    <tr><td><code>click</code></td><td>Clicked, or Enter/Space on a button</td></tr>
+                    <tr><td><code>input</code></td><td>Every keystroke/paste/delete in a field</td></tr>
+                    <tr><td><code>change</code></td><td>Value committed: select picked, checkbox ticked, field loses focus</td></tr>
+                    <tr><td><code>submit</code> / <code>reset</code></td><td>Form submitted (after validation) / reset (before fields clear)</td></tr>
+                    <tr><td><code>keydown</code> / <code>keyup</code></td><td>Keys; check <code>event.key</code> ('Escape', 'Enter', 'ArrowDown')</td></tr>
+                    <tr><td><code>focus</code> / <code>blur</code></td><td>Element gains/loses focus (don't bubble; <code>focusin</code>/<code>focusout</code> do)</td></tr>
+                    <tr><td><code>mouseenter</code> / <code>mouseleave</code></td><td>Pointer enters/leaves (no bubbling)</td></tr>
+                    <tr><td><code>scroll</code>, <code>resize</code></td><td>Page scrolled / window resized (throttle these)</td></tr>
+                    <tr><td><code>DOMContentLoaded</code></td><td>HTML parsed (not needed with <code>defer</code>)</td></tr>
+                    <tr><td><code>load</code></td><td>Everything, including images, has loaded</td></tr>
+                </tbody>
+            </table>
+            <p><code>form.reset()</code> doesn't fire <code>input</code> or <code>change</code>.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>The event object</summary>
+            <ul>
+                <li><code>event.target</code>: the element actually clicked (innermost).</li>
+                <li><code>event.currentTarget</code>: the element the listener is on.</li>
+                <li><code>event.preventDefault()</code>: cancel the default action (form submit reload, link navigation, a key typing).</li>
+                <li><code>event.stopPropagation()</code>: stop bubbling further (rarely needed).</li>
+                <li><code>event.key</code>, <code>event.shiftKey</code>, <code>event.metaKey</code> for keyboard events.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Bubbling and delegation</summary>
+            <p>Events go <strong>capture</strong> (window → target), then <strong>target</strong>, then <strong>bubble</strong> (target → window). Listeners run in the bubble phase by default.</p>
+            <pre><code>table.addEventListener('click', (e) =&gt; {
+  const row = e.target.closest('tbody tr');
+  if (!row) return;
+  row.classList.toggle('is-selected');
 });</code></pre>
-                    <ul>
-                        <li><strong>Delegation</strong> = one listener on the parent handles all children, including ones rendered later.</li>
-                        <li><code>event.target</code> = what was clicked. <code>event.currentTarget</code> = what the listener is on.</li>
-                        <li>⚠️ Two listeners that both <code>toggle</code> the same class cancel each other out (row-selection bug).</li>
-                        <li>⚠️ A listener on a parent hears <em>every</em> child. Check <code>event.target</code> (the radio-button bug).</li>
-                    </ul>
-                </details>
-            </section>
+            <ul>
+                <li><strong>Delegation</strong>: one listener on a parent handles all children, including ones added later.</li>
+                <li>A parent listener hears <em>every</em> child's events, so check what was clicked.</li>
+                <li>Two listeners toggling the same class cancel each other out.</li>
+            </ul>
+        </details>
+    </section>
 
-            <!-- ======================================================
-                 PATTERNS
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-patterns">
-                <h2 id="h-patterns">Patterns</h2>
+    <section class="topic-section" aria-labelledby="js-async">
+        <h2 id="js-async">Async</h2>
 
-                <details class="note" data-topic="patterns">
-                    <summary>State → render()</summary>
-                    <pre><code>const state = { employees: [...], query: '', dept: 'All' };
+        <details class="note" open>
+            <summary>Timers</summary>
+            <pre><code>const id = setTimeout(fn, 1000);   // once, after 1s
+clearTimeout(id);
+const iv = setInterval(fn, 1000);  // every 1s
+clearInterval(iv);</code></pre>
+        </details>
 
-function render() { /* read state, redraw the page */ }
+        <details class="note" open>
+            <summary>The event loop</summary>
+            <p>JS runs one thing at a time. Order: all synchronous code → <strong>microtasks</strong> (promise callbacks, <code>await</code> continuations) → <strong>macrotasks</strong> (<code>setTimeout</code>, events), one at a time.</p>
+            <pre><code>console.log(1);
+setTimeout(() =&gt; console.log(2), 0);
+Promise.resolve().then(() =&gt; console.log(3));
+console.log(4);
+// 1, 4, 3, 2</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Promises</summary>
+            <pre><code>fetch(url)
+  .then((res) =&gt; res.json())
+  .then((data) =&gt; { … })
+  .catch((err) =&gt; { … })
+  .finally(() =&gt; { … });
+
+Promise.all([a(), b()])        // all succeed, or rejects on the first failure
+Promise.allSettled([a(), b()]) // wait for every one, success or not
+Promise.race / Promise.any</code></pre>
+            <p>States: pending → fulfilled or rejected.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>async / await and fetch</summary>
+            <pre><code>async function load() {
+  try {
+    const res = await fetch('/api/employees');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);  // 404/500 don't reject!
+    const data = await res.json();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+await fetch(url, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(newEmployee),
+});</code></pre>
+            <p>An async function always returns a promise. <code>fetch</code> only rejects on network errors.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-more">
+        <h2 id="js-more">Errors, storage, modules</h2>
+
+        <details class="note" open>
+            <summary>Errors</summary>
+            <pre><code>try { risky(); } catch (err) { console.error(err.message); } finally { }
+throw new Error('Something broke');</code></pre>
+            <table>
+                <thead><tr><th scope="col">Error</th><th scope="col">Usually means</th></tr></thead>
+                <tbody>
+                    <tr><td>TypeError: Cannot read properties of null</td><td>An element/value you expected doesn't exist</td></tr>
+                    <tr><td>TypeError: x is not a function</td><td>Typo in a method name, wrong type, or something overwrote it</td></tr>
+                    <tr><td>ReferenceError: x is not defined</td><td>Misspelled or out-of-scope variable</td></tr>
+                    <tr><td>SyntaxError</td><td>The code can't be parsed; the whole file won't run</td></tr>
+                    <tr><td>TypeError: Assignment to constant variable</td><td>Reassigning a const</td></tr>
+                </tbody>
+            </table>
+        </details>
+
+        <details class="note" open>
+            <summary>localStorage / sessionStorage</summary>
+            <pre><code>localStorage.setItem('filters', JSON.stringify(state.filters));
+const saved = JSON.parse(localStorage.getItem('filters')) ?? defaults;
+localStorage.removeItem('filters');</code></pre>
+            <ul>
+                <li>Strings only, about 5MB, per site. <code>getItem</code> returns <code>null</code> if missing.</li>
+                <li><code>localStorage</code> persists; <code>sessionStorage</code> clears when the tab closes.</li>
+                <li>Never store passwords or tokens there.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
+            <summary>Modules (import / export)</summary>
+            <pre><code>// utils.js
+export function formatSalary(n) { … }
+export default render;
+
+// main.js   (&lt;script type="module" src="main.js"&gt;)
+import render, { formatSalary } from './utils.js';</code></pre>
+            <p>Modules have their own scope (no accidental globals), run in strict mode, and are deferred. They need a server (not <code>file://</code>).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Debugging</summary>
+            <ul>
+                <li>Console (<kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>J</kbd>): fix the <strong>first</strong> red error. One crash stops the rest of the script.</li>
+                <li><code>console.log</code>, <code>console.table(array)</code>, <code>console.error</code>.</li>
+                <li><code>debugger;</code> pauses the code with DevTools open; step through and inspect variables.</li>
+                <li>Hard refresh: <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="js-patterns">
+        <h2 id="js-patterns">Patterns</h2>
+
+        <details class="note" open>
+            <summary>State → render</summary>
+            <pre><code>const state = { items: [], query: '' };
+function render() { /* rebuild the UI from state */ }
+input.addEventListener('input', (e) =&gt; { state.query = e.target.value; render(); });
+render();</code></pre>
+            <p>Handlers only update state, then call render. One source of truth; the same idea React is built on.</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Escape HTML before innerHTML</summary>
+            <pre><code>const escapeHTML = (s) =&gt; String(s).replace(/[&amp;&lt;&gt;"']/g, (c) =&gt; ({
+  '&amp;': '&amp;amp;', '&lt;': '&amp;lt;', '&gt;': '&amp;gt;', '"': '&amp;quot;', "'": '&amp;#39;'
+}[c]));</code></pre>
+        </details>
+
+        <details class="note" open>
+            <summary>Debounce and throttle</summary>
+            <pre><code>function debounce(fn, ms) {
+  let timer;
+  return (...args) =&gt; {
+    clearTimeout(timer);
+    timer = setTimeout(() =&gt; fn(...args), ms);
+  };
+}</code></pre>
+            <p><strong>Debounce</strong>: run after activity stops (search box). <strong>Throttle</strong>: run at most once every N ms (scroll, resize).</p>
+        </details>
+
+        <details class="note" open>
+            <summary>Classes for state, CSS for looks</summary>
+            <p>JS toggles a class or attribute (<code>is-selected</code>, <code>aria-sort</code>, <code>aria-pressed</code>); CSS decides what that looks like. For numbers, set a CSS variable.</p>
+        </details>
+    </section>
+</div>
+
+<!-- ==================================================================
+     INTERVIEW TAB
+     ================================================================== -->
+<div class="panel" role="tabpanel" id="panel-interview" aria-labelledby="tab-interview" tabindex="0" hidden>
+
+    <section class="topic-section" aria-labelledby="iv-round">
+        <h2 id="iv-round">The round</h2>
+
+        <details class="note">
+            <summary>What is the round?</summary>
+            <p class="say">A 60-minute HackerRank "Web Fundamentals" exercise covering HTML, CSS and JavaScript.</p>
+            <p>Expect to build or fix a small UI: a form, a list or table rendered from data, filtering/sorting, toggling classes.</p>
+        </details>
+
+        <details class="note">
+            <summary>Game plan for the 60 minutes</summary>
+            <ol>
+                <li><strong>Read every task first</strong> (5 min). Note what the tests check: ids, class names, exact text.</li>
+                <li>Get a <strong>working</strong> version of each requirement before polishing any of them.</li>
+                <li>Run the tests early and often. Fix the first failing one.</li>
+                <li>Keep the Console open. Fix the <em>first</em> red error.</li>
+                <li>Use the exact ids/classes/text the task asks for. Tests match them literally.</li>
+                <li>Last 10 minutes: edge cases (empty input, no matches, duplicates), accessibility, tidy up.</li>
+            </ol>
+        </details>
+
+        <details class="note">
+            <summary>How to talk while coding</summary>
+            <ul>
+                <li>Say the plan before typing: "I'll keep the data in a state object, write a render function, and have each listener update state then re-render."</li>
+                <li>Name tradeoffs: "I'll use textContent so user data can't inject HTML."</li>
+                <li>Mention accessibility unprompted: labels, button types, <code>aria-live</code>.</li>
+                <li>Mention edge cases even if you don't code them all.</li>
+                <li>Stuck? Say what you're checking: "querySelector returned null, so my selector must be wrong."</li>
+            </ul>
+        </details>
+
+        <details class="note">
+            <summary>Live-coding checklist</summary>
+            <ul>
+                <li>Every input has a <code>&lt;label for&gt;</code>. Every button has a <code>type</code>.</li>
+                <li><code>event.preventDefault()</code> on form submit.</li>
+                <li><code>textContent</code> for user data (or escape before <code>innerHTML</code>).</li>
+                <li>Copy before sorting; numbers sort with <code>(a, b) =&gt; a - b</code>.</li>
+                <li>One delegated listener for lists that re-render.</li>
+                <li>Classes for styling changes, not <code>el.style</code>.</li>
+                <li>Empty state ("No results") and a status message with <code>aria-live</code>.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-html">
+        <h2 id="iv-html">HTML &amp; accessibility questions</h2>
+
+        <details class="note">
+            <summary>What is semantic HTML and why does it matter?</summary>
+            <p class="say">Using elements for their meaning (header, nav, main, button) instead of generic divs, so browsers, screen readers and search engines understand the page.</p>
+            <p>Landmarks let screen reader users jump around; real buttons get keyboard support for free.</p>
+        </details>
+
+        <details class="note">
+            <summary>div vs section vs article vs aside?</summary>
+            <p class="say">article is self-contained; section groups related content under a heading; aside is related but secondary content like a sidebar; div has no meaning and is just for styling.</p>
+        </details>
+
+        <details class="note">
+            <summary>button vs link?</summary>
+            <p class="say">A link navigates somewhere; a button performs an action on the page.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is a button's default type?</summary>
+            <p class="say">submit. Inside a form, a button without type="button" submits the form and reloads the page.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you label a form input?</summary>
+            <p class="say">A label whose for matches the input's id, or wrap the input in the label. A placeholder is not a label.</p>
+            <p>No visible label? A visually-hidden label or <code>aria-label</code>. Group radios with fieldset + legend.</p>
+        </details>
+
+        <details class="note">
+            <summary>What does defer do? defer vs async?</summary>
+            <p class="say">defer downloads in parallel and runs after the HTML is parsed, in order; async runs as soon as it downloads, in any order.</p>
+            <p>A plain script in the head runs before the body exists, so querySelector returns null.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you write good alt text?</summary>
+            <p class="say">Describe what the image conveys in context; use alt="" when it's decorative or the info is already in nearby text.</p>
+        </details>
+
+        <details class="note">
+            <summary>aria-label vs aria-labelledby vs aria-describedby?</summary>
+            <p class="say">aria-label gives a name as a string; aria-labelledby takes the name from another element by id; aria-describedby adds extra description read after the name.</p>
+        </details>
+
+        <details class="note">
+            <summary>When should you use ARIA?</summary>
+            <p class="say">Only when native HTML can't do it. The first rule of ARIA is to use a native element if one exists.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you announce a status message to screen readers?</summary>
+            <p class="say">Put it in an element with role="status" or aria-live="polite"; its changes are announced without moving focus.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you hide something visually but keep it for screen readers?</summary>
+            <p class="say">A visually-hidden class (1px, clipped, overflow hidden, absolutely positioned). display:none hides it from screen readers too.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you make something keyboard accessible?</summary>
+            <p class="say">Use native interactive elements so it's focusable and works with Enter/Space, and keep a visible focus style.</p>
+            <p>Modals: move focus in, trap Tab, Escape closes, return focus to the opener.</p>
+        </details>
+
+        <details class="note">
+            <summary>GET vs POST?</summary>
+            <p class="say">GET puts data in the URL, for reading and searching; POST sends it in the body, for creating or changing data.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-css">
+        <h2 id="iv-css">CSS questions</h2>
+
+        <details class="note">
+            <summary>Explain the box model. content-box vs border-box?</summary>
+            <p class="say">Content, padding, border, margin. With content-box, width is just the content; with border-box it includes padding and border.</p>
+            <p>width 300 + padding 20 + border 2 → 344px vs 300px.</p>
+        </details>
+
+        <details class="note">
+            <summary>How does specificity work?</summary>
+            <p class="say">Inline styles beat ids, ids beat classes/attributes/pseudo-classes, those beat elements; if equal, the later rule wins. !important overrides all of it, so I avoid it.</p>
+        </details>
+
+        <details class="note">
+            <summary>rem vs em vs px?</summary>
+            <p class="say">px is fixed, rem is relative to the root font size, em is relative to the element's own font size. rem respects the user's font settings.</p>
+        </details>
+
+        <details class="note">
+            <summary>Flexbox vs Grid?</summary>
+            <p class="say">Flexbox is one-dimensional and content-driven; grid is two-dimensional and layout-driven. Grid for page structure, flex for components, often together.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you centre a div?</summary>
+            <p class="say">On the parent: display grid with place-items center, or display flex with justify-content and align-items center.</p>
+        </details>
+
+        <details class="note">
+            <summary>Explain position: relative, absolute, fixed, sticky.</summary>
+            <p class="say">relative stays in flow and anchors absolute children; absolute leaves the flow and positions against the nearest positioned ancestor; fixed is against the viewport; sticky scrolls normally until a threshold, then sticks.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why isn't my z-index working?</summary>
+            <p class="say">z-index only applies to positioned (or flex/grid) elements, and only competes within the same stacking context.</p>
+        </details>
+
+        <details class="note">
+            <summary>display:none vs visibility:hidden vs opacity:0?</summary>
+            <p class="say">display none removes it from layout and screen readers; visibility hidden keeps its space but hides it from everyone; opacity 0 keeps space and is still clickable and read aloud.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is margin collapsing?</summary>
+            <p class="say">Vertical margins between stacked blocks combine into the larger one instead of adding up. It doesn't happen in flex or grid containers.</p>
+        </details>
+
+        <details class="note">
+            <summary>Pseudo-class vs pseudo-element?</summary>
+            <p class="say">A pseudo-class selects a state, like :hover; a pseudo-element styles a part or adds content, like ::after.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is mobile-first?</summary>
+            <p class="say">Base CSS targets small screens and min-width media queries add layout as space grows.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why won't my text truncate in a flex item?</summary>
+            <p class="say">Flex items default to min-width: auto, so they won't shrink below their content. Set min-width: 0 on the flex child.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-js">
+        <h2 id="iv-js">JavaScript questions</h2>
+
+        <details class="note">
+            <summary>let vs const vs var?</summary>
+            <p class="say">let and const are block-scoped, var is function-scoped. const can't be reassigned. I default to const, use let when reassigning, avoid var.</p>
+        </details>
+
+        <details class="note">
+            <summary>== vs ===?</summary>
+            <p class="say">=== compares value and type with no conversion; == converts types first. I always use ===.</p>
+        </details>
+
+        <details class="note">
+            <summary>What's truthy and falsy?</summary>
+            <p class="say">Falsy: false, 0, empty string, null, undefined, NaN. Everything else is truthy, including empty arrays and objects.</p>
+        </details>
+
+        <details class="note">
+            <summary>null vs undefined?</summary>
+            <p class="say">undefined means never assigned; null means intentionally empty.</p>
+        </details>
+
+        <details class="note">
+            <summary>map vs forEach vs filter vs reduce?</summary>
+            <p class="say">map returns a transformed array, filter returns the items that pass, reduce boils it down to one value, and forEach just runs code and returns nothing.</p>
+        </details>
+
+        <details class="note">
+            <summary>Does sort mutate? How do you sort numbers?</summary>
+            <p class="say">Yes, it sorts in place, so I copy first. By default it compares as strings, so numbers need (a, b) => a - b.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is a closure?</summary>
+            <p class="say">A function that remembers the variables from the scope where it was created, even after that scope has finished.</p>
+            <p>Examples: event handlers remembering their item, debounce's timer, a counter.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is hoisting?</summary>
+            <p class="say">Declarations are processed before code runs: function declarations are usable early, var is undefined early, let and const throw if used before their line.</p>
+        </details>
+
+        <details class="note">
+            <summary>Arrow vs regular functions?</summary>
+            <p class="say">Arrows are shorter and don't have their own this; they use the surrounding this.</p>
+        </details>
+
+        <details class="note">
+            <summary>Primitive vs reference types?</summary>
+            <p class="say">Primitives are copied by value; objects and arrays are shared by reference, so changing a "copy" changes the original unless you actually clone it.</p>
+        </details>
+
+        <details class="note">
+            <summary>What does the spread operator do?</summary>
+            <p class="say">Unpacks an array, Set or object into individual items, which is used for copies, merges and passing arrays as arguments. Copies are shallow.</p>
+        </details>
+
+        <details class="note">
+            <summary>for...of vs for...in?</summary>
+            <p class="say">for...of loops over values of an iterable; for...in loops over the keys of an object.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-dom">
+        <h2 id="iv-dom">DOM &amp; events questions</h2>
+
+        <details class="note">
+            <summary>textContent vs innerHTML?</summary>
+            <p class="say">textContent sets plain text and is safe; innerHTML parses HTML, so user data in it can cause XSS.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is XSS and how do you prevent it?</summary>
+            <p class="say">Untrusted text gets parsed as HTML and runs script on your page. Insert data with textContent or createElement, or escape it before innerHTML.</p>
+        </details>
+
+        <details class="note">
+            <summary>createElement vs template + innerHTML?</summary>
+            <p class="say">innerHTML is concise but you must remember to escape; createElement is safe by default but more verbose.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why preventDefault on submit?</summary>
+            <p class="say">The default submit sends the form and reloads the page; preventDefault lets JS handle it without losing state.</p>
+        </details>
+
+        <details class="note">
+            <summary>event.target vs event.currentTarget?</summary>
+            <p class="say">target is what was actually clicked; currentTarget is the element the listener is attached to.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is event bubbling?</summary>
+            <p class="say">After an event fires on an element it travels up through its ancestors, triggering their listeners too.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is event delegation?</summary>
+            <p class="say">One listener on a parent handles events from all its children using bubbling and closest. It covers items added later and avoids many listeners.</p>
+        </details>
+
+        <details class="note">
+            <summary>input vs change event?</summary>
+            <p class="say">input fires on every keystroke; change fires when the value is committed.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why toggle classes instead of setting styles?</summary>
+            <p class="say">It keeps state in JS and visuals in CSS, so the design can change without touching the JS.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why would querySelector return null?</summary>
+            <p class="say">The selector is wrong (missing # or ., typo), or the script ran before the element existed.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you persist data in the browser?</summary>
+            <p class="say">localStorage, which stores strings only, so JSON.stringify to save and JSON.parse to read.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is debouncing?</summary>
+            <p class="say">Delaying a function until the user stops triggering it, e.g. searching only after typing pauses. It uses a closure to remember the timer.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is the state → render pattern?</summary>
+            <p class="say">One state object holds what can change, one render function rebuilds the UI from it, and handlers only update state then call render.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-async">
+        <h2 id="iv-async">Async questions</h2>
+
+        <details class="note">
+            <summary>What is a Promise?</summary>
+            <p class="say">An object for a value that arrives later: pending, then fulfilled with a value or rejected with an error.</p>
+        </details>
+
+        <details class="note">
+            <summary>How does async/await work?</summary>
+            <p class="say">An async function returns a promise; await pauses it until a promise settles, so async code reads top to bottom, with try/catch for errors.</p>
+        </details>
+
+        <details class="note">
+            <summary>Does fetch throw on a 404?</summary>
+            <p class="say">No, fetch only rejects on network failure, so you check res.ok yourself.</p>
+        </details>
+
+        <details class="note">
+            <summary>What UI states does a fetch need?</summary>
+            <p class="say">Loading, success, empty and error, ideally with a retry.</p>
+        </details>
+
+        <details class="note">
+            <summary>What order does this log? (1, setTimeout 2, Promise 3, 4)</summary>
+            <p class="say">1, 4, 3, 2: synchronous code first, then microtasks like promises, then macrotasks like setTimeout.</p>
+        </details>
+
+        <details class="note">
+            <summary>How do you run requests in parallel?</summary>
+            <p class="say">Promise.all, which resolves when all succeed and rejects on the first failure; allSettled waits for every one.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-react">
+        <h2 id="iv-react">React questions</h2>
+
+        <details class="note">
+            <summary>What is React?</summary>
+            <p class="say">A library where you describe UI as a function of state; when state changes React re-renders and updates only what changed in the DOM.</p>
+        </details>
+
+        <details class="note">
+            <summary>Props vs state?</summary>
+            <p class="say">Props are read-only inputs from the parent; state is data a component owns and changes, which triggers a re-render.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why do lists need keys?</summary>
+            <p class="say">Keys let React match items between renders. Use a stable id; index keys break when items are reordered or removed.</p>
+        </details>
+
+        <details class="note">
+            <summary>Why not mutate state?</summary>
+            <p class="say">React compares references to detect changes, so mutating the same array looks like no change. Always create a new array or object.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is useEffect for?</summary>
+            <p class="say">Side effects after render, like fetching or timers. The dependency array controls when it re-runs, and it can return a cleanup.</p>
+        </details>
+
+        <details class="note">
+            <summary>What is a controlled input?</summary>
+            <p class="say">An input whose value comes from state and updates state on every change.</p>
+        </details>
+
+        <details class="note">
+            <summary>Is JSX safe from XSS?</summary>
+            <p class="say">Text in curly braces is escaped automatically; dangerouslySetInnerHTML is not.</p>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-gotchas">
+        <h2 id="iv-gotchas">Gotchas (bugs I actually hit)</h2>
+
+        <details class="note">
+            <summary>JavaScript gotchas</summary>
+            <ul>
+                <li><code>x === 'desc';</code> compares and does nothing. Assignment is <code>=</code>.</li>
+                <li><code>for (e in arr)</code> gives indexes; an undeclared <code>e</code> becomes a global.</li>
+                <li><code>Array(mySet)</code> = <code>[Set]</code>. Use <code>[...mySet]</code>.</li>
+                <li><code>Math.max(arr)</code> = <code>NaN</code>. Use <code>Math.max(...arr)</code>.</li>
+                <li><code>map(id)</code> needs a function: <code>map((e) =&gt; e.id)</code>.</li>
+                <li>Arrays have <code>push</code>, not <code>append</code>.</li>
+                <li>Reassigning a <code>const</code> throws.</li>
+                <li>A wrong property name gives <code>undefined</code> silently.</li>
+                <li>Variables declared inside <code>{ }</code> don't exist outside.</li>
+                <li><code>None</code> is Python. JS has <code>null</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note">
+            <summary>DOM gotchas</summary>
+            <ul>
+                <li><code>querySelector('agree')</code> looks for an <code>&lt;agree&gt;</code> tag. Ids need <code>#</code>, classes need <code>.</code>.</li>
+                <li>One early error stops everything after it, including later listeners.</li>
+                <li>HTML in JS without quotes is a syntax error; the whole file won't run.</li>
+                <li>A <code>&lt;script src&gt;</code> ignores code between its tags.</li>
+                <li>No <code>'checkbox'</code> event. Use <code>'change'</code>.</li>
+                <li>Two listeners toggling the same class cancel out.</li>
+                <li>A listener on a form hears every field's events.</li>
+                <li><code>form.reset()</code> doesn't fire input/change; <code>reset</code> fires before fields clear.</li>
+                <li><code>id="reset"</code>/<code>"submit"</code> overwrites <code>form.reset()</code>/<code>form.submit()</code>.</li>
+                <li><code>innerHTML = …</code> wipes everything inside the container.</li>
+                <li>Setting <code>textContent</code> after appending a child deletes the child.</li>
+                <li>A string that looks like HTML isn't an element.</li>
+                <li><code>closest('tr')</code> also matches header rows; use <code>closest('tbody tr')</code>.</li>
+            </ul>
+        </details>
+
+        <details class="note">
+            <summary>CSS / HTML gotchas</summary>
+            <ul>
+                <li>No <code>&lt;link rel="stylesheet"&gt;</code> = no CSS.</li>
+                <li>A missing <code>&gt;</code> swallows the next tag.</li>
+                <li><code>margin: 0 0 1rem</code> also resets the top margin.</li>
+                <li>A rule can lose just by coming earlier in the file.</li>
+                <li>Invalid values are dropped silently (<code>font-weight: 1500</code>, mixed <code>rgb()</code> syntax, <code>outline: 1px</code>).</li>
+                <li>Flex text won't truncate without <code>min-width: 0</code>.</li>
+                <li><code>for</code>/<code>aria-*</code> references must match ids exactly.</li>
+                <li><code>class="num"</code> goes on the cell, not the button inside it.</li>
+            </ul>
+        </details>
+    </section>
+
+    <section class="topic-section" aria-labelledby="iv-snippets">
+        <h2 id="iv-snippets">Snippets to memorise</h2>
+
+        <details class="note">
+            <summary>State + render + listener</summary>
+            <pre><code>const state = { items: [], query: '' };
+
+function render() {
+  const q = state.query.trim().toLowerCase();
+  const visible = state.items.filter((i) =&gt; i.name.toLowerCase().includes(q));
+  list.replaceChildren(...visible.map(itemEl));
+  count.textContent = `${visible.length} of ${state.items.length}`;
+}
 
 search.addEventListener('input', (e) =&gt; {
-  state.query = e.target.value;   // 1. update state
-  render();                       // 2. redraw
+  state.query = e.target.value;
+  render();
+});
+render();</code></pre>
+        </details>
+
+        <details class="note">
+            <summary>Form submit handler</summary>
+            <pre><code>form.addEventListener('submit', (e) =&gt; {
+  e.preventDefault();
+  const data = new FormData(form);
+  const name = data.get('fullName').trim();
+  if (name.length &lt; 2) {
+    status.textContent = 'Please enter a full name.';
+    return;
+  }
+  // …add it
+  form.reset();
 });</code></pre>
-                    <ul>
-                        <li>Handlers only change <code>state</code>, then call <code>render()</code>. Never patch the page by hand.</li>
-                        <li>Helpers like <code>getVisible()</code> read state and return a new array without changing anything.</li>
-                        <li>Things that run <strong>once</strong> (building dropdown options) go outside <code>render()</code>.</li>
-                        <li>Containers that <code>render()</code> fills must be empty in the HTML. Anything else inside gets wiped.</li>
-                        <li>This is how React works.</li>
-                    </ul>
-                </details>
+        </details>
 
-                <details class="note" data-topic="patterns">
-                    <summary>Single source of truth</summary>
-                    <ul>
-                        <li>Recount from the page/data (<code>querySelectorAll(…).length</code>) instead of keeping a separate counter that can drift.</li>
-                        <li>Store raw data (<code>115000</code>), format when displaying (<code>formatSalary</code>).</li>
-                        <li>Build UI from data (department options via <code>new Set</code>) so it updates itself when data changes. Test: add a "Finance" employee and it appears.</li>
-                        <li>Unique ids: <code>Math.max(...list.map((e) =&gt; e.id)) + 1</code>.</li>
-                    </ul>
-                </details>
+        <details class="note">
+            <summary>Build an element safely</summary>
+            <pre><code>function itemEl(item) {
+  const li = document.createElement('li');
+  li.textContent = item.name;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.dataset.action = 'remove';
+  btn.textContent = 'Remove';
+  btn.setAttribute('aria-label', `Remove ${item.name}`);
+  li.append(btn);
+  return li;
+}</code></pre>
+        </details>
 
-                <details class="note" data-topic="patterns">
-                    <summary>JS sets state, CSS owns the visuals</summary>
-                    <ul>
-                        <li>Toggle a class (<code>is-selected</code>, <code>compact</code>) and let CSS style it. Avoid <code>el.style.color = …</code>.</li>
-                        <li>Set an attribute (<code>aria-sort</code>) and let CSS draw from it: <code>th[aria-sort="ascending"] button::after { content: " ▲"; }</code>.</li>
-                        <li>For numbers, set a CSS variable (<code>--progress</code>).</li>
-                    </ul>
-                </details>
+        <details class="note">
+            <summary>Delegated click handler</summary>
+            <pre><code>list.addEventListener('click', (e) =&gt; {
+  const btn = e.target.closest('[data-action="remove"]');
+  if (!btn) return;
+  const id = Number(btn.closest('[data-id]').dataset.id);
+  state.items = state.items.filter((i) =&gt; i.id !== id);
+  render();
+});</code></pre>
+        </details>
 
-                <details class="note" data-topic="patterns">
-                    <summary>Template string vs createElement (tradeoff)</summary>
-                    <table>
-                        <thead><tr><th scope="col"></th><th scope="col">Template + innerHTML</th><th scope="col">createElement + textContent</th></tr></thead>
-                        <tbody>
-                            <tr><td>Safety</td><td>Must escape every value. Forget once = XSS.</td><td>Safe by default.</td></tr>
-                            <tr><td>Length</td><td>Short, looks like the HTML.</td><td>Verbose (about 3× the lines).</td></tr>
-                            <tr><td>Result</td><td>A string the browser parses.</td><td>Real elements you can keep and attach listeners to.</td></tr>
-                        </tbody>
-                    </table>
-                    <p><em>Interview line:</em> "innerHTML is concise but you have to remember to escape; createElement is safe without trying, at the cost of verbosity. React's JSX gives you both."</p>
-                </details>
-            </section>
+        <details class="note">
+            <summary>Sortable column comparator</summary>
+            <pre><code>const { key, dir } = state.sort;
+const sorted = [...items].sort((a, b) =&gt; {
+  const r = typeof a[key] === 'number'
+    ? a[key] - b[key]
+    : a[key].localeCompare(b[key]);
+  return dir === 'asc' ? r : -r;
+});</code></pre>
+        </details>
 
-            <!-- ======================================================
-                 DEBUGGING
-                 ====================================================== -->
-            <section class="topic-section" aria-labelledby="h-debug">
-                <h2 id="h-debug">Debugging</h2>
+        <details class="note">
+            <summary>Fetch with loading + error</summary>
+            <pre><code>async function load() {
+  status.textContent = 'Loading…';
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.items = await res.json();
+    status.textContent = '';
+    render();
+  } catch (err) {
+    status.textContent = 'Could not load. Try again.';
+  }
+}</code></pre>
+        </details>
 
-                <details class="note" data-topic="debug">
-                    <summary>How to debug: Console first</summary>
-                    <ol>
-                        <li>Open the Console (<kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>J</kbd>) and refresh.</li>
-                        <li>Fix the <strong>first</strong> red error, refresh, repeat. JS stops at the first crash.</li>
-                        <li>If <em>lots</em> of unrelated things break at once, it's usually one early crash: everything after it (including listeners) never runs.</li>
-                        <li>A <strong>syntax</strong> error (e.g. HTML written in JS without quotes) stops the <em>whole file</em> from running.</li>
-                        <li>Use <code>console.log(state)</code> to check data before blaming the UI.</li>
-                        <li>Hard refresh with <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> if changes don't show.</li>
-                    </ol>
-                </details>
+        <details class="note">
+            <summary>Unique values, counts, next id</summary>
+            <pre><code>const depts = [...new Set(items.map((i) =&gt; i.dept))].sort();
+const counts = items.reduce((acc, i) =&gt; {
+  acc[i.dept] = (acc[i.dept] || 0) + 1;
+  return acc;
+}, {});
+const nextId = Math.max(0, ...items.map((i) =&gt; i.id)) + 1;</code></pre>
+        </details>
+    </section>
+</div>
 
-                <details class="note" data-topic="debug">
-                    <summary>What the error messages mean</summary>
-                    <table>
-                        <thead><tr><th scope="col">Error</th><th scope="col">Usual cause</th></tr></thead>
-                        <tbody>
-                            <tr><td>Cannot read properties of <strong>null</strong></td><td>A <code>querySelector</code> found nothing (missing <code>#</code>/<code>.</code>, typo in the id, element not in the HTML).</td></tr>
-                            <tr><td>X <strong>is not a function</strong></td><td>Typo in a method name (<code>queryDelectorAll</code>), wrong type (<code>array.append</code>), or shadowed (<code>form.reset</code> by <code>id="reset"</code>).</td></tr>
-                            <tr><td>X <strong>is not defined</strong></td><td>Wrong variable name, or it's out of scope (declared inside another <code>{ }</code>). Also <code>None</code> (that's Python; JS has <code>null</code>).</td></tr>
-                            <tr><td>Assignment to constant variable</td><td>Reassigning a <code>const</code>.</td></tr>
-                            <tr><td>Unexpected token '&lt;'</td><td>HTML in JS without quotes/backticks.</td></tr>
-                            <tr><td>X is not iterable</td><td><code>for...of</code> on a plain object.</td></tr>
-                            <tr><td>Shows <code>[object Set]</code> / <code>[object Object]</code></td><td>Put a whole object where a string was expected.</td></tr>
-                            <tr><td>Shows <code>null</code> / <code>undefined</code> on the page</td><td>Wrong property name (<code>department</code> vs <code>dept</code>) or a missing form field.</td></tr>
-                        </tbody>
-                    </table>
-                </details>
-
-                <details class="note" data-topic="debug">
-                    <summary>DevTools tips</summary>
-                    <ul>
-                        <li><strong>Elements</strong>: the live DOM. Watch classes and attributes change as you click.</li>
-                        <li><strong>Styles</strong>: crossed-out = lost the cascade; ⚠️ = invalid value. Edit live to experiment (lost on refresh).</li>
-                        <li><strong>Computed</strong>: the box-model diagram (content / padding / border / margin).</li>
-                        <li>Hover an element: orange = margin, green = padding.</li>
-                        <li>Device toolbar (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>) to test phone widths.</li>
-                        <li>Run a local server when you need it: <code>python3 -m http.server 8000</code> → <code>localhost:8000</code>.</li>
-                    </ul>
-                </details>
-            </section>
-
-            <!-- Shown by notes.js when nothing matches. -->
-            <p class="empty" id="no-results" hidden>No notes match.</p>
+            <!-- Shown by notes.js when the current tab has no matches. -->
+            <p class="empty" id="no-results" hidden></p>
         </main>
+        </div>
     </body>
 </html>
