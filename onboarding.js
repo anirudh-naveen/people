@@ -12,13 +12,13 @@
 //   - Submit button disabled until "I agree" is checked
 //   - each new hire gets a Remove button
 
-// with no #, query selector looks for an element named 'name'
-// with #, query selector looks for an element with the id 'name'
-// (and with a dot, .name, it looks for an element with class="name")
+// > with no #, query selector looks for an element named 'name'
+// > with #, query selector looks for an element with the id 'name'
+// > (and with a dot, .name, it looks for an element with class="name")
 
 const form = document.querySelector('.form');
-// NOTE: despite its name, `newHires` is the <p id="status"> message
-// paragraph, not the list. Renaming it to `status` would be clearer.
+// ! NOTE: despite its name, `newHires` is the <p id="status"> message
+// ! paragraph, not the list. Renaming it to `status` would be clearer.
 // role="status" in the HTML makes screen readers announce its changes.
 const newHires = document.querySelector('#status')
 const list = document.querySelector('#new-hires')
@@ -46,9 +46,9 @@ form.addEventListener('submit', (event) => {
     const data = new FormData(form);
     const name = data.get('fullName').trim();
     const email = data.get('email').trim();
-    // NOTE: the form has no field with name="department", so this is
-    // null and the list shows "Name - null". Add a
-    // <select name="department"> to the form to fix it.
+    // ! NOTE: the form has no field with name="department", so this is
+    // ! null and the list shows "Name - null". Add a
+    // ! <select name="department"> to the form to fix it.
     const dept = data.get('department');
 
     // Extra validation. `return` stops the function early, so nothing
@@ -92,9 +92,9 @@ form.addEventListener('submit', (event) => {
     newHires.textContent = `Added ${name}.`;
     // form.reset() clears every field and fires the 'reset' event
     // (handled below) immediately, before the next line runs.
-    // NOTE: the Clear button in the HTML has id="reset". An element with
-    // that id inside a form REPLACES form.reset, so this line throws
-    // "form.reset is not a function". Rename that id (e.g. "clear-btn").
+    // ! NOTE: the Clear button in the HTML has id="reset". An element with
+    // ! that id inside a form REPLACES form.reset, so this line throws
+    // ! "form.reset is not a function". Rename that id (e.g. "clear-btn").
     form.reset();
     // Put the cursor back in the first field, ready for the next hire.
     form.querySelector('input').focus();
@@ -110,9 +110,9 @@ form.addEventListener('submit', (event) => {
 form.addEventListener('reset', () => {
     submitBtn.disabled = true;
     counter.textContent = '0/200';
-    // NOTE: this also wipes "Added <name>." right after a successful
-    // submit (because submit calls form.reset()). Remove this line if
-    // you want the success message to stay.
+    // ! NOTE: this also wipes "Added <name>." right after a successful
+    // ! submit (because submit calls form.reset()). Remove this line if
+    // ! you want the success message to stay.
     newHires.textContent = '';
 });
 
@@ -123,8 +123,8 @@ form.addEventListener('reset', () => {
 // .checked is true/false; `!` flips it, so:
 //   checked   → disabled = false (button works)
 //   unchecked → disabled = true
-// This is a UX nicety, NOT security: anyone can re-enable a button in
-// DevTools, and the checkbox's `required` does the real validation.
+// > This is a UX nicety, NOT security: anyone can re-enable a button in
+// > DevTools, and the checkbox's `required` does the real validation.
 // ---------------------------------------------------------------------
 /// <summary>
 /// Handles submit button state.

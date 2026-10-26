@@ -2,33 +2,56 @@
    styles.css: shared styles for index.html and onboarding.html
    =====================================================================
 
-   Quick reminders:
-   - A rule = SELECTOR { property: value; }
-       tag      → body, h2, footer      (every element of that type)
-       .class   → .card                 (elements with class="card")
-       #id      → #search               (the element with id="search")
-       a b      → .card img             (b anywhere INSIDE a)
-       a > b    → b that is a DIRECT child of a
-       a + b    → b immediately AFTER sibling a
-       [attr]   → input[type="search"]  (attribute selector)
-       :hover   → a state (pseudo-class)
-       ::after  → generated content (pseudo-element)
-   - THE CASCADE: when two rules set the same property on the same
-     element, the more SPECIFIC selector wins (#id > .class > tag).
-     If specificity is equal, the rule that comes LATER in the file wins.
-   - An INVALID value (typo, out of range, wrong syntax) is silently
-     ignored. In DevTools → Styles it shows crossed out with a ⚠️.
-   - Units: 1rem = the root font size (16px by default).
-            1em  = the element's OWN font size.
+   > Quick reminders:
+   > - A rule = SELECTOR { property: value; }
+   >     tag      → body, h2, footer      (every element of that type)
+   >     .class   → .card                 (elements with class="card")
+   >     #id      → #search               (the element with id="search")
+   >     a b      → .card img             (b anywhere INSIDE a)
+   >     a > b    → b that is a DIRECT child of a
+   >     a + b    → b immediately AFTER sibling a
+   >     [attr]   → input[type="search"]  (attribute selector)
+   >     :hover   → a state (pseudo-class)
+   >     ::after  → generated content (pseudo-element)
+   > - THE CASCADE: when two rules set the same property on the same
+   >   element, the more SPECIFIC selector wins (#id > .class > tag).
+   >   If specificity is equal, the rule that comes LATER in the file wins.
+   > - An INVALID value (typo, out of range, wrong syntax) is silently
+   >   ignored. In DevTools → Styles it shows crossed out with a ⚠️.
+   > - Units: 1rem = the root font size (16px by default).
+   >          1em  = the element's OWN font size.
    ===================================================================== */
 
 
 /* ---------------------------------------------------------------------
+   TODO · Day 6, Step 1: DESIGN TOKENS
+   · Define the colours, border radius, spacing scale and shadow as custom
+   · properties on :root, here at the very top. Then replace the matching
+   · hard-coded values throughout this file with var(...).
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Step 2: DARK MODE
+   · Redefine the colour tokens for users whose system is set to dark
+   · mode. Every rule that uses the tokens should flip with no other
+   · changes.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · JS track 6: MANUAL THEME OVERRIDE
+   · Dark colour tokens that apply when <html data-theme="dark">.
+   · Choosing "light" must also win over a dark system setting.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
    RESET: box-sizing for every element
-   `*` = every element; *::before / *::after = their generated content.
-   Example: width: 300px; padding: 20px; border: 2px
-     content-box (browser default) → 300 + 40 + 4 = 344px wide
-     border-box                    → 300px wide (content shrinks to 256)
+   > `*` = every element; *::before / *::after = their generated content.
+   > Example: width: 300px; padding: 20px; border: 2px
+   >   content-box (browser default) → 300 + 40 + 4 = 344px wide
+   >   border-box                    → 300px wide (content shrinks to 256)
    --------------------------------------------------------------------- */
 *,
 *::before,
@@ -38,9 +61,11 @@
   box-sizing: border-box;
 }
 
-/* display: flex is 1d while display: grid is 2d */
-/* (flex = items in ONE direction, a row OR a column;
-   grid = rows AND columns at the same time) */
+/*
+   > display: flex is 1d while display: grid is 2d */
+/*
+   > (flex = items in ONE direction, a row OR a column;
+   > grid = rows AND columns at the same time) */
 
 
 /* Main Styles */
@@ -60,8 +85,9 @@ body {
     background:#f6f7fb;
 }
 
-/* margin shorthand with 3 values = top | left & right | bottom.
-   Top margin 0 removes the browser's default space above headings. */
+/*
+   > margin shorthand with 3 values = top | left & right | bottom.
+   > Top margin 0 removes the browser's default space above headings. */
 h1, h2, h3 {
     line-height: 1.2;
     margin: 0 0 0.5rem;
@@ -73,6 +99,11 @@ h1, h2, h3 {
 h2 {
     margin-top: 2rem;
 }
+
+/*
+   TODO · Day 6, Step 4: FLUID HEADING
+   · Make the h1's font size grow with the window width while staying
+   · between a minimum and a maximum, without a media query. */
 
 /* Images are inline by default (they sit on the text baseline and leave
    a small gap underneath). display: block removes that gap. */
@@ -93,7 +124,6 @@ main {
     padding: 2rem 1rem;
 }
 
-
 /* App Styles */
 /* ---------------------------------------------------------------------
    PAGE LAYOUT with CSS GRID (Day 5)
@@ -105,8 +135,6 @@ main {
        placed with grid-area: <name>.
      min-height: 100vh → at least the full height of the window
        (vh = 1% of the viewport height).
-   NOTE: `min-height: 100vh` is missing its ; (fine here only because
-   it's the last declaration in the rule).
    --------------------------------------------------------------------- */
 .app {
     display: grid;
@@ -115,14 +143,12 @@ main {
     grid-template-areas:
         "header  header"
         "sidebar main";
-    min-height: 100vh
+    min-height: 100vh;
 }
 
-/* NOTE: ".siderbar" is a typo for ".sidebar", so this rule matches
-   nothing. The sidebar still lands in the right spot by luck: grid
-   "auto-places" it in the first empty cell, which is the sidebar cell. */
+
 .site-header {grid-area: header;}
-.siderbar {grid-area: sidebar;}
+.sidebar {grid-area: sidebar;}
 /* Inside the grid, main should fill its cell, so undo the centring and
    max-width from the main rule above. (.app main is more specific than
    main, so it wins.) */
@@ -157,6 +183,36 @@ main {
     font-weight: 600;
 }
 
+
+/* ---------------------------------------------------------------------
+   TODO · Day 5, Step 2: STAT TILES
+   · The HTML is done. Lay out .stats as a grid that fits as many tiles
+   · per row as there's room for, with no media queries. Each .stat is a
+   · card with a small muted label above a large bold value.
+   · Challenge 1: make one tile span two columns.
+   --------------------------------------------------------------------- */
+/* Stats Styles */
+
+.stats {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+   gap: 1rem;
+   margin-bottom: 2rem;
+}
+
+.stat {
+   display: flex;
+   flex-direction: column;
+   padding: 1.25rem;
+   background: #fff;
+   border: 1px solid #e3e5ee;
+   border-radius: 12px;
+}
+
+.stat__label {color: #6b7085; font-size: 0.875rem; }
+.stat__value {font-size: 2rem; font-weight: 700; }
+
+
 /* Card Styles */
 /* ---------------------------------------------------------------------
    EMPLOYEE CARDS (built by cardEl() in index.js)
@@ -175,7 +231,7 @@ main {
 /* auto left/right margins centre a block element horizontally */
 .card img {
     border-radius: 50%; /* circle */
-    margin: 0 auto 1rem;
+    margin: 0;
 }
 
 .card .role {
@@ -189,7 +245,35 @@ main {
     margin: 0 0 0.75rem;
 }
 
+.card-list {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+   gap: 1.5rem;
+}
 
+/*
+   TODO · Day 5, Step 4: STATUS DOT ON THE AVATAR
+   · A small green circle with a white ring, pinned to the bottom-right
+   · corner of each card's photo (uses the .avatar wrapper from cardEl()
+   · in index.js). Once it works, remove the positioning from .avatar,
+   · watch what happens, then put it back. */
+
+.avatar {
+   position: relative;     /* the anchor */
+   width: 120px;
+   margin: 0 auto 1rem;
+}
+
+.avatar__status {
+   position: absolute;
+   right: 8px;
+   bottom: 8px;
+   width: 18px;
+   height: 18px;
+   border-radius: 50%;
+   background: #22a35a;
+   border: 3px solid #fff;
+}
 
  /* Row Styles */
 /* ---------------------------------------------------------------------
@@ -254,9 +338,9 @@ main {
 }
 
 /* flex: 1 → take all the spare width (pushes badge + button right).
-   min-width: 0 → THE FAMOUS GOTCHA. Flex items default to
-   min-width: auto ("never narrower than my content"), so without this
-   the name never overflows and the ellipsis never appears. */
+   > min-width: 0 → THE FAMOUS GOTCHA. Flex items default to
+   > min-width: auto ("never narrower than my content"), so without this
+   > the name never overflows and the ellipsis never appears. */
 .employee-row__info {
     flex: 1;
     min-width: 0;
@@ -290,6 +374,7 @@ main {
 /* Small, uppercase, spaced-out header labels.
    letter-spacing in em scales with the font size. */
 .data-table th {
+    position: sticky;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -384,8 +469,8 @@ main {
 
 /* Form controls don't inherit fonts from body by default, hence
    font: inherit. width: 100% + border-box = exactly fills the field.
-   NOTE: tel, number, file and search inputs aren't in this list, so they
-   keep the browser's default look. */
+   ! NOTE: tel, number, file and search inputs aren't in this list, so they
+   ! keep the browser's default look. */
 input[type="text"],
 input[type="email"],
 input[type="date"],
@@ -425,6 +510,16 @@ fieldset {
     color: #fff;
 }
 
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Step 5: INTERACTION STATES
+   · - Buttons: a hover colour, a slight press on :active, and a clearly
+   ·   unavailable look when disabled. Animate the changes smoothly.
+   · - One visible keyboard-focus style for everything focusable.
+   · - Cards lift slightly on hover.
+   · - Inputs show an error border only after the user has interacted.
+   · - Turn the motion off for users who prefer reduced motion.
+   --------------------------------------------------------------------- */
+
 
 /* Card Styles */
 /* ---------------------------------------------------------------------
@@ -443,12 +538,24 @@ fieldset {
     margin-top: auto; /* pushes link to the bottom */
 }
 
+/*
+   TODO · Day 6, Step 6: LONG EMAILS
+   · Give each card an email link (cardEl() in index.js), then stop long
+   · addresses from breaking the card: one line, cut off with "…". */
+
+/*
+   TODO · Day 5, Step 2 (continued): CARD GRID
+   · Switch .card-list below from flex-wrap to a grid with as many columns
+   · of at least 220px as fit. Compare how a lone card on the last row
+   · behaves in each version.
+   · Challenge 1: a "featured employee" card that spans the full row. */
+
 /* The cards sit in a row and WRAP onto new lines when they run out of
    room. No media queries needed. */
 .card-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+   gap: 1.5rem;
 }
 
 /* flex: grow shrink basis */
@@ -456,6 +563,9 @@ fieldset {
     flex: 1 1 240px; /* grow, shrink, but aim for 240px wide */
 }
 
+.card--featured {
+    grid-column: 1 / -1;
+}
 
 
 /* Toolbar */
@@ -484,9 +594,11 @@ fieldset {
     white-space: nowrap;
 }
 
-/* hides text visually but keeps it for screen readers */
-/* (display: none or visibility: hidden would hide it from screen
-   readers too.) Used for the search box's <label>. Memorise this one. */
+/*
+   > hides text visually but keeps it for screen readers */
+/*
+   > (display: none or visibility: hidden would hide it from screen
+   > readers too.) Used for the search box's <label>. Memorise this one. */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -508,6 +620,10 @@ fieldset {
     height: 64px;
     background: #fff;
     border-bottom: 1px solid #e3e5ee;
+
+    position: sticky;
+    top: 0;
+    z-index: 10; /* stay above cards when scrolling */
 }
 
 .logo {
@@ -555,3 +671,174 @@ footer {
     text-align: center;
     padding: 0.25rem;
 }
+
+
+/* =====================================================================
+   DAY 5: POSITIONING COMPONENTS
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   TODO · Day 5, Step 5: ADD EMPLOYEE MODAL
+   · - The backdrop covers the whole window, dims the page, sits above
+   ·   everything and centres the modal box.
+   · - The backdrop must still disappear when it has the hidden attribute.
+   · - The box: white, rounded, shadowed, max 440px wide.
+   · - Header: title on the left, × close button on the right.
+   · - Actions: Cancel and Add aligned to the right.
+   --------------------------------------------------------------------- */
+
+.modal-backdrop {
+   position: fixed;
+   inset: 0; /* top/right/bottom/left: 0 = cover screen */
+   background: rgb(15 18 35 / 0.5);
+   display: grid;
+   place-items: center; /* center the modal */
+   z-index: 100;
+   padding: 1rem;
+}
+
+.modal-backdrop[hidden] {
+   display: none; /* our display:grid would override [hidden]*/
+}
+
+.modal {
+   width: 100%;
+   max-width: 440px;
+   background: #fff;
+   border-radius: 16px;
+   box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+}
+.modal__header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 1rem 1.25rem;
+   border-bottom: 1px solid #e3e5ee;
+}
+
+.modal__header h2 { margin: 0; font-size: 1.125rem; }
+
+.modal__close {
+   border: 0;
+   background: none;
+   font-size: 1.5rem;
+   cursor: pointer;
+}
+
+.modal__body { padding: 1.25rem; }
+
+.modal__actions {
+
+   display: flex;
+   justify-content: flex-end;
+   gap: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------
+   TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU
+   · A menu that opens just below the ⋯ button, aligned to its right edge,
+   · and shows on top of the content after it.
+   --------------------------------------------------------------------- */
+
+.menu {
+   position: relative;
+}
+
+.menu__list {
+   position: absolute;
+   top: 100%;
+   right: 0;
+   z-index: 20;
+   margin: 0.25rem 0 0;
+   padding: 0.25rem;
+   list-style: none;
+   min-width: 140px;
+   background: #fff;
+   border: 1px solid #e3e5ee;
+   border-radius: 8px;
+   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.menu__list button {
+   display: block;
+   width: 100%;
+   padding: 0.5rem 0.75rem;
+   border: 0;
+   background: none;
+   font: inherit;
+   text-align: left;
+   cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------
+   TODO · Day 5, Challenge 3: TOAST
+   · A small notification fixed to the bottom-right corner of the window.
+   · Day 7 morning challenge: make it slide up and fade in when it
+   · appears, and fade out when a class is added from JS.
+   --------------------------------------------------------------------- */
+
+   .toast {
+      position: fixed;
+      background: rgba(255, 55, 55);
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 100%;
+      max-width: 240px;
+      border-radius: 12px;
+      text-align: center;
+      color: #fff;
+   }
+
+
+/* =====================================================================
+   DAY 6: RESPONSIVE
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Step 3: SMALL SCREENS (768px and below)
+   · - The page becomes one column: header, then main. No sidebar.
+   · - Hide the header nav links.
+   · - The toolbar wraps, and the search box gets its own full row.
+   · - The payroll table scrolls sideways inside .table-scroll instead of
+   ·   widening the page.
+   · Test at 375px, 768px and 1280px in DevTools device mode.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Challenge 1: MOBILE-FIRST
+   · Rewrite the media query above the other way round: single column by
+   · default, and the sidebar column added from 769px up. Compare the
+   · line counts.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Challenge 2: HAMBURGER BUTTON
+   · Hidden by default, visible only at 768px and below.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · Day 6, Challenge 3: TABLE AS CARDS ON MOBILE
+   · On small screens each table row becomes a stacked block, and each cell
+   · shows its column name (from its data-label attribute) before its value.
+   --------------------------------------------------------------------- */
+
+
+/* =====================================================================
+   DAY 7: LOADING STATES
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   TODO · Day 7, Morning: SPINNER
+   · A 24px circle with one coloured side that rotates forever.
+   --------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------
+   TODO · Day 7, Morning: SKELETON CARDS
+   · Grey placeholder shapes (a circle and two lines, one shorter) with a
+   · shimmer that sweeps across them. Stop the animations for users who
+   · prefer reduced motion.
+   --------------------------------------------------------------------- */

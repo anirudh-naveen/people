@@ -20,7 +20,7 @@
 // call them.
 
 
-// use # for const to define true privacy
+// > use # for const to define true privacy
 // ---------------------------------------------------------------------
 // Grab elements we need more than once.
 // document.querySelector(selector) returns the FIRST element matching a
@@ -49,7 +49,7 @@ const state = {
     //   start is 'YYYY-MM-DD', so comparing as strings = comparing dates.
     //   img is just a number for the pravatar.cc placeholder photo.
     employees: [
-        { id: 1, name: 'Priya Shah', role: 'Senior Engineer', dept: 'Engineering', salary: 115000, start: '2022-03-01', status: 'Active', img: 12 },
+        { id: 1, name: 'Priya Shah', role: 'Senior Engineer', dept: 'Engineering', salary: 115000, start: '2022-03-01', status: 'Active', featured: true , img: 5 },
         { id: 2, name: 'Marcus Lee', role: 'Account Executive', dept: 'Sales', salary: 80000, start: '2024-07-15', status: 'Active', img: 13 },
         { id: 3, name: 'Ana Gomez', role: 'People Partner', dept: 'People', salary: 80000, start: '2021-11-08', status: 'Active', img: 5 },
         { id: 4, name: 'Jordan Kim', role: 'Senior Engineer', dept: 'Engineering', salary: 120000, start: '2025-01-20', status: 'Active', img: 15 },
@@ -57,6 +57,8 @@ const state = {
         { id: 6, name: 'Morgan Lee', role: 'People Partner', dept: 'People', salary: 85000, start: '2022-09-30', status: 'Active', img: 6 },
         { id: 7, name: 'Alex Johnson', role: 'Staff Engineer', dept: 'Engineering', salary: 145000, start: '2021-05-15', status: 'Active', img: 7 },
         { id: 8, name: 'Slug Freeman', role: 'Analyst', dept: 'Finance', salary: 100000, start: '2026-01-01', status: 'Active', img: 8 },
+        // TODO · Day 5, Step 3: add about 10 more employees, so the page is
+        // · long enough to test the sticky header and table header.
     ],
     // What's typed in the search box ('' = show everyone).
     query: '',
@@ -72,6 +74,13 @@ const state = {
     tableSort: { key: 'name', dir: 'asc' },
 };
 
+// ---------------------------------------------------------------------
+// TODO · JS track 6: REMEMBER THE FILTERS
+// · Save the search text, department and card sort whenever they change,
+// · and restore them on page load, so a refresh keeps them. The search
+// · box and dropdowns should show the restored values too.
+// ---------------------------------------------------------------------
+
 
 // =====================================================================
 // DEPARTMENT DROPDOWN: built from the data instead of hard-coded
@@ -80,15 +89,15 @@ const state = {
 // three times still stores it only once, so the result is the list of
 // unique department names.
 const departments = new Set()
-// 'in' → keys (of an object)
-// 'of' → items (of an array, Set, string...)
+// > 'in' → keys (of an object)
+// > 'of' → items (of an array, Set, string...)
 // for...of walks through the ITEMS of the array: each `e` is one employee
 // object. (for...in would give the indexes '0', '1', '2'... instead.)
 for (const e of state.employees) {
     departments.add(e.dept)
 }
 
-// [...departments] unpacks the sets elements into an array
+// > [...departments] unpacks the sets elements into an array
 // A Set has no .sort(), so we spread it into a real array first.
 // `...` = "take each value out of this collection"; wrapping it in [ ]
 // collects those values into a new array. (Array(departments) would NOT
@@ -146,11 +155,11 @@ dataTable.addEventListener('click', (event) => {
     const clickedRow = event.target.closest('tbody tr');
     // null counts as false, so header/caption clicks skip this block.
     if (clickedRow) {
-        // classList methods (affects the list of classes the element has)
-            //.add
-            //.remove
-            //.toggle
-            //contains
+        // > classList methods (affects the list of classes the element has)
+            // > .add
+            // > .remove
+            // > .toggle
+            // > contains
         // 'is-selected' is a name we made up. It's not in the HTML file.
         // JS adds it to the LIVE page (the DOM), and CSS
         // `.data-table tbody tr.is-selected` paints it purple.
@@ -160,8 +169,6 @@ dataTable.addEventListener('click', (event) => {
         const selectedCount = document.querySelectorAll('.data-table tbody tr.is-selected').length;
         document.querySelector('#selected-count').textContent = `Selected: ${selectedCount}`;
 
-        // NOTE: `rows` below is never used. Safe to delete.
-        const rows = dataTable.rows.length
         // Progress = selected ÷ total body rows × 100, as a percentage.
         // dataTable.rows includes the header row, hence the "- 1".
         // style.setProperty writes a CSS custom property (variable) on the
@@ -198,10 +205,12 @@ function getVisible() {
         //   'newest' → b vs a (swapped!) = latest start date first
         // .sort() changes the array it's called on, but here that's the
         // new array from .filter(), so state.employees keeps its order.
-        .sort((a, b) =>
-            state.sort === 'name' ? a.name.localeCompare(b.name) :
-                b.start.localeCompare(a.start)
-    );
+        .sort((a, b) => {
+            if (a.featured !== b.featured) return a.featured ? -1 : 1;
+            return state.sort === 'name'
+                ? a.name.localeCompare(b.name)
+                : b.start.localeCompare(a.start);
+        });
 }
 
 
@@ -209,9 +218,6 @@ function getVisible() {
 // More element handles used by render().
 const listEl = document.querySelector('.card-list');
 const countEl = document.querySelector('#result-count');
-// NOTE: `tableEl` is the same element as `dataTable` above and isn't
-// used anywhere. Safe to delete.
-const tableEl = document.querySelector('.data-table');
 // '.data-table tbody' = a <tbody> TAG inside an element with class
 // data-table. (No dot before tbody: '.tbody' would mean a CLASS.)
 const tbodyEl = document.querySelector('.data-table tbody');
@@ -237,11 +243,11 @@ const escapeHTML = (s) =>
 // cardEl(e): build ONE employee card as a real element
 // =====================================================================
 // Uses createElement + textContent instead of an HTML string.
-// Tradeoff (interview question!):
-//   + safe by default: textContent never parses HTML, so no escapeHTML
-//     is needed and there's nothing to forget
-//   + gives back a real element you could attach listeners to
-//   - much more verbose than a template string
+// > Tradeoff (interview question!):
+// >   + safe by default: textContent never parses HTML, so no escapeHTML
+// >     is needed and there's nothing to forget
+// >   + gives back a real element you could attach listeners to
+// >   - much more verbose than a template string
 // declares the html of the cards based on what is in data
 function cardEl(e) {
     // create the elements, fill them, put them together
@@ -249,10 +255,13 @@ function cardEl(e) {
     // className sets the whole class attribute. Fine here because the
     // element is brand new (no classes to overwrite).
     article.className = 'card';
+    if (e.featured) article.classList.add('card--featured');
     // dataset.id = ... writes the attribute data-id="...".
     // The Remove listener reads it back with .dataset.id.
     article.dataset.id = e.id;
 
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
     // Elements have properties matching their attributes (src, alt, ...).
     const img = document.createElement('img');
     img.src = `https://i.pravatar.cc/120?img=${e.img}`;
@@ -263,6 +272,12 @@ function cardEl(e) {
     // so the layout doesn't jump.
     img.width = 120;
     img.height = 120;
+
+    const status = document.createElement('span');
+    status.className = 'avatar__status';
+    status.setAttribute('aria-label', 'Online');
+
+    avatar.append(img, status)
 
     const name = document.createElement('h3');
     name.textContent = e.name;
@@ -284,9 +299,19 @@ function cardEl(e) {
     btn.dataset.action = 'remove';
     btn.textContent = 'Remove';
 
+    // TODO · Day 5, Step 4: wrap the photo in a <div class="avatar"> and
+    // · add a status dot element after it, with a label screen readers can
+    // · read (e.g. "Online").
+
+    // TODO · Day 6, Step 6: add the employee's email as a mailto: link.
+    // · (The data needs an email for each employee first.)
+
+    // TODO · Day 5, Challenge 1: give one employee a "featured" card that
+    // · spans the full row of the grid.
+
     // append can take several elements at once, added in this order
     // (= top-to-bottom order of the card).
-    article.append(img, name, role, dept, btn);
+    article.append(avatar, name, role, dept, btn);
     return article;   // an ELEMENT, not a string
 }
 
@@ -299,6 +324,8 @@ function cardEl(e) {
 // formatSalary (from app.js) turns 115000 into "$115,000.00". It's a
 // number we format ourselves, so it can't contain HTML.
 // <td> = data cell. (<th> is only for header cells.)
+// TODO · Day 6, Challenge 3: give each cell a data-label with its column
+// · name, for the stacked mobile table layout.
 function payrollHTML(e) {
     return `
         <tr>
@@ -346,8 +373,8 @@ function render() {
     // replaceChildren removes everything inside .card-list and puts in
     // whatever we pass. visible.map(cardEl) is an ARRAY of <article>
     // elements; `...` spreads them into separate arguments.
-    // NOTE: when nothing matches, the list is just empty. The old
-    // "No one matches." message isn't shown any more.
+    // ! NOTE: when nothing matches, the list is just empty. The old
+    // ! "No one matches." message isn't shown any more.
     listEl.replaceChildren(...visible.map(cardEl));
     countEl.textContent = `${visible.length} of ${state.employees.length} people`;
 
@@ -411,11 +438,70 @@ listEl.addEventListener('click', (e) => {
     render();
 });
 // First draw when the page loads.
-// If anything inside render() throws an error, the script stops HERE and
-// none of the listeners below get attached. A good reason to check the
-// Console for the FIRST red error when several things break at once.
+// > If anything inside render() throws an error, the script stops HERE and
+// > none of the listeners below get attached. A good reason to check the
+// > Console for the FIRST red error when several things break at once.
 render();
 
+
+// ---------------------------------------------------------------------
+// TODO · JS track 5, Part 1: WIRE THE MODAL
+// · Replace the hard-coded "Add Employee" below with the Day 5 modal:
+// ·   - The Add Employee button opens it and moves focus inside it.
+// ·   - The ×, Cancel, a click on the backdrop, and Escape all close it.
+// ·   - Closing clears the form and returns focus to the Add Employee
+// ·     button.
+// ·   - Submitting adds an employee from the form's values, re-renders
+// ·     and closes.
+// ---------------------------------------------------------------------
+
+
+const modal = document.querySelector('#add-modal');
+const openBtn = document.querySelector('.toolbar .btn--primary');
+const modalForm = modal.querySelector('form');
+
+function openModal() {
+    modal.hidden = false;
+    modal.querySelector('input').focus();   // move focus into the dialog
+}
+
+function closeModal() {
+    modal.hidden = true;
+    modalForm.reset();
+    openBtn.focus();                        // return focus where it came from
+}
+
+openBtn.addEventListener('click', openModal);
+modal.querySelector('modal__close').addEventListener('click', closeModal);
+modal.querySelector('.modal__actions .btn:not(.btn--primary)')
+    .addEventListener('click', closeModal);
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();       // clicked the backdrop
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+});
+
+modalForm.addEventListener('submit'
+, (e) => {
+    e.preventDefault();
+    state.employees.push({
+        id: Date.now(),
+        name: modal.querySelector('#m-name').value.trim(),
+        role: modal.querySelector('#m-role').value.trim(),
+        dept: 'Engineering',
+        start: new Date().toISOString().slice(0, 10),
+        img: 20,
+    });
+    render();
+    closeModal();
+});
+
+
+// TODO · Day 7, Morning challenge: show a toast ("Added <name>") when an
+// · employee is added, and remove it after 3 seconds.
 
 // Add Employee button (hard-coded employee for practice; JS track 5
 // replaces this with a real form in a modal).
@@ -443,7 +529,7 @@ document.querySelector('.data-table thead').addEventListener('click', (e) => {
 
     // Same column as now → flip direction.
     // Different column → switch to it and start ascending.
-    // Remember: `=` ASSIGNS, `===` COMPARES.
+    // > Remember: `=` ASSIGNS, `===` COMPARES.
     if (key === state.tableSort.key) {
         if (state.tableSort.dir === 'asc') {
             state.tableSort.dir = 'desc';
@@ -459,3 +545,61 @@ document.querySelector('.data-table thead').addEventListener('click', (e) => {
     }
     render();
 });
+
+
+// =====================================================================
+// JS TRACK 5: INTERACTIVE COMPONENTS
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// TODO · JS track 5, Part 2: TABS
+// · Clicking a tab shows its panel and hides the others. Only the selected
+// · tab is reachable with Tab; the arrow keys move between tabs. Keep
+// · aria-selected in sync.
+// ---------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------
+// TODO · JS track 5, Part 3: ACCORDION
+// · Each question button opens its answer and closes any other open one.
+// · Keep aria-expanded in sync.
+// ---------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------
+// TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU
+// · The ⋯ button opens and closes its menu. Clicking outside the menu or
+// · pressing Escape closes it.
+// ---------------------------------------------------------------------
+
+const menuBtn = document.querySelector('.menu .btn');
+const menu = document.querySelector('#row-menu');
+
+function closeMenu() {
+    menu.hidden = true;
+    menuBtn.setAttribute('aria-expanded', 'false');
+}
+
+menuBtn.addEventListener('click', () => {
+    const open = menu.hidden;
+    menu.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', String(open));
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu')) closeMenu();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.hidden) closeMenu();
+});
+
+// =====================================================================
+// JS TRACK 6: THEME
+// =====================================================================
+
+// ---------------------------------------------------------------------
+// TODO · JS track 6: THEME TOGGLE
+// · The #theme button switches between light and dark by setting
+// · data-theme on <html>. The choice survives a page reload.
+// ---------------------------------------------------------------------

@@ -23,10 +23,11 @@
         <link rel="stylesheet" href="styles.css">
 
         <!-- JavaScript -->
-        <!-- defer = download now, but RUN only after the whole HTML is
-             parsed (so querySelector can find every element). Deferred
-             scripts run in the order they're listed: app.js first, so
-             index.js can use its formatSalary(). -->
+        <!--
+             > defer = download now, but RUN only after the whole HTML is
+             > parsed (so querySelector can find every element). Deferred
+             > scripts run in the order they're listed: app.js first, so
+             > index.js can use its formatSalary(). -->
         <script src="app.js" defer></script>
         <script src="index.js" defer></script>
     </head>
@@ -51,6 +52,16 @@
                         <li><a href="notes.html">Notes</a></li>
                     </ul>
                 </nav>
+
+                <!--
+                     TODO · Day 6, Challenge 2: HAMBURGER BUTTON
+                     · A menu button for small screens, with an accessible
+                     · name. -->
+
+                <!--
+                     TODO · JS track 6: THEME TOGGLE
+                     · A button with id="theme" that switches between light
+                     · and dark. -->
             </header>
 
             <!-- <aside> = content related to, but separate from, the main
@@ -66,8 +77,20 @@
 
             <!-- <main> = THE main content. Only one per page. -->
             <main>
-                <!-- exactly one h1 per page; headings go in order
-                     (h1 → h2 → h3) without skipping levels -->
+                <div class="stats">
+                    <div class="stat"><span class="stat__label">Headcount</span>
+                        <span class="stat__value">248</span></div>
+                    <div class="stat"><span class="stat__label">New This Month</span>
+                        <span class="stat__value">12</span></div>
+                    <div class="stat"><span class="stat__label">On Leave</span>
+                        <span class="stat__value">5</span></div>
+                    <div class="stat"><span class="stat__label">Open Roles</span>
+                        <span class="stat__value">19</span></div>
+                </div> 
+
+                <!--
+                     > exactly one h1 per page; headings go in order
+                     > (h1 → h2 → h3) without skipping levels -->
                 <h1>Employee Directory</h1>
                 <p>All the employees at ACME.</p>
 
@@ -93,8 +116,9 @@
                         <select id="dept" aria-label="Filter by department">
                             <option value="All">All Departments</option>
                         </select>
-                        <!-- type="button": a plain button. (A <button> inside a
-                             form defaults to type="submit".) -->
+                        <!--
+                             > type="button": a plain button. (A <button> inside a
+                             > form defaults to type="submit".) -->
                         <button type="button" class="btn btn--primary">Add Employee</button>
                         <!-- aria-live="polite": screen readers announce changes
                              to this text ("3 of 8 people") when they're
@@ -115,10 +139,12 @@
                     <div class="card-list"></div>
                 </section>
 
+                
                 <!-- employee bars -->
                 <!-- Day 4 exercise: the flexbox "employee row" component.
                      BEM class names: employee-row = block,
                      employee-row__name = an element (part) of it. -->
+                
                 <div class="employee-row">
                     <!-- alt="" = decorative: the name is right next to it -->
                     <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
@@ -129,13 +155,37 @@
                     <span class="badge badge--active">Active</span>
                     <!-- aria-label gives the icon-only button a real name;
                          otherwise it's read as "horizontal ellipsis" -->
-                    <button type="button" class="btn" aria-label="More actions for Priya Shah">⋯</button>
+
+                    
+                    <!--
+                         TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU
+                         · Clicking ⋯ opens a small menu of actions (e.g. Edit,
+                         · Remove) positioned against this button. The button
+                         · should tell screen readers whether the menu is
+                         · open. -->
+
+                    <div class="menu">
+                         <button type="button" class="btn"
+                              aria-label="More actions for Priya Shah"
+                              aria-expanded="false"
+                              aria-controls="row-menu">⋯</button>
+                         <ul class="menu__list" id="row-menu" hidden>
+                              <li><button type="button">Edit</button></li>
+                              <li><button type="button">Remove</button></li>
+                         </ul>
+                    </div>
+
                 </div>
+               
 
 
                 <!-- payroll -->
                 <section aria-labelledby="payroll-heading">
                     <h2 id="payroll-heading">Payroll</h2>
+                    <!--
+                         TODO · Day 6, Step 3: wrap the table in a
+                         · <div class="table-scroll"> so it can scroll
+                         · sideways on small screens. -->
                     <table class="data-table">
                         <!-- <caption> = the table's title, read by screen
                              readers when they enter the table -->
@@ -183,8 +233,9 @@
 
                 <aside class="upcoming-birthdays">
                     <h2 id="birthdays-heading">Upcoming Birthdays</h2>
-                    <!-- Tip: aria-labelledby usually goes on the landmark
-                         (the <aside>), like the <section>s above. -->
+                    <!--
+                         > Tip: aria-labelledby usually goes on the landmark
+                         > (the <aside>), like the <section>s above. -->
                     <ul aria-labelledby="birthdays-heading">
                         <!-- <time datetime="..."> = a machine-readable date
                              (YYYY-MM-DD) behind the human-friendly text -->
@@ -193,6 +244,20 @@
                         <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
                     </ul>
                 </aside>
+
+                <!--
+                     TODO · JS track 5, Part 2: TABS
+                     · An employee section with three tabs (Profile, Pay,
+                     · Documents), each showing its own panel. Use the tab
+                     · roles and states so screen readers announce which
+                     · tab is selected. -->
+
+                <!--
+                     TODO · JS track 5, Part 3: ACCORDION (FAQ)
+                     · A few questions whose answers expand and collapse.
+                     · First build it with no JS, then build your own
+                     · version with buttons where only one answer is open
+                     · at a time. -->
             </main>
         </div>
 
@@ -201,5 +266,48 @@
         <footer class="site-footer">
             <p>&copy; 2026 ACME, Inc.</p>
         </footer>
+
+        <!--
+             TODO · Day 5, Step 5: ADD EMPLOYEE MODAL
+             · A backdrop (id="add-modal", hidden by default) holding a
+             · dialog box with: a title, a × close button, and a form with
+             · Full name and Role fields plus Cancel and Add buttons.
+             · Screen readers should know it's a modal dialog and read its
+             · title as its name. Remove "hidden" temporarily while you
+             · style it. -->
+        
+          <div class="modal-backdrop" id="add-modal" hidden>
+               <div class="modal" role="dialog" aria-modal="true"aria-labelledby="modal-title">
+                    <header class="modal__header">
+                         <h2 id="modal-title">Add Employee</h2>
+                         <button type="button" class="modal__close" aria-label="Close">&times;</button>
+                    </header>
+
+                    <form class="modal__body">
+                         <div class="field">
+                              <label for="m-name">Full name</label>
+                              <input id="m-name" type="text" required />
+                         </div>
+                         <div class="field">
+                              <label for="m-role">Role</label>
+                              <input id="m-role" type="text" required />
+                         </div>
+                         <div class="modal__actions">
+                              <button type="button" class="btn">Cancel</button>
+                              <button type="submit" class="btn btn--primary">Add</button>
+                         </div>
+                    </form>
+               </div>
+          </div>
+
+        <!--
+             TODO · Day 5, Challenge 3: TOAST
+             · A container for a short message that appears in the
+             · bottom-right corner and is announced to screen readers. -->
+               <div class="toast" id="toast" hidden>
+                    <header class="toast-header">
+                         <p id="toast-text" aria-live="polite"> Notification Text.</p>
+                    </header>
+               </div>
     </body>
 </html>

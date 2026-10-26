@@ -6,10 +6,10 @@
 // script. Anything declared at the top level here (like formatSalary)
 // becomes a global that index.js can call.
 //
-// Heads-up: top-level `const` names here (employees, depts, copy) are
-// shared with the other scripts on the page. If index.js ever declared
-// its own `const employees`, the browser would throw
-// "Identifier 'employees' has already been declared".
+// > Heads-up: top-level `const` names here (employees, depts, copy) are
+// > shared with the other scripts on the page. If index.js ever declared
+// > its own `const employees`, the browser would throw
+// > "Identifier 'employees' has already been declared".
 
 // Practice data: an ARRAY of OBJECTS.
 const employees = [
@@ -21,10 +21,10 @@ const employees = [
 
 // Average salary: add every salary up, divide by how many there are.
 // for...of loops over the ITEMS of an array.
-// NOTE: `total` is never declared with let, so it becomes an accidental
-// GLOBAL variable (and would throw in strict mode). Should be
-// `let total = 0`.
-// A loop body without { } only includes the ONE next line.
+// ! NOTE: `total` is never declared with let, so it becomes an accidental
+// ! GLOBAL variable (and would throw in strict mode). Should be
+// ! `let total = 0`.
+// > A loop body without { } only includes the ONE next line.
 function averageSalary(list) {
     total = 0
     for (const item of list)
@@ -49,9 +49,9 @@ function byDept(list) {
 
 // Employees whose name contains the query.
 // filter keeps the items where the function returns true.
-// NOTE: .includes is case-SENSITIVE ('priya' won't find 'Priya'). The
-// exercise asked for case-insensitive: lowercase both sides, like
-// getVisible() in index.js does.
+// ! NOTE: .includes is case-SENSITIVE ('priya' won't find 'Priya'). The
+// ! exercise asked for case-insensitive: lowercase both sides, like
+// ! getVisible() in index.js does.
 function search(list, query) {
     if (!query) return null;
     return list.filter((e) => e.name.includes(query));
@@ -78,9 +78,9 @@ function topEarners(list, n) {
     return [...list].sort((a, b) => b.salary - a.salary).slice(n-1, n);
 }
 
-// other examples
-// (Cheat sheet of array methods. These lines run, but their results
-// aren't stored, so they don't affect anything.)
+// > other examples
+// > (Cheat sheet of array methods. These lines run, but their results
+// > aren't stored, so they don't affect anything.)
 employees.map((e) => e.name); // ['Priya Shah', ...] transform each
 
 employees.filter((e) => e.dept === 'Engineering'); // keep the matches

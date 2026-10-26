@@ -14,8 +14,9 @@
         <link rel="stylesheet" href="styles.css">
 
         <!-- JavaScript -->
-        <!-- defer = run after the HTML is parsed, in this order.
-             A <script> with src="" ignores any code between its tags. -->
+        <!--
+             > defer = run after the HTML is parsed, in this order.
+             > A <script> with src="" ignores any code between its tags. -->
         <script src="app.js" defer></script>
         <script src="onboarding.js" defer></script>
     </head>
@@ -24,8 +25,9 @@
             <a href="index.html" class="logo">People</a>
             <nav aria-label="Main">
                 <ul class="nav-links">
-                    <!-- NOTE: aria-current="page" should be on the
-                         Onboarding link on THIS page, not Directory. -->
+                    <!--
+                         ! NOTE: aria-current="page" should be on the
+                         ! Onboarding link on THIS page, not Directory. -->
                     <li><a href="index.html" aria-current="page">Directory</a></li>
                     <li><a href="onboarding.html">Onboarding</a></li>
                     <li><a href="#">Payroll</a></li>
@@ -37,12 +39,14 @@
         <main>
             <h1>New Hire Onboarding</h1>
 
-            <!-- 'action' designated the destination link after completing a form -->
-                <!-- # means it stays on the same page -->
-            <!-- 'method' defines how a form sends its data -->
-                <!-- GET: default; appends data to the URL -->
-                <!-- POST: sends data in the request body -->
-                <!-- DIALOG: opens a dialog box for user input -->
+            <!--
+                 > 'action' designated the destination link after completing a form
+                 >     # means it stays on the same page
+                 > 'method' defines how a form sends its data
+                 >     GET: default; appends data to the URL
+                 >     POST: sends data in the request body
+                 >     DIALOG: opens a dialog box for user input
+            -->
             <!-- class="form" is how onboarding.js finds it:
                  document.querySelector('.form') -->
             <form class="form" action="#" method="post">
@@ -50,16 +54,17 @@
                      group's title, read before each field inside it -->
                 <fieldset>
                     <legend>Personal Details</legend>
-                    <!-- Every field follows the same pattern:
-                           <label for="X"> ↔ <input id="X">  links the label
-                             (clicking the label focuses the input, and
-                             screen readers read the label)
-                           name="..."  is the key FormData uses:
-                             data.get('fullName')
-                           required    makes the browser block submit until
-                             it's filled in
-                           type="..."  picks the right control/keyboard and
-                             adds built-in validation (email, number...) -->
+                    <!--
+                         > Every field follows the same pattern:
+                         >   <label for="X"> ↔ <input id="X">  links the label
+                         >     (clicking the label focuses the input, and
+                         >     screen readers read the label)
+                         >   name="..."  is the key FormData uses:
+                         >     data.get('fullName')
+                         >   required    makes the browser block submit until
+                         >     it's filled in
+                         >   type="..."  picks the right control/keyboard and
+                         >     adds built-in validation (email, number...) -->
                     <div class="field">
                         <label for="profile">Profile Picture</label>
                         <!-- accept="image/*" = only offer image files -->
@@ -73,9 +78,10 @@
                         <input id="full-name" name ="fullName" type="text" required autocomplete="name"/>
                     </div>
 
-                    <!-- NOTE: autocomplete takes TOKENS like "email" or
-                         "tel", not example values. The examples you wrote
-                         here belong in placeholder="...". -->
+                    <!--
+                         ! NOTE: autocomplete takes TOKENS like "email" or
+                         ! "tel", not example values. The examples you wrote
+                         ! here belong in placeholder="...". -->
                     <div class="field">
                         <label for="email">Work Email</label>
                         <input id="email" name ="email" type="email" required autocomplete="you@acme.com"/>
@@ -108,11 +114,11 @@
                          submitted. checked = the default choice.
                          Wrapping the input inside its <label> links them
                          without needing for/id.
-                         NOTE: a group of radios should be named by a
-                         <fieldset> + <legend>, not a <label> (a label
-                         without for="" isn't linked to anything). Move
-                         "Employment Type" into a <legend> inside the
-                         radio-group fieldset. -->
+                         ! NOTE: a group of radios should be named by a
+                         ! <fieldset> + <legend>, not a <label> (a label
+                         ! without for="" isn't linked to anything). Move
+                         ! "Employment Type" into a <legend> inside the
+                         ! radio-group fieldset. -->
                     <div class="field">
                         <label>Employment Type</label>
                         <fieldset class="radio-group">
@@ -141,10 +147,10 @@
                      is checked. -->
                 <button id="submit-btn" type="submit" class="btn btn--primary" disabled>Submit</button>
                 <!-- type="reset" clears the whole form.
-                     NOTE: id="reset" REPLACES the form's built-in
-                     form.reset() method (any control's id/name becomes a
-                     property of its form), which breaks form.reset() in
-                     onboarding.js. Rename it, e.g. id="clear-btn". -->
+                     ! NOTE: id="reset" REPLACES the form's built-in
+                     ! form.reset() method (any control's id/name becomes a
+                     ! property of its form), which breaks form.reset() in
+                     ! onboarding.js. Rename it, e.g. id="clear-btn". -->
                 <button id="reset" type="reset" class="btn">Clear</button>
             </form>
 
@@ -156,5 +162,6 @@
             <ul id="new-hires"></ul>
         </main>
     </body>
-<!-- NOTE: the closing </html> tag is missing. Browsers forgive it, but
-     add it for completeness. -->
+<!--
+     ! NOTE: the closing </html> tag is missing. Browsers forgive it, but
+     ! add it for completeness. -->

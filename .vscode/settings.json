@@ -1,0 +1,49 @@
+{
+    // Better Comments: colours a comment line by the tag it starts with.
+    //   TODO  (orange, bold) = the first line of something to build
+    //   ·     (orange)       = the rest of that TODO's lines
+    //   !     (red)          = a known bug in the code to fix
+    //   >     (blue)         = general info, tips and gotchas
+    //   (no tag)             = describes the code next to it
+    //                          (your theme's normal comment colour)
+    "better-comments.multilineComments": true,
+    "better-comments.highlightPlainText": false,
+    "better-comments.tags": [
+        {
+            "tag": "TODO",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "·",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "!",
+            "color": "#F44747",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": ">",
+            "color": "#3498DB",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        }
+    ]
+}
