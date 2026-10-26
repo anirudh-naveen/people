@@ -1,3 +1,35 @@
+/* =====================================================================
+   styles.css: shared styles for index.html and onboarding.html
+   =====================================================================
+
+   Quick reminders:
+   - A rule = SELECTOR { property: value; }
+       tag      → body, h2, footer      (every element of that type)
+       .class   → .card                 (elements with class="card")
+       #id      → #search               (the element with id="search")
+       a b      → .card img             (b anywhere INSIDE a)
+       a > b    → b that is a DIRECT child of a
+       a + b    → b immediately AFTER sibling a
+       [attr]   → input[type="search"]  (attribute selector)
+       :hover   → a state (pseudo-class)
+       ::after  → generated content (pseudo-element)
+   - THE CASCADE: when two rules set the same property on the same
+     element, the more SPECIFIC selector wins (#id > .class > tag).
+     If specificity is equal, the rule that comes LATER in the file wins.
+   - An INVALID value (typo, out of range, wrong syntax) is silently
+     ignored. In DevTools → Styles it shows crossed out with a ⚠️.
+   - Units: 1rem = the root font size (16px by default).
+            1em  = the element's OWN font size.
+   ===================================================================== */
+
+
+/* ---------------------------------------------------------------------
+   RESET: box-sizing for every element
+   `*` = every element; *::before / *::after = their generated content.
+   Example: width: 300px; padding: 20px; border: 2px
+     content-box (browser default) → 300 + 40 + 4 = 344px wide
+     border-box                    → 300px wide (content shrinks to 256)
+   --------------------------------------------------------------------- */
 *,
 *::before,
 *::after {
@@ -7,27 +39,43 @@
 }
 
 /* display: flex is 1d while display: grid is 2d */
+/* (flex = items in ONE direction, a row OR a column;
+   grid = rows AND columns at the same time) */
 
 
 /* Main Styles */
+/* ---------------------------------------------------------------------
+   BODY: page-wide defaults. Text properties like font-family, color and
+   line-height are INHERITED by everything inside, so we set them once.
+   --------------------------------------------------------------------- */
 body {
+    /* browsers add 8px of margin around the page by default */
     margin: 0;
+    /* a "font stack": use the first one available on this device */
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 1rem;
+    /* unitless line-height = 1.5 × the font size */
     line-height: 1.5;
     color: #1f2333;
     background:#f6f7fb;
 }
 
+/* margin shorthand with 3 values = top | left & right | bottom.
+   Top margin 0 removes the browser's default space above headings. */
 h1, h2, h3 {
     line-height: 1.2;
     margin: 0 0 0.5rem;
 }
 
+/* Put space back above h2s only. This works because it comes AFTER the
+   rule above (same specificity → later wins). Bigger space above than
+   below groups each heading with its own content (proximity). */
 h2 {
     margin-top: 2rem;
 }
 
+/* Images are inline by default (they sit on the text baseline and leave
+   a small gap underneath). display: block removes that gap. */
 img {
     max-width: 100%;    /* images never overflow their container */
     display: block;
@@ -37,14 +85,29 @@ a {
     color: #6b2fb3;
 }
 
+/* Centre the main content and cap its width for readability. */
 main {
     max-width: 1100px;
     margin: 0 auto; /* auto left/right margins = centered */
+    /* 2rem (32px) top & bottom, 1rem (16px) left & right */
     padding: 2rem 1rem;
 }
 
 
 /* App Styles */
+/* ---------------------------------------------------------------------
+   PAGE LAYOUT with CSS GRID (Day 5)
+   .app wraps header + sidebar + main in index.html.
+     grid-template-columns: 220px 1fr → a fixed 220px sidebar column,
+       and 1fr = "one fraction of the leftover space" for main.
+     grid-template-rows: 64px 1fr → header row, then the rest.
+     grid-template-areas draws the layout with names; each child is
+       placed with grid-area: <name>.
+     min-height: 100vh → at least the full height of the window
+       (vh = 1% of the viewport height).
+   NOTE: `min-height: 100vh` is missing its ; (fine here only because
+   it's the last declaration in the rule).
+   --------------------------------------------------------------------- */
 .app {
     display: grid;
     grid-template-columns: 220px 1fr;
@@ -55,8 +118,14 @@ main {
     min-height: 100vh
 }
 
+/* NOTE: ".siderbar" is a typo for ".sidebar", so this rule matches
+   nothing. The sidebar still lands in the right spot by luck: grid
+   "auto-places" it in the first empty cell, which is the sidebar cell. */
 .site-header {grid-area: header;}
 .siderbar {grid-area: sidebar;}
+/* Inside the grid, main should fill its cell, so undo the centring and
+   max-width from the main rule above. (.app main is more specific than
+   main, so it wins.) */
 .app main { grid-area: main; max-width: none; margin: 0; }
 
 .sidebar {
@@ -65,6 +134,7 @@ main {
     padding: 1rem 0.75rem;
 }
 
+/* Stack the sidebar links vertically with flexbox. */
 .sidebar nav {
     display: flex;
     flex-direction: column;
@@ -75,9 +145,12 @@ main {
     padding: 0.5rem 0.75rem;
     border-radius: 8px;
     color: #3a3f55;
+    /* remove the underline */
     text-decoration: none;
 }
 
+/* Highlight the current page's link. aria-current="page" tells screen
+   readers which link is the current page, and CSS reuses it as a hook. */
 .sidebar a[aria-current="page"] {
     background: #f1ecfa;
     color: #6b2fb3;
@@ -85,15 +158,21 @@ main {
 }
 
 /* Card Styles */
+/* ---------------------------------------------------------------------
+   EMPLOYEE CARDS (built by cardEl() in index.js)
+   --------------------------------------------------------------------- */
 .card {
     background: white;
     border: 1px solid #e3e5ee;
     border-radius: 12px;
     padding: 1.5rem;
+    /* x-offset y-offset blur color. rgb(0 0 0 / 6%) = black at 6%
+       opacity (modern syntax: spaces, then / before the alpha) */
     box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
     text-align: center;
 }
 
+/* auto left/right margins centre a block element horizontally */
 .card img {
     border-radius: 50%; /* circle */
     margin: 0 auto 1rem;
@@ -113,11 +192,20 @@ main {
 
 
  /* Row Styles */
+/* ---------------------------------------------------------------------
+   SORTABLE TABLE HEADERS (JS track 4)
+   Each <th> contains a <button> so keyboard users can Tab to it.
+   --------------------------------------------------------------------- */
+/* Make the buttons look like plain header text. */
 .data-table th button {
     all: unset;        /* remove all default button styling */
     cursor: pointer;
 }
 
+/* The arrows. JS sets aria-sort on the sorted <th>; CSS draws the arrow
+   from that attribute ("JS sets state, CSS owns the visuals").
+   ::after inserts content after the button's text. Screen readers
+   ignore it, which is fine because aria-sort already tells them. */
 .data-table th[aria-sort="ascending"] button::after {
     content: " ▲";
 }
@@ -126,14 +214,21 @@ main {
     content: " ▼";
 }
 
+/* `all: unset` also removed the focus ring, so add one back.
+   :focus-visible = only for KEYBOARD focus, not mouse clicks. */
 .data-table th button:focus-visible {
     outline: 1px solid #6b2fb3;
     outline-offset: 2px;
 }
 
 
+/* ---------------------------------------------------------------------
+   EMPLOYEE ROW component (Day 4 exercise, flexbox)
+   [avatar] [name / title ........ (grows)] [badge] [⋯]
+   --------------------------------------------------------------------- */
 .employee-row {
     display: flex;
+    /* vertically centre all the items in the row */
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
@@ -142,6 +237,7 @@ main {
     border-radius: 12px;
 }
 
+/* Truncate long names with "…". All three lines are required. */
 .employee-row__name {
     font-weight: 600;
     white-space: nowrap;      /* keep it on one line, never wrap */
@@ -149,6 +245,7 @@ main {
     text-overflow: ellipsis;  /* show "…" where it was cut */
 }
 
+/* flex-shrink: 0 → never squash the avatar into an oval */
 .employee-row__avatar {
     width: 48px;
     height: 48px;
@@ -156,6 +253,10 @@ main {
     flex-shrink: 0;
 }
 
+/* flex: 1 → take all the spare width (pushes badge + button right).
+   min-width: 0 → THE FAMOUS GOTCHA. Flex items default to
+   min-width: auto ("never narrower than my content"), so without this
+   the name never overflows and the ellipsis never appears. */
 .employee-row__info {
     flex: 1;
     min-width: 0;
@@ -164,6 +265,9 @@ main {
 
 
 /* Table Styles */
+/* ---------------------------------------------------------------------
+   PAYROLL TABLE
+   --------------------------------------------------------------------- */
 .data-table {
     width: 100%;
     border-collapse: collapse;   /* single borders between cells */
@@ -183,6 +287,8 @@ main {
     border-bottom: 1px solid #e3e5ee;
 }
 
+/* Small, uppercase, spaced-out header labels.
+   letter-spacing in em scales with the font size. */
 .data-table th {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -190,27 +296,41 @@ main {
     color: #6b7085;
 }
 
+/* :nth-child(even) → every 2nd row (zebra stripes) */
 .data-table tbody tr:nth-child(even) {background: #fafbfd; }
 
 /* any body row with the label is-selected gets a purple background */
 .data-table tbody tr.is-selected { background: #e9ddfb; }
 
+/* Compact view: JS toggles class="compact" on <body>, and this
+   descendant selector shrinks the cell padding. */
 .compact .data-table td { padding: 0.25rem 1rem; }
 
+/* This comes later than the is-selected rule with equal specificity, so
+   hovering a selected row shows the hover colour instead. */
 .data-table tbody tr:hover {background: #f1ecfa;}
 
+/* Numbers: right-aligned, and every digit the same width so columns of
+   numbers line up. Put this class on the CELL (<td>/<th>). */
 .num {
     text-align: right;
     font-variant-numeric: tabular-nums;     /* digits line up */
 }
 
+/* ---------------------------------------------------------------------
+   PROGRESS BAR (JS track 3): a track with a fill inside it.
+   JS sets the CSS variable:  fill.style.setProperty('--progress', '40%')
+   --------------------------------------------------------------------- */
 .progress {
     height: 8px;
     background: #e3e5ee;     /* the empty track */
+    /* a huge radius = fully rounded "pill" ends */
     border-radius: 999px;
     overflow: hidden;        /* keeps the fill inside the rounded corners */
 }
 
+/* var(--progress, 0%) reads the variable, with 0% as a fallback if it
+   isn't set yet. transition animates width changes over 0.2s. */
 .progress__fill {
     height: 100%;
     width: var(--progress, 0%);   /* ← the key line */
@@ -221,6 +341,11 @@ main {
 
 
 /* Badge, Form Field, and Button Styles */
+/* ---------------------------------------------------------------------
+   BADGES: small coloured status pills.
+   BEM naming: .badge = the block, .badge--active = a variant (modifier).
+   inline-block → sits in a line of text but accepts padding properly.
+   --------------------------------------------------------------------- */
 .badge {
     display: inline-block;
     padding: 0.125rem 0.5rem;
@@ -232,6 +357,9 @@ main {
 .badge--active { background: #e3f6ea; color: #1b7a3d; }
 .badge--leave { background: #fff4d6; color: #8a5a00; }
 
+/* ---------------------------------------------------------------------
+   FORMS (onboarding.html)
+   --------------------------------------------------------------------- */
 .field {
     margin-bottom: 1rem;
 }
@@ -242,6 +370,11 @@ main {
     margin-bottom: 0.25rem;
 }
 
+/* .form legend → every <legend> inside the form, including the nested
+   radio-group one. font-weight must be 1–1000 (600 = semi-bold).
+   Contrast check: light grey at 50% opacity on white is roughly 1.7:1,
+   below the WCAG minimum (4.5:1 for normal text, 3:1 for large). A solid
+   grey like #6b7085 passes. */
 .form legend {
     color: rgb(146, 146, 146, 0.5);    /* add transparent */
     font-size: 1.5rem;
@@ -249,6 +382,10 @@ main {
     margin-bottom: 0.25rem;
 }
 
+/* Form controls don't inherit fonts from body by default, hence
+   font: inherit. width: 100% + border-box = exactly fills the field.
+   NOTE: tel, number, file and search inputs aren't in this list, so they
+   keep the browser's default look. */
 input[type="text"],
 input[type="email"],
 input[type="date"],
@@ -268,6 +405,10 @@ fieldset {
     margin: 0 0 1.5rem;
 }
 
+/* ---------------------------------------------------------------------
+   BUTTONS
+   Padding in em (not rem), so it scales with the button's own text size.
+   --------------------------------------------------------------------- */
 .btn {
     padding: 0.625em 1.25em;
     font: inherit;
@@ -286,6 +427,12 @@ fieldset {
 
 
 /* Card Styles */
+/* ---------------------------------------------------------------------
+   CARD LAYOUT with FLEXBOX (Day 4)
+   This second .card rule ADDS to the first one further up. Both apply.
+   --------------------------------------------------------------------- */
+/* A column inside each card, so margin-top: auto can push the last item
+   to the bottom even when the text above wraps. */
 .card {
     display: flex;
     flex-direction: column;
@@ -296,12 +443,15 @@ fieldset {
     margin-top: auto; /* pushes link to the bottom */
 }
 
+/* The cards sit in a row and WRAP onto new lines when they run out of
+   room. No media queries needed. */
 .card-list {
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
 
+/* flex: grow shrink basis */
 .card-list .card {
     flex: 1 1 240px; /* grow, shrink, but aim for 240px wide */
 }
@@ -309,6 +459,9 @@ fieldset {
 
 
 /* Toolbar */
+/* ---------------------------------------------------------------------
+   TOOLBAR: search + department + Add button in one row
+   --------------------------------------------------------------------- */
 .toolbar {
     display: flex;
     align-items: center;
@@ -324,12 +477,16 @@ fieldset {
     border-radius: 8px;
 }
 
+/* margin-left: auto in a flex row = "push me as far right as possible".
+   nowrap stops "Add Employee" breaking onto two lines. */
 .toolbar .btn--primary {
     margin-left: auto;
     white-space: nowrap;
 }
 
 /* hides text visually but keeps it for screen readers */
+/* (display: none or visibility: hidden would hide it from screen
+   readers too.) Used for the search box's <label>. Memorise this one. */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -340,6 +497,9 @@ fieldset {
 }
 
 /* Navbar and Footer Styles */
+/* ---------------------------------------------------------------------
+   TOP NAVBAR: logo on the left, links on the right
+   --------------------------------------------------------------------- */
 .site-header {
     display: flex;
     align-items: center; /* vertically center logo + links */
@@ -357,6 +517,8 @@ fieldset {
     text-decoration: none;
 }
 
+/* A <ul> styled as a horizontal row of links. Lists have default
+   bullets, margin and left padding, so all three are removed. */
 .nav-links {
     display: flex;
     gap: 0.25rem;
@@ -365,6 +527,8 @@ fieldset {
     padding: 0;
 }
 
+/* display: block makes the whole padded area clickable, not just the
+   text. */
 .nav-links a {
     display: block;
     padding: 0.5rem 0.75rem;
@@ -382,6 +546,9 @@ fieldset {
     font-weight: 600;
 }
 
+/* FOOTER. padding = space between the footer's edge and its content
+   (the grey background fills the padding too). The <p> inside also has
+   its own default 1em top/bottom margin, which adds to this. */
 footer {
     background: rgb(230, 230, 230);
     border-top: 1px solid #6b2fb3;

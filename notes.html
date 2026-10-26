@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- ============================================================
+             notes.html: my bootcamp study notes
+             Each note is a <details> element (click the summary to open
+             or close it, no JS needed). data-topic="..." is what the topic
+             filter buttons in notes.js match against.
+             To add a note: copy any <details class="note"> block, change
+             the data-topic, the <summary> and the content.
+             Inside <pre><code>, write < as &lt; and > as &gt; or the
+             browser will treat them as real tags.
+             ============================================================ -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bootcamp Notes</title>
+        <link rel="stylesheet" href="notes.css">
+        <script src="notes.js" defer></script>
+    </head>
+    <body>
+        <header class="notes-header">
+            <a href="index.html" class="back-link">← Directory</a>
+            <h1>Bootcamp Notes</h1>
+            <p class="subtitle">Everything I've learned building the HR dashboard, plus the bugs I hit along the way.</p>
+        </header>
+
+        <!-- Search + topic filters + expand/collapse. Wired up in notes.js. -->
+        <div class="notes-toolbar">
+            <label for="note-search" class="visually-hidden">Search notes</label>
+            <input type="search" id="note-search" placeholder="Search notes… (press / to focus)">
+
+            <!-- aria-pressed marks which topic is active. The buttons are
+                 grouped and named for screen readers by role="group" +
+                 aria-label. -->
+            <div class="topics" role="group" aria-label="Filter by topic">
+                <button type="button" data-topic="all" aria-pressed="true">All</button>
+                <button type="button" data-topic="html" aria-pressed="false">HTML</button>
+                <button type="button" data-topic="css" aria-pressed="false">CSS</button>
+                <button type="button" data-topic="js" aria-pressed="false">JS basics</button>
+                <button type="button" data-topic="dom" aria-pressed="false">DOM &amp; events</button>
+                <button type="button" data-topic="patterns" aria-pressed="false">Patterns</button>
+                <button type="button" data-topic="debug" aria-pressed="false">Debugging</button>
+            </div>
+
+            <div class="toolbar-row">
+                <p id="note-count" aria-live="polite"></p>
+                <button type="button" id="expand-all" class="link-btn">Expand all</button>
+                <button type="button" id="collapse-all" class="link-btn">Collapse all</button>
+            </div>
+        </div>
+
+        <main class="notes">
+
+            <!-- ======================================================
+                 HTML
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-html">
+                <h2 id="h-html">HTML</h2>
+
+                <details class="note" data-topic="html">
+                    <summary>Page skeleton &amp; loading scripts</summary>
+                    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Page name&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+    &lt;script src="app.js" defer&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;…&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    <ul>
+                        <li><code>lang</code> tells screen readers which language to pronounce.</li>
+                        <li><code>viewport</code> makes phones use their real width instead of zooming out.</li>
+                        <li><strong><code>defer</code></strong> downloads the script now but runs it after the HTML is parsed, so <code>querySelector</code> can find elements. Deferred scripts run in the order they're listed.</li>
+                        <li>A <code>&lt;script src="…"&gt;</code> <strong>ignores</strong> any code written between its tags.</li>
+                        <li>CSS is not loaded unless there's a <code>&lt;link rel="stylesheet"&gt;</code> in the <code>&lt;head&gt;</code>.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="html">
+                    <summary>Semantic landmarks &amp; headings</summary>
+                    <ul>
+                        <li><code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code> (one per page), <code>&lt;aside&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;footer&gt;</code>. Screen readers can jump between them; <code>&lt;div&gt;</code>/<code>&lt;span&gt;</code> mean nothing.</li>
+                        <li>Two <code>&lt;nav&gt;</code>s on a page? Give each an <code>aria-label</code> ("Main", "Sections").</li>
+                        <li>Name a section with <code>aria-labelledby="id-of-its-heading"</code>. The id must match exactly.</li>
+                        <li>One <code>&lt;h1&gt;</code>; then h2 → h3 in order, no skipping levels.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="html">
+                    <summary>Forms</summary>
+                    <ul>
+                        <li><code>&lt;label for="x"&gt;</code> ↔ <code>&lt;input id="x"&gt;</code> links them. Clicking the label focuses the input. Or wrap: <code>&lt;label&gt;&lt;input&gt; Text&lt;/label&gt;</code>.</li>
+                        <li>A <code>placeholder</code> is <strong>not</strong> a label (it vanishes when typing). If there's no visible label, use a <code>.visually-hidden</code> one.</li>
+                        <li><code>name="…"</code> is the key <code>FormData</code> uses: <code>new FormData(form).get('fullName')</code>.</li>
+                        <li>Built-in validation: <code>required</code>, <code>type="email"</code>, <code>min</code>/<code>max</code>/<code>step</code>, <code>maxlength</code>. The browser blocks submit until they pass.</li>
+                        <li>Radios with the same <code>name</code> form one group. Name the group with <code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code>.</li>
+                        <li><code>autocomplete</code> takes tokens (<code>name</code>, <code>email</code>, <code>tel</code>, <code>off</code>), not example values.</li>
+                        <li><code>method</code>: GET puts data in the URL, POST in the request body. <code>action="#"</code> stays on the page.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="html">
+                    <summary>Buttons: always set type</summary>
+                    <ul>
+                        <li>A <code>&lt;button&gt;</code> defaults to <code>type="submit"</code>. Any non-submit button should be <code>type="button"</code>.</li>
+                        <li><code>type="reset"</code> clears the whole form.</li>
+                        <li><code>disabled</code> blocks clicks. It's a UX nicety, not security (anyone can re-enable it in DevTools).</li>
+                        <li>⚠️ Never give a form control <code>id</code>/<code>name</code> of <code>"submit"</code> or <code>"reset"</code>. It <strong>replaces</strong> <code>form.submit()</code>/<code>form.reset()</code>, causing "form.reset is not a function".</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="html">
+                    <summary>Tables</summary>
+                    <pre><code>&lt;table&gt;
+  &lt;caption&gt;October 2026 pay run&lt;/caption&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th scope="col"&gt;Name&lt;/th&gt;…&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Priya&lt;/td&gt;…&lt;/tr&gt;&lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+                    <ul>
+                        <li><code>&lt;caption&gt;</code> is the table's title.</li>
+                        <li><code>&lt;th scope="col"&gt;</code> is a <strong>header</strong> cell for its column. <code>&lt;td&gt;</code> is a <strong>data</strong> cell. Don't use <code>th</code> for data.</li>
+                        <li>Render rows into the <code>&lt;tbody&gt;</code> only, so the caption and header survive.</li>
+                        <li>Clickable header? Put a <code>&lt;button&gt;</code> <em>inside</em> the <code>&lt;th&gt;</code> so keyboards can reach it.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="html">
+                    <summary>Accessibility attributes cheat sheet</summary>
+                    <table>
+                        <thead><tr><th scope="col">Attribute</th><th scope="col">Use it for</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>alt="…"</code></td><td>Describe an image. <code>alt=""</code> when it's decorative (e.g. the name is right next to it).</td></tr>
+                            <tr><td><code>aria-label</code></td><td>Name an element with no visible text (icon buttons like ⋯), or make repeated buttons unique ("Remove Priya").</td></tr>
+                            <tr><td><code>aria-labelledby</code></td><td>Name it using another element's text, by id.</td></tr>
+                            <tr><td><code>aria-describedby</code></td><td>Extra description read after the name (counter, error message).</td></tr>
+                            <tr><td><code>role="status"</code> / <code>aria-live="polite"</code></td><td>Announce text changes without moving focus.</td></tr>
+                            <tr><td><code>aria-current="page"</code></td><td>The link to the page you're on.</td></tr>
+                            <tr><td><code>aria-pressed</code></td><td>A toggle button's on/off state.</td></tr>
+                            <tr><td><code>aria-sort</code></td><td>On the sorted <code>&lt;th&gt;</code>: <code>ascending</code> / <code>descending</code>. Only one at a time.</td></tr>
+                            <tr><td><code>.visually-hidden</code></td><td>Hide visually, keep for screen readers. (<code>display:none</code> hides from both.)</td></tr>
+                        </tbody>
+                    </table>
+                </details>
+            </section>
+
+            <!-- ======================================================
+                 CSS
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-css">
+                <h2 id="h-css">CSS</h2>
+
+                <details class="note" data-topic="css">
+                    <summary>Selectors</summary>
+                    <table>
+                        <thead><tr><th scope="col">Selector</th><th scope="col">Matches</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>tbody</code></td><td>every <code>&lt;tbody&gt;</code> element (tag, no symbol)</td></tr>
+                            <tr><td><code>.card</code></td><td>elements with <code>class="card"</code></td></tr>
+                            <tr><td><code>#search</code></td><td>the element with <code>id="search"</code></td></tr>
+                            <tr><td><code>.card img</code></td><td><code>img</code> anywhere inside <code>.card</code> (descendant)</td></tr>
+                            <tr><td><code>main &gt; *</code></td><td>direct children only</td></tr>
+                            <tr><td><code>.a + .a</code></td><td>an <code>.a</code> right after another <code>.a</code> (spacing <em>between</em> items)</td></tr>
+                            <tr><td><code>input[type="search"]</code></td><td>attribute selector</td></tr>
+                            <tr><td><code>tr.is-selected</code></td><td>a <code>tr</code> that also has that class (no space!)</td></tr>
+                            <tr><td><code>:hover</code>, <code>:focus-visible</code>, <code>:nth-child(even)</code></td><td>states (pseudo-classes)</td></tr>
+                            <tr><td><code>::after</code> + <code>content</code></td><td>generated content (pseudo-element)</td></tr>
+                        </tbody>
+                    </table>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>The cascade &amp; specificity</summary>
+                    <ul>
+                        <li>When two rules set the same property: higher <strong>specificity</strong> wins. <code>#id</code> &gt; <code>.class / [attr] / :pseudo</code> &gt; <code>tag</code>.</li>
+                        <li>Equal specificity → the rule <strong>later</strong> in the file wins. That's why <code>h2 { margin-top: 2rem }</code> must come <em>after</em> <code>h1, h2, h3 { margin: 0 0 .5rem }</code>.</li>
+                        <li>Shorthands reset everything they cover: <code>margin: 0 0 1rem</code> also sets top to 0.</li>
+                        <li>In DevTools → Styles, a losing declaration is shown crossed out.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Box model &amp; box-sizing</summary>
+                    <p>Content → padding → border → margin (margin is outside and doesn't count toward width).</p>
+                    <p><code>width: 300px; padding: 20px; border: 2px solid;</code></p>
+                    <ul>
+                        <li><strong>content-box</strong> (default): width = content only → <strong>344px</strong> rendered (300 + 40 + 4).</li>
+                        <li><strong>border-box</strong>: width includes padding + border → <strong>300px</strong> rendered, content shrinks to 256.</li>
+                    </ul>
+                    <pre><code>*, *::before, *::after { box-sizing: border-box; }</code></pre>
+                    <p>Check with DevTools → Computed (the box diagram) or <code>el.offsetWidth</code>.</p>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Units: rem, em, px, %, vh, fr</summary>
+                    <ul>
+                        <li><strong>rem</strong> is relative to the root (<code>&lt;html&gt;</code>) font size, 16px by default. <code>1.5rem</code> = 24px. Scales with the user's browser font setting (accessibility).</li>
+                        <li><strong>em</strong> is relative to the element's <em>own</em> font size. Good for button padding that should grow with its text.</li>
+                        <li><strong>%</strong> is relative to the parent. <strong>vh</strong> = 1% of the window height. <strong>fr</strong> = a share of the leftover grid space.</li>
+                        <li>Rule of thumb: rem for most spacing, em for things that should scale with their own text.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Margins: defaults &amp; collapsing</summary>
+                    <ul>
+                        <li>Browsers give <code>body</code>, <code>p</code>, <code>h1</code>–<code>h6</code>, <code>ul</code> default margins. A <code>&lt;p&gt;</code> inside a padded footer adds its own 1em above and below.</li>
+                        <li><strong>Vertical margins collapse</strong>: between two stacked siblings, the bigger margin wins. They don't add up.</li>
+                        <li>Space <em>outside</em> = margin. Space <em>inside</em> (where the background shows) = padding.</li>
+                        <li>Margin <code>0 auto</code> centres a block that has a width.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Invalid CSS fails silently</summary>
+                    <ul>
+                        <li><code>font-weight: 1500</code> is out of range (1–1000), so the whole line is ignored.</li>
+                        <li><code>rgb(146, 146, 146 / 0.5)</code> mixes comma and slash syntax, so it's ignored. Use <code>rgb(146 146 146 / 0.5)</code> (modern) or <code>rgba(146, 146, 146, 0.5)</code>.</li>
+                        <li><code>outline: 1px</code> has no style, so it's invisible. You need <code>outline: 2px solid color</code>.</li>
+                        <li>A typo in a selector (<code>.siderbar</code>) just matches nothing.</li>
+                        <li>Always check DevTools → Styles for crossed-out lines with ⚠️.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Colour contrast</summary>
+                    <ul>
+                        <li>WCAG minimum: <strong>4.5:1</strong> for normal text, <strong>3:1</strong> for large text.</li>
+                        <li>Semi-transparent grey text usually fails. Prefer a solid mid-grey like <code>#6b7085</code>.</li>
+                        <li>DevTools: click the colour swatch next to <code>color</code> to see the ratio.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Flexbox (one direction)</summary>
+                    <pre><code>.toolbar { display: flex; align-items: center; gap: .75rem; }</code></pre>
+                    <ul>
+                        <li><strong>On the container:</strong> <code>flex-direction</code> (row/column), <code>justify-content</code> (main axis: <code>space-between</code>…), <code>align-items</code> (cross axis: <code>center</code>), <code>gap</code>, <code>flex-wrap: wrap</code>.</li>
+                        <li><strong>On items:</strong> <code>flex: 1</code> = take all spare room. <code>flex: 1 1 240px</code> = grow, shrink, aim for 240px (with wrap → responsive cards with no media queries). <code>flex-shrink: 0</code> = never squash (avatars).</li>
+                        <li><code>margin-left: auto</code> pushes an item to the far right.</li>
+                        <li><code>margin-top: auto</code> inside a column pushes the item to the bottom.</li>
+                        <li>⚠️ <strong>Famous gotcha:</strong> flex items default to <code>min-width: auto</code> (never narrower than their content). To truncate text inside a flex child, give that child <code>min-width: 0</code>.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Truncate with an ellipsis (…)</summary>
+                    <pre><code>.name {
+  white-space: nowrap;      /* one line */
+  overflow: hidden;         /* hide the rest */
+  text-overflow: ellipsis;  /* show … */
+}
+/* + min-width: 0 on the flex child that contains it */</code></pre>
+                    <p>All three lines are needed. Text-overflow only works on one line with hidden overflow.</p>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Grid (rows and columns)</summary>
+                    <pre><code>.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas:
+    "header  header"
+    "sidebar main";
+  min-height: 100vh;
+}
+.site-header { grid-area: header; }</code></pre>
+                    <ul>
+                        <li>Flex = one direction. Grid = two directions.</li>
+                        <li><code>1fr</code> = one share of the leftover space.</li>
+                        <li>Items without a <code>grid-area</code> get auto-placed into the next empty cell.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="css">
+                    <summary>Custom properties (CSS variables)</summary>
+                    <pre><code>.progress__fill { width: var(--progress, 0%); }   /* 0% = fallback */</code></pre>
+                    <pre><code>fill.style.setProperty('--progress', `${percent}%`);  // JS sets it</code></pre>
+                    <ul>
+                        <li>Names start with <code>--</code>. Read with <code>var()</code>.</li>
+                        <li>The clean way to pass a <em>number</em> from JS to CSS. Remember the unit (<code>%</code>).</li>
+                        <li><code>transition: width .2s ease</code> animates the change.</li>
+                    </ul>
+                </details>
+            </section>
+
+            <!-- ======================================================
+                 JS BASICS
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-js">
+                <h2 id="h-js">JavaScript basics</h2>
+
+                <details class="note" data-topic="js">
+                    <summary>let, const &amp; block scope</summary>
+                    <ul>
+                        <li><code>const</code> can't be reassigned (but an object's contents can change). <code>let</code> can be reassigned. Avoid <code>var</code>.</li>
+                        <li>Both are <strong>block-scoped</strong>: they only exist inside the <code>{ }</code> where they're declared. A variable made inside a submit handler doesn't exist outside it.</li>
+                        <li>Assigning without <code>const</code>/<code>let</code> (<code>total = 0</code>) creates an accidental <strong>global</strong>. Always declare.</li>
+                        <li>Reassigning a const → <code>TypeError: Assignment to constant variable</code>. Make a new variable with a new name instead.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>= vs ===</summary>
+                    <pre><code>dir = 'desc';     // ASSIGNS: makes dir 'desc'
+dir === 'desc';   // COMPARES: true/false, changes nothing</code></pre>
+                    <p>A line like <code>state.dir === 'desc';</code> on its own does nothing at all.</p>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>for...of vs for...in</summary>
+                    <pre><code>for (const e of employees) { … }  // e = each ITEM (employee object)
+for (const i in employees) { … }  // i = each KEY ('0', '1', '2' as strings)</code></pre>
+                    <ul>
+                        <li><strong>of</strong> → items of an iterable: arrays, Sets, strings.</li>
+                        <li><strong>in</strong> → keys of an object.</li>
+                        <li><code>for...of</code> does <strong>not</strong> work on plain objects ("is not iterable").</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Handy syntax: template literals, ternary, destructuring</summary>
+                    <pre><code>`Selected: ${count}`                       // template literal
+dir === 'asc' ? 'desc' : 'asc'             // ternary = one-line if/else
+const { key, dir } = state.tableSort;      // destructuring
+a[key]                                     // bracket notation: property named by a variable
+!checked                                   // flip a boolean
+value || 0                                 // default if value is falsy</code></pre>
+                    <p>Falsy values: <code>false</code>, <code>0</code>, <code>''</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. Everything else is truthy.</p>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Spread ... (unpack a collection)</summary>
+                    <pre><code>[...employees]                 // copy an array
+[...new Set(list)]             // Set → array (unique values)
+Math.max(...ids)               // array → separate arguments
+{ ...emp, salary: 190000 }     // copy an object, change one field
+el.replaceChildren(...nodes)   // array of elements → arguments</code></pre>
+                    <ul>
+                        <li><code>Array(mySet)</code> does <strong>not</strong> unpack. It makes <code>[Set]</code>, one item.</li>
+                        <li><code>Math.max([1,2,3])</code> is <code>NaN</code>. <code>Math.max(...[1,2,3])</code> is <code>3</code>.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Array methods cheat sheet</summary>
+                    <table>
+                        <thead><tr><th scope="col">Method</th><th scope="col">Returns</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>map(fn)</code></td><td>new array, each item transformed. <code>fn</code> must be a <em>function</em>: <code>map((e) =&gt; e.id)</code>, not <code>map(id)</code>.</td></tr>
+                            <tr><td><code>filter(fn)</code></td><td>new array of items where fn returns true</td></tr>
+                            <tr><td><code>find(fn)</code></td><td>first match, or <code>undefined</code></td></tr>
+                            <tr><td><code>some(fn)</code></td><td><code>true</code> if any item matches</td></tr>
+                            <tr><td><code>reduce(fn, start)</code></td><td>one value built up step by step (fn must return the accumulator)</td></tr>
+                            <tr><td><code>sort(fn)</code></td><td>⚠️ <strong>changes the original</strong>. Sort a copy: <code>[...arr].sort()</code></td></tr>
+                            <tr><td><code>slice(a, b)</code></td><td>copy of a portion (end b is excluded)</td></tr>
+                            <tr><td><code>join('')</code></td><td>one string. Without <code>''</code> you get commas.</td></tr>
+                            <tr><td><code>push(x)</code></td><td>adds to the end, changing the original (arrays have no <code>.append</code>)</td></tr>
+                            <tr><td><code>includes(x)</code></td><td><code>true</code>/<code>false</code>. Case-sensitive on strings. <code>'abc'.includes('')</code> is <code>true</code>.</td></tr>
+                        </tbody>
+                    </table>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Sorting: compare functions</summary>
+                    <pre><code>(a, b) =&gt; a.name.localeCompare(b.name)    // strings, A–Z
+(a, b) =&gt; a.salary - b.salary             // numbers, low → high
+(a, b) =&gt; b.salary - a.salary             // swapped = high → low
+return dir === 'asc' ? result : -result;  // flip sign = reverse</code></pre>
+                    <ul>
+                        <li>Return negative → <code>a</code> first; positive → <code>b</code> first; 0 → equal.</li>
+                        <li>Store numbers as numbers. As strings, <code>'$80,000'</code> sorts after <code>'$145,000'</code>.</li>
+                        <li><code>'YYYY-MM-DD'</code> date strings sort correctly as strings.</li>
+                        <li><code>typeof x === 'number'</code> to choose between the two.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Set: unique values</summary>
+                    <pre><code>const depts = new Set();
+for (const e of employees) depts.add(e.dept);   // duplicates ignored
+const sorted = [...depts].sort();               // Set has no .sort()</code></pre>
+                </details>
+
+                <details class="note" data-topic="js">
+                    <summary>Closures</summary>
+                    <p>A function "remembers" the variables from where it was created. Each Remove button's listener, created inside the submit handler, remembers <em>its own</em> <code>li</code>:</p>
+                    <pre><code>const li = document.createElement('li');
+removeBtn.addEventListener('click', () =&gt; li.remove());</code></pre>
+                </details>
+            </section>
+
+            <!-- ======================================================
+                 DOM & EVENTS
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-dom">
+                <h2 id="h-dom">DOM &amp; events</h2>
+
+                <details class="note" data-topic="dom">
+                    <summary>Finding elements</summary>
+                    <pre><code>document.querySelector('#agree')        // first match, or null
+document.querySelectorAll('.card')      // all matches (has forEach)
+el.closest('tbody tr')                  // walk UP to the nearest match, or null</code></pre>
+                    <ul>
+                        <li>It takes a <strong>CSS selector</strong>: <code>'agree'</code> looks for an <code>&lt;agree&gt;</code> tag, <code>'.dept'</code> for a class, <code>'#dept'</code> for an id.</li>
+                        <li>Wrong selector → <code>null</code> → "Cannot read properties of null" on the next line.</li>
+                        <li>Call it on an element to search only inside it: <code>form.querySelector('input')</code>.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>textContent vs innerHTML (XSS)</summary>
+                    <ul>
+                        <li><code>textContent</code> = plain text, never parsed. Safe by default.</li>
+                        <li><code>innerHTML</code> = parses the string as HTML. Putting user data in it without escaping = <strong>XSS</strong> (a name like <code>&lt;img src=x onerror=alert(1)&gt;</code> would run code).</li>
+                        <li>With innerHTML, run every piece of data through <code>escapeHTML()</code>.</li>
+                        <li>Setting <code>textContent</code> replaces everything inside, child elements too. Set text <em>before</em> appending children.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>Creating &amp; changing elements</summary>
+                    <pre><code>const li = document.createElement('li');  // create (in memory)
+li.textContent = 'New hire';              // fill
+list.append(li);                          // put on the page (at the end)
+li.remove();                              // take it off
+listEl.replaceChildren(...cards);         // clear + insert in one go</code></pre>
+                    <ul>
+                        <li>A string like <code>`&lt;option&gt;…&lt;/option&gt;`</code> is <strong>not</strong> an element. <code>append</code> would add it as text.</li>
+                        <li>You can't assign elements to <code>innerHTML</code> (you'd see <code>[object HTMLElement]</code>).</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>classList, attributes &amp; dataset</summary>
+                    <pre><code>el.classList.add('x')     el.classList.remove('x')
+el.classList.toggle('x')  // returns true if now present
+el.classList.contains('x')
+el.setAttribute('aria-sort', 'ascending');  el.removeAttribute('aria-sort');
+el.dataset.id      // reads data-id="…" (always a STRING, so use Number())
+el.dataset.id = 5  // writes data-id="5"
+input.value  checkbox.checked  button.disabled</code></pre>
+                    <ul>
+                        <li><code>classList</code> = only that element's <em>own</em> classes ("sticky notes" on it), not its parents'.</li>
+                        <li><code>el.className = 'x'</code> replaces <em>all</em> classes; <code>classList</code> changes one.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>The DOM vs the HTML file</summary>
+                    <ul>
+                        <li>The browser builds a live copy of the page in memory (the <strong>DOM</strong>). JS changes the DOM, never your file.</li>
+                        <li>DevTools → Elements = live DOM (shows <code>is-selected</code>, generated cards). View Source (<kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>U</kbd>) = the original file.</li>
+                        <li>Refreshing rebuilds the DOM from the file, so all JS changes are lost (use <code>localStorage</code> to remember things).</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>Events you'll use</summary>
+                    <table>
+                        <thead><tr><th scope="col">Event</th><th scope="col">Fires when</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>click</code></td><td>clicked (or Enter/Space on a button)</td></tr>
+                            <tr><td><code>input</code></td><td>every keystroke/paste/delete</td></tr>
+                            <tr><td><code>change</code></td><td>select picked, checkbox ticked, text field loses focus</td></tr>
+                            <tr><td><code>submit</code></td><td>form submitted, <em>after</em> built-in validation passes</td></tr>
+                            <tr><td><code>reset</code></td><td>form reset. Fires <em>before</em> the fields clear.</td></tr>
+                            <tr><td><code>keydown</code></td><td>a key is pressed (<code>event.key</code>)</td></tr>
+                        </tbody>
+                    </table>
+                    <ul>
+                        <li>The first argument is an <strong>event name</strong>. There's no <code>'checkbox'</code> event; it silently never fires.</li>
+                        <li><code>form.reset()</code> does <strong>not</strong> fire <code>input</code>/<code>change</code>, so reset counters and buttons in a <code>reset</code> listener.</li>
+                        <li><code>event.preventDefault()</code> on submit stops the page reload.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="dom">
+                    <summary>Bubbling &amp; event delegation</summary>
+                    <p>A click starts at the innermost element and <strong>bubbles</strong> up: <code>td → tr → tbody → table</code>. Every ancestor's click listener runs.</p>
+                    <pre><code>list.addEventListener('click', (e) =&gt; {
+  const btn = e.target.closest('[data-action="remove"]');
+  if (!btn) return;            // click wasn't on a Remove button
+  …
+});</code></pre>
+                    <ul>
+                        <li><strong>Delegation</strong> = one listener on the parent handles all children, including ones rendered later.</li>
+                        <li><code>event.target</code> = what was clicked. <code>event.currentTarget</code> = what the listener is on.</li>
+                        <li>⚠️ Two listeners that both <code>toggle</code> the same class cancel each other out (row-selection bug).</li>
+                        <li>⚠️ A listener on a parent hears <em>every</em> child. Check <code>event.target</code> (the radio-button bug).</li>
+                    </ul>
+                </details>
+            </section>
+
+            <!-- ======================================================
+                 PATTERNS
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-patterns">
+                <h2 id="h-patterns">Patterns</h2>
+
+                <details class="note" data-topic="patterns">
+                    <summary>State → render()</summary>
+                    <pre><code>const state = { employees: [...], query: '', dept: 'All' };
+
+function render() { /* read state, redraw the page */ }
+
+search.addEventListener('input', (e) =&gt; {
+  state.query = e.target.value;   // 1. update state
+  render();                       // 2. redraw
+});</code></pre>
+                    <ul>
+                        <li>Handlers only change <code>state</code>, then call <code>render()</code>. Never patch the page by hand.</li>
+                        <li>Helpers like <code>getVisible()</code> read state and return a new array without changing anything.</li>
+                        <li>Things that run <strong>once</strong> (building dropdown options) go outside <code>render()</code>.</li>
+                        <li>Containers that <code>render()</code> fills must be empty in the HTML. Anything else inside gets wiped.</li>
+                        <li>This is how React works.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="patterns">
+                    <summary>Single source of truth</summary>
+                    <ul>
+                        <li>Recount from the page/data (<code>querySelectorAll(…).length</code>) instead of keeping a separate counter that can drift.</li>
+                        <li>Store raw data (<code>115000</code>), format when displaying (<code>formatSalary</code>).</li>
+                        <li>Build UI from data (department options via <code>new Set</code>) so it updates itself when data changes. Test: add a "Finance" employee and it appears.</li>
+                        <li>Unique ids: <code>Math.max(...list.map((e) =&gt; e.id)) + 1</code>.</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="patterns">
+                    <summary>JS sets state, CSS owns the visuals</summary>
+                    <ul>
+                        <li>Toggle a class (<code>is-selected</code>, <code>compact</code>) and let CSS style it. Avoid <code>el.style.color = …</code>.</li>
+                        <li>Set an attribute (<code>aria-sort</code>) and let CSS draw from it: <code>th[aria-sort="ascending"] button::after { content: " ▲"; }</code>.</li>
+                        <li>For numbers, set a CSS variable (<code>--progress</code>).</li>
+                    </ul>
+                </details>
+
+                <details class="note" data-topic="patterns">
+                    <summary>Template string vs createElement (tradeoff)</summary>
+                    <table>
+                        <thead><tr><th scope="col"></th><th scope="col">Template + innerHTML</th><th scope="col">createElement + textContent</th></tr></thead>
+                        <tbody>
+                            <tr><td>Safety</td><td>Must escape every value. Forget once = XSS.</td><td>Safe by default.</td></tr>
+                            <tr><td>Length</td><td>Short, looks like the HTML.</td><td>Verbose (about 3× the lines).</td></tr>
+                            <tr><td>Result</td><td>A string the browser parses.</td><td>Real elements you can keep and attach listeners to.</td></tr>
+                        </tbody>
+                    </table>
+                    <p><em>Interview line:</em> "innerHTML is concise but you have to remember to escape; createElement is safe without trying, at the cost of verbosity. React's JSX gives you both."</p>
+                </details>
+            </section>
+
+            <!-- ======================================================
+                 DEBUGGING
+                 ====================================================== -->
+            <section class="topic-section" aria-labelledby="h-debug">
+                <h2 id="h-debug">Debugging</h2>
+
+                <details class="note" data-topic="debug">
+                    <summary>How to debug: Console first</summary>
+                    <ol>
+                        <li>Open the Console (<kbd>Cmd</kbd>+<kbd>Opt</kbd>+<kbd>J</kbd>) and refresh.</li>
+                        <li>Fix the <strong>first</strong> red error, refresh, repeat. JS stops at the first crash.</li>
+                        <li>If <em>lots</em> of unrelated things break at once, it's usually one early crash: everything after it (including listeners) never runs.</li>
+                        <li>A <strong>syntax</strong> error (e.g. HTML written in JS without quotes) stops the <em>whole file</em> from running.</li>
+                        <li>Use <code>console.log(state)</code> to check data before blaming the UI.</li>
+                        <li>Hard refresh with <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> if changes don't show.</li>
+                    </ol>
+                </details>
+
+                <details class="note" data-topic="debug">
+                    <summary>What the error messages mean</summary>
+                    <table>
+                        <thead><tr><th scope="col">Error</th><th scope="col">Usual cause</th></tr></thead>
+                        <tbody>
+                            <tr><td>Cannot read properties of <strong>null</strong></td><td>A <code>querySelector</code> found nothing (missing <code>#</code>/<code>.</code>, typo in the id, element not in the HTML).</td></tr>
+                            <tr><td>X <strong>is not a function</strong></td><td>Typo in a method name (<code>queryDelectorAll</code>), wrong type (<code>array.append</code>), or shadowed (<code>form.reset</code> by <code>id="reset"</code>).</td></tr>
+                            <tr><td>X <strong>is not defined</strong></td><td>Wrong variable name, or it's out of scope (declared inside another <code>{ }</code>). Also <code>None</code> (that's Python; JS has <code>null</code>).</td></tr>
+                            <tr><td>Assignment to constant variable</td><td>Reassigning a <code>const</code>.</td></tr>
+                            <tr><td>Unexpected token '&lt;'</td><td>HTML in JS without quotes/backticks.</td></tr>
+                            <tr><td>X is not iterable</td><td><code>for...of</code> on a plain object.</td></tr>
+                            <tr><td>Shows <code>[object Set]</code> / <code>[object Object]</code></td><td>Put a whole object where a string was expected.</td></tr>
+                            <tr><td>Shows <code>null</code> / <code>undefined</code> on the page</td><td>Wrong property name (<code>department</code> vs <code>dept</code>) or a missing form field.</td></tr>
+                        </tbody>
+                    </table>
+                </details>
+
+                <details class="note" data-topic="debug">
+                    <summary>DevTools tips</summary>
+                    <ul>
+                        <li><strong>Elements</strong>: the live DOM. Watch classes and attributes change as you click.</li>
+                        <li><strong>Styles</strong>: crossed-out = lost the cascade; ⚠️ = invalid value. Edit live to experiment (lost on refresh).</li>
+                        <li><strong>Computed</strong>: the box-model diagram (content / padding / border / margin).</li>
+                        <li>Hover an element: orange = margin, green = padding.</li>
+                        <li>Device toolbar (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>) to test phone widths.</li>
+                        <li>Run a local server when you need it: <code>python3 -m http.server 8000</code> → <code>localhost:8000</code>.</li>
+                    </ul>
+                </details>
+            </section>
+
+            <!-- Shown by notes.js when nothing matches. -->
+            <p class="empty" id="no-results" hidden>No notes match.</p>
+        </main>
+    </body>
+</html>

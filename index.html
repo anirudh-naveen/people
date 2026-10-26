@@ -1,23 +1,50 @@
 <!DOCTYPE html>     <!-- tells the browser: modern HTML -->
 <html lang="en">    <!-- language, for screen readers -->
     <head>          <!-- info ABOUT the page, not shown -->
+        <!-- ============================================================
+             index.html: the Employee Directory (dashboard) page
+             ============================================================
+             Most of the visible content (cards, table rows, department
+             options) is EMPTY here and gets filled in by index.js.
+             To see what JS added, use DevTools → Elements (the live
+             DOM), not View Source (the original file).
+        -->
+
+        <!-- charset: which character encoding the file uses (UTF-8
+             handles every language plus symbols like ▲ and ⋯) -->
         <meta charset="UTF-8">
+        <!-- viewport: on phones, use the real screen width instead of
+             pretending to be a 980px desktop and zooming out -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- shown in the browser tab (could be "Employee Directory") -->
         <title>Document</title>
 
         <!-- CSS -->
         <link rel="stylesheet" href="styles.css">
 
         <!-- JavaScript -->
+        <!-- defer = download now, but RUN only after the whole HTML is
+             parsed (so querySelector can find every element). Deferred
+             scripts run in the order they're listed: app.js first, so
+             index.js can use its formatSalary(). -->
         <script src="app.js" defer></script>
         <script src="index.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
+        <!-- .app = the CSS grid wrapper (header across the top, sidebar
+             on the left, main on the right). See ".app" in styles.css. -->
         <div class="app">
+            <!-- <header> = landmark for the site's top banner -->
             <header class="site-header">
                 <a href="index.html" class="logo">People</a>
+                <!-- <nav> = landmark for navigation. aria-label names it,
+                     because this page has TWO navs and screen reader
+                     users need to tell them apart. -->
                 <nav aria-label="Main">
+                    <!-- links in a list: screen readers announce
+                         "list, 3 items" -->
                     <ul class="nav-links">
+                        <!-- aria-current="page" marks the page you're on -->
                         <li><a href="index.html" aria-current="page">Directory</a></li>
                         <li><a href="onboarding.html">Onboarding</a></li>
                         <li><a href="#">Payroll</a></li>
@@ -25,6 +52,8 @@
                 </nav>
             </header>
 
+            <!-- <aside> = content related to, but separate from, the main
+                 content -->
             <aside class="sidebar">
                 <nav aria-label="Sections">
                     <a href="#">Overview</a>
@@ -34,39 +63,71 @@
                 </nav>
             </aside>
 
+            <!-- <main> = THE main content. Only one per page. -->
             <main>
+                <!-- exactly one h1 per page; headings go in order
+                     (h1 → h2 → h3) without skipping levels -->
                 <h1>Employee Directory</h1>
                 <p>All the employees at ACME.</p>
 
+                <!-- aria-labelledby="team-heading" names this section using
+                     the text of the element with id="team-heading". The
+                     two values must match exactly. -->
                 <section aria-labelledby="team-heading">
                     <h2 id="team-heading">Team</h2>
                     <!-- search & filters -->
+                    <!-- .toolbar is a flex row (styles.css) -->
                     <div class="toolbar">
+                        <!-- The label is hidden visually but still read by
+                             screen readers (.visually-hidden). for="search"
+                             links it to id="search". A placeholder is NOT
+                             a label: it disappears when you type. -->
                         <label for="search" class="visually-hidden">Search Employees</label>
+                        <!-- type="search" gives a clear (×) button and a
+                             "search" keyboard on phones -->
                         <input type="search" id="search" placeholder="Search by name or role...">
+                        <!-- Only the "All" option is written here. index.js
+                             adds one <option> per department from the data.
+                             value="All" matches state.dept === 'All'. -->
                         <select id="dept" aria-label="Filter by department">
                             <option value="All">All Departments</option>
                         </select>
+                        <!-- type="button": a plain button. (A <button> inside a
+                             form defaults to type="submit".) -->
                         <button type="button" class="btn btn--primary">Add Employee</button>
+                        <!-- aria-live="polite": screen readers announce changes
+                             to this text ("3 of 8 people") when they're
+                             idle, without moving focus -->
                         <p id="result-count" aria-live="polite"></p>
                     </div>
 
                     <!-- employee cards -->
+                    <!-- the values ("name", "newest") are what state.sort
+                         gets set to -->
                     <select id="sort" aria-label="Sort by">
                         <option value="name">Name A-Z</option>
                         <option value="newest">Newest Hire</option>
                     </select>
+                    <!-- Leave EMPTY: render() replaces everything inside it
+                         on every update, so anything written here would be
+                         deleted. -->
                     <div class="card-list"></div>
                 </section>
 
                 <!-- employee bars -->
+                <!-- Day 4 exercise: the flexbox "employee row" component.
+                     BEM class names: employee-row = block,
+                     employee-row__name = an element (part) of it. -->
                 <div class="employee-row">
+                    <!-- alt="" = decorative: the name is right next to it -->
                     <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
                     <div class="employee-row__info">
                         <p class="employee-row__name">Priya Shah</p>
                         <p class="employee-row__title">Senior Engineer</p>
                     </div>
                     <span class="badge badge--active">Active</span>
+                    <!-- aria-label gives the icon-only button a real name;
+                         otherwise it's read as "horizontal ellipsis" -->
                     <button type="button" class="btn" aria-label="More actions for Priya Shah">⋯</button>
                 </div>
 
@@ -75,22 +136,45 @@
                 <section aria-labelledby="payroll-heading">
                     <h2 id="payroll-heading">Payroll</h2>
                     <table class="data-table">
+                        <!-- <caption> = the table's title, read by screen
+                             readers when they enter the table -->
                         <caption>October 2026 pay run</caption>
+                        <!-- <thead> = header rows, stays hard-coded -->
                         <thead>
                             <tr>
+                                <!-- <th scope="col"> = header cell for its
+                                     COLUMN.
+                                     data-key = which employee property
+                                     this column sorts by (read in JS as
+                                     th.dataset.key).
+                                     The <button> makes it keyboard-
+                                     clickable (Tab + Enter).
+                                     index.js adds aria-sort to the sorted
+                                     <th>, and CSS draws ▲/▼ from it. -->
                                 <th scope="col" data-key="name"><button type="button">Name</button></th>
                                 <th scope="col" data-key="dept"><button type="button">Department</button></th>
                                 <th scope="col" data-key="status"><button type="button">Status</button></th>
+                                <!-- class="num" right-aligns the header
+                                     above the right-aligned numbers -->
                                 <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
                             </tr>
                         </thead>
 
+                        <!-- <tbody> = data rows. Empty on purpose: render()
+                             fills it from state.employees. -->
                         <tbody></tbody>
                     </table>
 
+                    <!-- aria-pressed="false" makes this a TOGGLE button for
+                         screen readers. JS flips it to "true" when on. -->
                     <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>
                     <p id="selected-count">Selected: 0</p>
 
+                    <!-- Progress bar: the outer div is the grey track, the
+                         inner div is the purple fill whose width comes
+                         from the --progress CSS variable set by JS.
+                         Optional a11y upgrade: role="progressbar" +
+                         aria-label + aria-valuenow on the outer div. -->
                     <div class="progress">
                         <div class="progress__fill"></div>
                     </div>
@@ -98,7 +182,11 @@
 
                 <aside class="upcoming-birthdays">
                     <h2 id="birthdays-heading">Upcoming Birthdays</h2>
+                    <!-- Tip: aria-labelledby usually goes on the landmark
+                         (the <aside>), like the <section>s above. -->
                     <ul aria-labelledby="birthdays-heading">
+                        <!-- <time datetime="..."> = a machine-readable date
+                             (YYYY-MM-DD) behind the human-friendly text -->
                         <li><time datetime="2026-10-20">Oct 20</time> Ben Reilly</li>
                         <li><time datetime="2026-11-15">Nov 15</time> Haley Stardew</li>
                         <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
@@ -106,7 +194,9 @@
                 </aside>
             </main>
         </div>
-        
+
+        <!-- <footer> = landmark for the site footer. It's outside .app, so
+             it sits below the whole grid. &copy; is the HTML entity for ©. -->
         <footer class="site-footer">
             <p>&copy; 2026 ACME, Inc.</p>
         </footer>

@@ -1,14 +1,21 @@
 <!DOCTYPE html>     <!-- tells the browser: modern HTML -->
 <html lang="en">    <!-- language, for screen readers -->
     <head>          <!-- info ABOUT the page, not shown -->
+        <!-- ============================================================
+             onboarding.html: the New Hire Onboarding form page
+             The behaviour (validation, counter, list) is in
+             onboarding.js.
+             ============================================================ -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
 
         <!-- CSS -->
         <link rel="stylesheet" href="styles.css">
-        
+
         <!-- JavaScript -->
+        <!-- defer = run after the HTML is parsed, in this order.
+             A <script> with src="" ignores any code between its tags. -->
         <script src="app.js" defer></script>
         <script src="onboarding.js" defer></script>
     </head>
@@ -17,6 +24,8 @@
             <a href="index.html" class="logo">People</a>
             <nav aria-label="Main">
                 <ul class="nav-links">
+                    <!-- NOTE: aria-current="page" should be on the
+                         Onboarding link on THIS page, not Directory. -->
                     <li><a href="index.html" aria-current="page">Directory</a></li>
                     <li><a href="onboarding.html">Onboarding</a></li>
                     <li><a href="#">Payroll</a></li>
@@ -33,19 +42,39 @@
                 <!-- GET: default; appends data to the URL -->
                 <!-- POST: sends data in the request body -->
                 <!-- DIALOG: opens a dialog box for user input -->
+            <!-- class="form" is how onboarding.js finds it:
+                 document.querySelector('.form') -->
             <form class="form" action="#" method="post">
+                <!-- <fieldset> groups related fields; its <legend> is the
+                     group's title, read before each field inside it -->
                 <fieldset>
                     <legend>Personal Details</legend>
+                    <!-- Every field follows the same pattern:
+                           <label for="X"> ↔ <input id="X">  links the label
+                             (clicking the label focuses the input, and
+                             screen readers read the label)
+                           name="..."  is the key FormData uses:
+                             data.get('fullName')
+                           required    makes the browser block submit until
+                             it's filled in
+                           type="..."  picks the right control/keyboard and
+                             adds built-in validation (email, number...) -->
                     <div class="field">
                         <label for="profile">Profile Picture</label>
+                        <!-- accept="image/*" = only offer image files -->
                         <input id="profile" name ="profile" type="file" accept="image/*" required/>
                     </div>
 
                     <div class="field">
                         <label for="full-name">Full Name</label>
+                        <!-- autocomplete="name" lets the browser offer the
+                             user's saved name -->
                         <input id="full-name" name ="fullName" type="text" required autocomplete="name"/>
                     </div>
 
+                    <!-- NOTE: autocomplete takes TOKENS like "email" or
+                         "tel", not example values. The examples you wrote
+                         here belong in placeholder="...". -->
                     <div class="field">
                         <label for="email">Work Email</label>
                         <input id="email" name ="email" type="email" required autocomplete="you@acme.com"/>
@@ -58,16 +87,31 @@
 
                     <div class="field">
                         <label for="start">Start Date</label>
+                        <!-- type="date" shows a date picker; its value is
+                             always "YYYY-MM-DD" -->
                         <input id="start" name ="startDate" type="date" required/>
                     </div>
 
                     <div class="field">
                         <label for="salary">Salary</label>
-                        <input id="salary" name ="salary" type="number" 
+                        <!-- min / max / step = allowed range and increments.
+                             The browser blocks submit if the value is
+                             outside them (e.g. 30500 isn't a step of 1000). -->
+                        <input id="salary" name ="salary" type="number"
                             min="30000" max="500000" step="1000"
                             required autocomplete="off"/>
                     </div>
-                
+
+                    <!-- Radio buttons: the same name="type" makes them ONE
+                         group (only one can be picked). value = what gets
+                         submitted. checked = the default choice.
+                         Wrapping the input inside its <label> links them
+                         without needing for/id.
+                         NOTE: a group of radios should be named by a
+                         <fieldset> + <legend>, not a <label> (a label
+                         without for="" isn't linked to anything). Move
+                         "Employment Type" into a <legend> inside the
+                         radio-group fieldset. -->
                     <div class="field">
                         <label>Employment Type</label>
                         <fieldset class="radio-group">
@@ -76,7 +120,11 @@
                             <label><input type="radio" name="type" value="contractor" /> Contractor</label>
                         </fieldset>
                     </div>
-                    
+
+                    <!-- maxlength stops typing at 200 characters.
+                         aria-describedby="notes-count" makes screen readers
+                         read the counter along with the field. It must
+                         match the counter's id exactly. -->
                     <div class="field">
                         <label for="notes">Anything we should know?</label>
                         <textarea id="notes" name="notes" rows="4" maxlength="200" aria-describedby="notes-count"></textarea>
@@ -88,12 +136,24 @@
                     </label>
                 </fieldset>
 
+                <!-- Starts disabled. onboarding.js enables it when "I agree"
+                     is checked. -->
                 <button id="submit-btn" type="submit" class="btn btn--primary" disabled>Submit</button>
+                <!-- type="reset" clears the whole form.
+                     NOTE: id="reset" REPLACES the form's built-in
+                     form.reset() method (any control's id/name becomes a
+                     property of its form), which breaks form.reset() in
+                     onboarding.js. Rename it, e.g. id="clear-btn". -->
                 <button id="reset" type="reset" class="btn">Clear</button>
             </form>
 
+            <!-- role="status": screen readers announce new messages here
+                 ("Added Priya.") without moving focus -->
             <p id="status" role="status"></p>
             <h2>Added this session</h2>
+            <!-- filled in by onboarding.js on each successful submit -->
             <ul id="new-hires"></ul>
         </main>
     </body>
+<!-- NOTE: the closing </html> tag is missing. Browsers forgive it, but
+     add it for completeness. -->
