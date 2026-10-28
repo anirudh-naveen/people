@@ -1,22 +1,94 @@
-<!-- ====================================================================
-     live.html: Directory (live), loading people from an API (Day 7)
-     ====================================================================
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- ============================================================
+             live.html: Directory (live), loading people from an API
+             (Day 7)
+             ============================================================
+             Everything inside the list is created by live.js from the
+             randomuser.me API. This page practises the exact shape of the
+             reported Rippling task: fetch data → render it → handle
+             loading/error/empty → handle MORE data (Load more, infinite
+             scroll, or numbered pages).
+             ! fetch() doesn't work from a file:// page. Open this through
+             ! a local server (Live Server, or python3 -m http.server).
+             ============================================================ -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>People · Live directory</title>
+        <link rel="stylesheet" href="styles.css">
 
-     TODO · Day 7, Afternoon: BUILD THE PAGE
-     · - The usual skeleton and <head> (charset, viewport, title,
-     ·   styles.css), with live.js loaded so it runs after the HTML is
-     ·   parsed.
-     · - The same site header as the other pages. Add a "Live" link to
-     ·   the nav here and on the other pages.
-     · - Inside <main>:
-     ·     a "Directory" heading
-     ·     a list with id="people" that uses the card-list layout
-     ·     a status paragraph with id="status" that screen readers
-     ·       announce
-     ·     a "Load more" button with id="more"
-     ·     an empty element with id="sentinel" at the very bottom, hidden
-     ·       from screen readers (used for infinite scroll)
+        <!-- Apply a saved theme before the page is drawn (see index.html). -->
+        <script>
+            try {
+                const saved = localStorage.getItem('theme');
+                if (saved) document.documentElement.dataset.theme = saved;
+            } catch (err) {}
+        </script>
 
-     TODO · Day 7, Exercise 1: a search box above the list.
-     TODO · Day 7, Exercise 3: Prev / page numbers / Next controls.
-     ==================================================================== -->
+        <script src="site.js" defer></script>
+        <script src="live.js" defer></script>
+    </head>
+    <body>
+        <header class="site-header">
+            <a href="index.html" class="logo">People</a>
+            <nav aria-label="Main">
+                <ul class="nav-links" id="main-nav">
+                    <li><a href="index.html">Directory</a></li>
+                    <li><a href="onboarding.html">Onboarding</a></li>
+                    <li><a href="live.html" aria-current="page">Live</a></li>
+                    <li><a href="index.html#payroll-heading">Payroll</a></li>
+                    <li><a href="notes.html">Notes</a></li>
+                </ul>
+            </nav>
+            <button type="button" id="theme" class="icon-btn"
+                    aria-label="Dark mode" aria-pressed="false">
+                <span aria-hidden="true">◐</span>
+            </button>
+            <button type="button" class="icon-btn nav-toggle"
+                    aria-label="Menu" aria-expanded="false" aria-controls="main-nav">
+                <span aria-hidden="true">☰</span>
+            </button>
+        </header>
+
+        <main>
+            <h1>Directory (live)</h1>
+            <p>People loaded from the randomuser.me API, 12 at a time.</p>
+
+            <!-- Controls: search the people already loaded (Exercise 1,
+                 debounced), and choose how more people load. -->
+            <div class="toolbar">
+                <label for="live-search" class="visually-hidden">Search loaded people</label>
+                <input type="search" id="live-search" placeholder="Search loaded people by name…">
+
+                <label for="mode" class="visually-hidden">How to load more</label>
+                <select id="mode">
+                    <option value="scroll">Load more + infinite scroll</option>
+                    <option value="pages">Numbered pages</option>
+                </select>
+            </div>
+
+            <!-- The list: empty here; live.js fills it with cards (or
+                 skeleton placeholders while the first page loads).
+                 .card-list gives it the same responsive grid as the
+                 directory. aria-busy is set to "true" while loading. -->
+            <ul id="people" class="card-list" aria-busy="false"></ul>
+
+            <div class="load-footer">
+                <!-- role="status": screen readers announce "Loading…" and
+                     error messages without moving focus. -->
+                <p id="status" role="status"></p>
+                <!-- "Load more" mode. Turns into "Retry" after an error. -->
+                <button id="more" type="button" class="btn">Load more</button>
+                <!-- "Numbered pages" mode (Exercise 3). live.js fills it
+                     with Prev / 1 2 3 4 5 / Next buttons. -->
+                <nav id="pager" class="pager" aria-label="Pages" hidden></nav>
+            </div>
+
+            <!-- The infinite-scroll tripwire: an empty element at the very
+                 bottom. When it scrolls into view, live.js loads the next
+                 page. Hidden from screen readers because it's not content. -->
+            <div id="sentinel" aria-hidden="true"></div>
+        </main>
+    </body>
+</html>

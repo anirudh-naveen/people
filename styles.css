@@ -1,6 +1,19 @@
 /* =====================================================================
-   styles.css: shared styles for index.html and onboarding.html
+   styles.css: shared styles for every page (index, onboarding, live)
    =====================================================================
+
+   How this file is organised (top to bottom):
+     1. Design tokens (colours, spacing...) + dark mode
+     2. Reset and base styles
+     3. App layout (CSS grid, mobile-first)
+     4. Site header, nav, hamburger, theme button
+     5. Sidebar
+     6. Dashboard pieces: stats, toolbar, buttons, cards, employee row,
+        dropdown menu, payroll table, progress bar
+     7. Forms
+     8. Modal, toast, tabs, accordion
+     9. Loading states (spinner, skeletons, pager) for live.html
+    10. Footer and utilities
 
    > Quick reminders:
    > - A rule = SELECTOR { property: value; }
@@ -23,215 +36,608 @@
    ===================================================================== */
 
 
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Step 1: DESIGN TOKENS
-   · Define the colours, border radius, spacing scale and shadow as custom
-   · properties on :root, here at the very top. Then replace the matching
-   · hard-coded values throughout this file with var(...).
+/* =====================================================================
+   1. DESIGN TOKENS (Day 6, Step 1)
+   =====================================================================
+   Every colour, radius, spacing step and shadow is defined ONCE here as
+   a custom property (a CSS variable), then used everywhere with var().
+   Why: change a value in one place and the whole site follows, and dark
+   mode only has to redefine these variables (see below).
+
+   > Custom properties start with -- and are read with var(--name).
+   > var(--name, fallback) uses the fallback if the variable is missing.
+   > They're LIVE at runtime (unlike Sass variables, which compile away),
+   > so a media query or JavaScript can change them and every rule that
+   > reads them updates instantly.
+   > Name tokens by ROLE (--color-border), not by look (--light-grey):
+   > in dark mode the border isn't light grey any more.
    --------------------------------------------------------------------- */
+:root {
+    /* surfaces and text */
+    --color-bg: #f6f7fb;            /* page background */
+    --color-surface: #ffffff;       /* cards, header, table, modal */
+    --color-surface-alt: #fafbfd;   /* zebra stripes */
+    --color-text: #1f2333;
+    --color-text-soft: #3a3f55;     /* nav links */
+    --color-muted: #6b7085;         /* secondary text, labels */
+    --color-border: #e3e5ee;
+    --color-border-strong: #c9ccd8; /* inputs and plain buttons */
 
+    /* brand and states */
+    --color-brand: #6b2fb3;
+    --color-brand-soft: #f1ecfa;    /* hovers, current page */
+    --color-selected: #e9ddfb;      /* selected table rows */
+    --color-success: #22a35a;       /* "online" dot */
+    --color-danger: #d93025;        /* validation errors */
+
+    /* status badges: background + text colour for each status */
+    --badge-active-bg: #e3f6ea;     --badge-active-fg: #1b7a3d;
+    --badge-leave-bg: #fff4d6;      --badge-leave-fg: #8a5a00;
+    --badge-terminated-bg: #fde7e7; --badge-terminated-fg: #a32020;
+
+    /* shape, spacing, depth */
+    --radius: 12px;
+    --radius-sm: 8px;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-5: 2rem;
+    --shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 20px 50px rgb(0 0 0 / 0.25);
+
+    /* layout */
+    --header-h: 64px;               /* used by the sticky table header */
+}
 
 /* ---------------------------------------------------------------------
-   TODO · Day 6, Step 2: DARK MODE
-   · Redefine the colour tokens for users whose system is set to dark
-   · mode. Every rule that uses the tokens should flip with no other
-   · changes.
+   DARK MODE (Day 6, Step 2 + JS track 6)
+   The same tokens, with dark values. No other rule in this file changes:
+   they all read the variables, so they all flip automatically.
+
+   Two ways to get dark mode:
+     a) The user chose it with the theme button → <html data-theme="dark">
+     b) The operating system is set to dark AND the user hasn't chosen
+        light → @media (prefers-color-scheme: dark) + :not([data-theme=light])
+   > The :not([data-theme="light"]) part is what lets a manual "light"
+   > choice beat a dark OS setting.
+   ! The dark values have to be written twice (once per selector): a media
+   ! query can't be combined with an attribute selector into one rule
+   ! without a preprocessor. Keep the two blocks in sync.
    --------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+    --color-bg: #12131a;
+    --color-surface: #1c1e28;
+    --color-surface-alt: #20222d;
+    --color-text: #e8e9f0;
+    --color-text-soft: #c9cbd8;
+    --color-muted: #9a9fb5;
+    --color-border: #2c2f3d;
+    --color-border-strong: #3a3e50;
+    --color-brand: #b48ef0;         /* lighter purple keeps contrast on dark */
+    --color-brand-soft: #2a2140;
+    --color-selected: #3a2a5c;
+    --badge-active-bg: #163a26;     --badge-active-fg: #7fdca4;
+    --badge-leave-bg: #3d3010;      --badge-leave-fg: #f2c46b;
+    --badge-terminated-bg: #3d1a1a; --badge-terminated-fg: #f19a9a;
+    --shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 20px 50px rgb(0 0 0 / 0.6);
+    /* tells the browser to draw form controls and scrollbars dark too */
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-bg: #12131a;
+        --color-surface: #1c1e28;
+        --color-surface-alt: #20222d;
+        --color-text: #e8e9f0;
+        --color-text-soft: #c9cbd8;
+        --color-muted: #9a9fb5;
+        --color-border: #2c2f3d;
+        --color-border-strong: #3a3e50;
+        --color-brand: #b48ef0;
+        --color-brand-soft: #2a2140;
+        --color-selected: #3a2a5c;
+        --badge-active-bg: #163a26;     --badge-active-fg: #7fdca4;
+        --badge-leave-bg: #3d3010;      --badge-leave-fg: #f2c46b;
+        --badge-terminated-bg: #3d1a1a; --badge-terminated-fg: #f19a9a;
+        --shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+        --shadow-lg: 0 20px 50px rgb(0 0 0 / 0.6);
+        color-scheme: dark;
+    }
+}
 
 
-/* ---------------------------------------------------------------------
-   TODO · JS track 6: MANUAL THEME OVERRIDE
-   · Dark colour tokens that apply when <html data-theme="dark">.
-   · Choosing "light" must also win over a dark system setting.
-   --------------------------------------------------------------------- */
-
-
-/* ---------------------------------------------------------------------
-   RESET: box-sizing for every element
+/* =====================================================================
+   2. RESET AND BASE
+   =====================================================================
    > `*` = every element; *::before / *::after = their generated content.
-   > Example: width: 300px; padding: 20px; border: 2px
+   > box-sizing example: width: 300px; padding: 20px; border: 2px
    >   content-box (browser default) → 300 + 40 + 4 = 344px wide
    >   border-box                    → 300px wide (content shrinks to 256)
    --------------------------------------------------------------------- */
 *,
 *::before,
 *::after {
-    /* With border-box, width includes padding and border */
-    /* Without border-box, width adds to padding and border */
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-/*
-   > display: flex is 1d while display: grid is 2d */
-/*
-   > (flex = items in ONE direction, a row OR a column;
-   > grid = rows AND columns at the same time) */
-
-
-/* Main Styles */
-/* ---------------------------------------------------------------------
-   BODY: page-wide defaults. Text properties like font-family, color and
-   line-height are INHERITED by everything inside, so we set them once.
-   --------------------------------------------------------------------- */
+/* Text properties (font, colour, line-height) are INHERITED by everything
+   inside body, so they're set once here. */
 body {
-    /* browsers add 8px of margin around the page by default */
-    margin: 0;
-    /* a "font stack": use the first one available on this device */
+    margin: 0;                  /* browsers add 8px by default */
+    /* a "font stack": the first font available on this device is used */
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 1rem;
-    /* unitless line-height = 1.5 × the font size */
-    line-height: 1.5;
-    color: #1f2333;
-    background:#f6f7fb;
+    line-height: 1.5;           /* unitless = 1.5 × the font size */
+    color: var(--color-text);
+    background: var(--color-bg);
 }
 
-/*
-   > margin shorthand with 3 values = top | left & right | bottom.
-   > Top margin 0 removes the browser's default space above headings. */
+/* margin shorthand with 3 values = top | left & right | bottom.
+   Top margin 0 removes the browser's default space above headings. */
 h1, h2, h3 {
     line-height: 1.2;
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--space-2);
 }
 
-/* Put space back above h2s only. This works because it comes AFTER the
-   rule above (same specificity → later wins). Bigger space above than
-   below groups each heading with its own content (proximity). */
+/* Space back above h2s only. Works because it comes AFTER the rule above
+   (same specificity → later wins). More space above than below groups
+   each heading with its own content. */
 h2 {
-    margin-top: 2rem;
+    margin-top: var(--space-5);
 }
 
-/*
-   TODO · Day 6, Step 4: FLUID HEADING
-   · Make the h1's font size grow with the window width while staying
-   · between a minimum and a maximum, without a media query. */
+/* FLUID HEADING (Day 6, Step 4)
+   clamp(MIN, PREFERRED, MAX): the preferred size 1rem + 2vw grows with the
+   window width (2vw = 2% of it); clamp keeps it between 1.5rem and
+   2.25rem. The rem part means it still follows the user's font setting. */
+h1 {
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.25rem);
+}
 
-/* Images are inline by default (they sit on the text baseline and leave
-   a small gap underneath). display: block removes that gap. */
+/* Images are inline by default and leave a small gap under them (they sit
+   on the text baseline). display: block removes the gap; max-width stops
+   them overflowing their container. */
 img {
-    max-width: 100%;    /* images never overflow their container */
+    max-width: 100%;
     display: block;
 }
 
 a {
-    color: #6b2fb3;
+    color: var(--color-brand);
 }
 
-/* Centre the main content and cap its width for readability. */
+/* ONE visible keyboard-focus style for everything focusable (Day 6,
+   Step 5). :focus-visible only matches KEYBOARD focus, so mouse clicks
+   don't draw rings but keyboard users always see where they are.
+   ! Never remove focus outlines without putting something back. */
+:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+}
+
+/* Users who asked their OS to reduce motion get no animations.
+   > This is the one place !important is genuinely right: an accessibility
+   > override that must beat every other rule. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Centre the main content and cap its width for readability.
+   (Pages with the .app grid undo this below.) */
 main {
     max-width: 1100px;
-    margin: 0 auto; /* auto left/right margins = centered */
-    /* 2rem (32px) top & bottom, 1rem (16px) left & right */
-    padding: 2rem 1rem;
+    margin: 0 auto;             /* auto left/right = centred */
+    padding: var(--space-5) var(--space-3);
 }
 
-/* App Styles */
-/* ---------------------------------------------------------------------
-   PAGE LAYOUT with CSS GRID (Day 5)
-   .app wraps header + sidebar + main in index.html.
-     grid-template-columns: 220px 1fr → a fixed 220px sidebar column,
-       and 1fr = "one fraction of the leftover space" for main.
-     grid-template-rows: 64px 1fr → header row, then the rest.
-     grid-template-areas draws the layout with names; each child is
-       placed with grid-area: <name>.
-     min-height: 100vh → at least the full height of the window
-       (vh = 1% of the viewport height).
+
+/* =====================================================================
+   3. APP LAYOUT: CSS GRID, MOBILE-FIRST (Day 5 Step 1, Day 6 Step 3 +
+      Challenge 1)
+   =====================================================================
+   MOBILE-FIRST: the base rule below is the PHONE layout (one column, no
+   sidebar). The media query further down ADDS the sidebar column when
+   there's room. Writing it this way round is usually shorter than
+   undoing a desktop layout, and it's the answer interviewers expect to
+   "how do you approach responsive design?".
+
+   grid-template-areas draws the layout as a picture: each quoted string
+   is a row, each word a cell. Children claim a cell with grid-area.
    --------------------------------------------------------------------- */
 .app {
     display: grid;
-    grid-template-columns: 220px 1fr;
-    grid-template-rows: 64px 1fr;
+    grid-template-columns: 1fr;                 /* one full-width column */
+    grid-template-rows: var(--header-h) 1fr;    /* header row, then the rest */
     grid-template-areas:
-        "header  header"
-        "sidebar main";
-    min-height: 100vh;
+        "header"
+        "main";
+    min-height: 100vh;                          /* at least the window height */
+}
+
+.site-header { grid-area: header; }
+.sidebar     { grid-area: sidebar; }
+/* Inside the grid, main fills its cell, so undo the centring from the
+   main rule above. (.app main is more specific than main, so it wins.) */
+.app main    { grid-area: main; max-width: none; margin: 0; min-width: 0; }
+
+/* From 769px up: a fixed 220px sidebar column + the rest for main.
+   1fr = "one fraction of the leftover space". "header header" makes the
+   header span both columns. */
+@media (min-width: 769px) {
+    .app {
+        grid-template-columns: 220px 1fr;
+        grid-template-areas:
+            "header  header"
+            "sidebar main";
+    }
 }
 
 
-.site-header {grid-area: header;}
-.sidebar {grid-area: sidebar;}
-/* Inside the grid, main should fill its cell, so undo the centring and
-   max-width from the main rule above. (.app main is more specific than
-   main, so it wins.) */
-.app main { grid-area: main; max-width: none; margin: 0; }
+/* =====================================================================
+   4. SITE HEADER, NAV, HAMBURGER, THEME BUTTON
+   ===================================================================== */
 
-.sidebar {
-    background: #fff;
-    border-right: 1px solid #e3e5ee;
-    padding: 1rem 0.75rem;
-}
-
-/* Stack the sidebar links vertically with flexbox. */
-.sidebar nav {
+/* The top bar: logo on the left, nav and buttons on the right.
+   position: sticky → scrolls normally until it reaches top: 0, then it
+   stays there (Day 5, Step 3). Unlike fixed, it keeps its space in the
+   layout. z-index keeps it above cards scrolling underneath it.
+   > Sticky also counts as "positioned", so the mobile nav panel below
+   > (position: absolute) is placed against the header. */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;            /* vertically centre everything */
+    gap: var(--space-2);
+    height: var(--header-h);
+    padding: 0 var(--space-4);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
 }
 
-.sidebar a {
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    color: #3a3f55;
-    /* remove the underline */
+.logo {
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--color-brand);
+    text-decoration: none;
+    margin-right: auto;             /* pushes everything else to the right */
+}
+
+/* A <ul> styled as a row of links. Lists have bullets, margin and
+   padding by default, so all three are removed. */
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--space-1);
+}
+
+/* display: block makes the whole padded area clickable, not just the text. */
+.nav-links a {
+    display: block;
+    padding: var(--space-2) 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-soft);
     text-decoration: none;
 }
 
-/* Highlight the current page's link. aria-current="page" tells screen
-   readers which link is the current page, and CSS reuses it as a hook. */
+.nav-links a:hover {
+    background: var(--color-brand-soft);
+}
+
+/* aria-current="page" marks the current page for screen readers, and
+   CSS reuses the same attribute as the styling hook (no "active" class). */
+.nav-links a[aria-current="page"] {
+    color: var(--color-brand);
+    font-weight: 600;
+}
+
+/* Small square icon buttons in the header (theme + hamburger). */
+.icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font: inherit;
+    font-size: 1.1rem;
+    color: var(--color-text-soft);
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--color-brand-soft);
+}
+
+/* The theme button is a toggle: aria-pressed="true" when dark is on. */
+.icon-btn[aria-pressed="true"] {
+    color: var(--color-brand);
+    border-color: var(--color-brand);
+}
+
+/* MOBILE (base): nav links are hidden behind the hamburger (Day 6,
+   Challenge 2). When JS adds .nav-open to the header, the links drop down
+   as a full-width panel just below the header. */
+.nav-links {
+    display: none;
+}
+
+.site-header.nav-open .nav-links {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: var(--header-h);           /* directly under the header */
+    left: 0;
+    right: 0;
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow);
+}
+
+/* DESKTOP: links always visible in a row; the hamburger disappears. */
+@media (min-width: 769px) {
+    .nav-links,
+    .site-header.nav-open .nav-links {
+        display: flex;
+        flex-direction: row;
+        position: static;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        background: none;
+    }
+
+    .nav-toggle {
+        display: none;
+    }
+}
+
+
+/* =====================================================================
+   5. SIDEBAR
+   =====================================================================
+   Hidden on phones (no room). From 769px it fills the "sidebar" cell. */
+.sidebar {
+    display: none;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-3) 0.75rem;
+}
+
+@media (min-width: 769px) {
+    .sidebar {
+        display: block;
+    }
+}
+
+/* Grid for the page shell, flex for the links inside it: a column. */
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.sidebar a {
+    padding: var(--space-2) 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-soft);
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background: var(--color-brand-soft);
+}
+
 .sidebar a[aria-current="page"] {
-    background: #f1ecfa;
-    color: #6b2fb3;
+    background: var(--color-brand-soft);
+    color: var(--color-brand);
     font-weight: 600;
 }
 
 
+/* =====================================================================
+   6. DASHBOARD PIECES
+   ===================================================================== */
+
 /* ---------------------------------------------------------------------
-   TODO · Day 5, Step 2: STAT TILES
-   · The HTML is done. Lay out .stats as a grid that fits as many tiles
-   · per row as there's room for, with no media queries. Each .stat is a
-   · card with a small muted label above a large bold value.
-   · Challenge 1: make one tile span two columns.
+   STAT TILES (Day 5, Step 2)
+   repeat(auto-fit, minmax(180px, 1fr)) = "as many columns of at least
+   180px as fit, stretched to share the leftover space". 4 across on a
+   laptop, 2×2 on a tablet, 1 per row on a phone, no media queries.
+   > auto-fit vs auto-fill: with only a few items, auto-fill keeps empty
+   > column slots; auto-fit collapses them so the items stretch.
    --------------------------------------------------------------------- */
-/* Stats Styles */
-
 .stats {
-   display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-   gap: 1rem;
-   margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
 }
 
+/* Each tile is a small flex COLUMN: label stacked above the value. */
 .stat {
-   display: flex;
-   flex-direction: column;
-   padding: 1.25rem;
-   background: #fff;
-   border: 1px solid #e3e5ee;
-   border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
 }
 
-.stat__label {color: #6b7085; font-size: 0.875rem; }
-.stat__value {font-size: 2rem; font-weight: 700; }
+.stat__label { color: var(--color-muted); font-size: 0.875rem; }
+.stat__value { font-size: 2rem; font-weight: 700; }
+
+/* Day 5, Challenge 1: the first tile spans two columns, but only on wide
+   screens with room for 5 columns. On narrower screens the span would
+   push the last tile onto a lonely row of its own. */
+@media (min-width: 1200px) {
+    .stat--wide {
+        grid-column: span 2;
+    }
+}
 
 
-/* Card Styles */
+/* ---------------------------------------------------------------------
+   TOOLBAR: search + department + count in one row, sort + Add below
+   --------------------------------------------------------------------- */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;               /* lets items drop to a new line on phones */
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: var(--space-4);
+}
+
+/* flex: 1 1 260px → the search box grows to take the spare width, and
+   when there's less than ~260px it wraps onto its own row. */
+.toolbar input[type="search"] {
+    flex: 1 1 260px;
+}
+
+/* Selects in the toolbar size to their content instead of 100%. */
+.toolbar select {
+    width: auto;
+}
+
+/* margin-left: auto in a flex row = "push me as far right as possible".
+   nowrap stops "Add employee" breaking onto two lines. */
+.toolbar .btn--primary {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.toolbar #result-count {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+/* Phones: the search box takes a full row of its own (Day 6, Step 3).
+   flex-basis: 100% = "ask for the whole line". */
+@media (max-width: 768px) {
+    .toolbar input[type="search"] {
+        flex-basis: 100%;
+    }
+}
+
+
+/* ---------------------------------------------------------------------
+   BUTTONS + INTERACTION STATES (Day 6, Step 5)
+   Padding in em (not rem), so it scales with the button's own font size.
+   > Put `transition` on the normal state, not on :hover, so the change
+   > animates both in AND out.
+   --------------------------------------------------------------------- */
+.btn {
+    padding: 0.625em 1.25em;
+    font: inherit;                  /* buttons don't inherit fonts by default */
+    font-weight: 600;
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.btn:hover {
+    background: var(--color-brand-soft);
+}
+
+/* A tiny press-down while held. transform doesn't affect layout, so
+   nothing around the button moves. */
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn--primary {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    color: #fff;
+}
+
+/* color-mix: 15% black mixed into the brand colour = a darker hover shade
+   that follows the token, so it's right in dark mode too. */
+.btn--primary:hover {
+    background: color-mix(in srgb, var(--color-brand), black 15%);
+}
+
+/* The disabled look must win over the hover colour. */
+.btn--primary:disabled:hover {
+    background: var(--color-brand);
+}
+
+
 /* ---------------------------------------------------------------------
    EMPLOYEE CARDS (built by cardEl() in index.js)
    --------------------------------------------------------------------- */
-.card {
-    background: white;
-    border: 1px solid #e3e5ee;
-    border-radius: 12px;
-    padding: 1.5rem;
-    /* x-offset y-offset blur color. rgb(0 0 0 / 6%) = black at 6%
-       opacity (modern syntax: spaces, then / before the alpha) */
-    box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
-    text-align: center;
+
+/* CARD GRID (Day 5, Step 2): as many columns of at least 220px as fit.
+   > Grid vs Day 4's flex-wrap: with grid, a lone card on the last row
+   > stays the same width as the others; with flex-wrap it stretches to
+   > fill the whole row. */
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
+    /* also used as a <ul> on live.html, so remove list defaults */
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-/* auto left/right margins centre a block element horizontally */
-.card img {
-    border-radius: 50%; /* circle */
-    margin: 0;
+/* A card is a flex COLUMN (Day 4, Step 4): the email link gets
+   margin-top: auto, which pushes it to the bottom even when the text
+   above wraps, so links line up across a row. */
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;                  /* lets long text truncate (see below) */
+    padding: var(--space-4);
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    /* hover lift (Day 6, Step 5) */
+    transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+/* Day 5, Challenge 1: the featured employee spans the full row.
+   grid-column: 1 / -1 = from the first column line to the LAST one
+   (-1 counts from the end), however many columns there are. */
+.card--featured {
+    grid-column: 1 / -1;
+    border-color: var(--color-brand);
+    background: linear-gradient(var(--color-brand-soft), var(--color-surface));
+}
+
+.card h3 {
+    margin: 0 0 var(--space-1);
 }
 
 .card .role {
@@ -240,100 +646,85 @@ main {
 }
 
 .card .dept {
-    color: #6b7085;
+    color: var(--color-muted);
     font-size: 0.875rem;
     margin: 0 0 0.75rem;
 }
 
-.card-list {
-   display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-   gap: 1.5rem;
+/* LONG EMAILS (Day 6, Step 6). An email has no spaces, so the browser
+   can't wrap it and it would poke out of the card. These lines cap it at
+   the card's width, keep it on one line and cut it off with "…".
+   > All of nowrap + overflow: hidden + text-overflow are needed, and the
+   > card itself needs min-width: 0 (a grid/flex item otherwise refuses to
+   > shrink below its content, so nothing ever overflows). */
+.card__email {
+    max-width: 100%;
+    margin-top: auto;               /* pushed to the bottom of the card */
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
 }
 
-/*
-   TODO · Day 5, Step 4: STATUS DOT ON THE AVATAR
-   · A small green circle with a white ring, pinned to the bottom-right
-   · corner of each card's photo (uses the .avatar wrapper from cardEl()
-   · in index.js). Once it works, remove the positioning from .avatar,
-   · watch what happens, then put it back. */
-
+/* ---------------------------------------------------------------------
+   AVATAR + STATUS DOT (Day 5, Step 4): absolute inside relative.
+   .avatar is a wrapper exactly the photo's size (an <img> can't contain
+   other elements, so the dot can't go inside it).
+   ! Remove `position: relative` from .avatar and the dot "flies away":
+   ! an absolute element positions itself against the nearest ancestor
+   ! whose position isn't static, and without this one that's the page.
+   --------------------------------------------------------------------- */
 .avatar {
-   position: relative;     /* the anchor */
-   width: 120px;
-   margin: 0 auto 1rem;
+    position: relative;             /* the anchor for the dot */
+    width: 120px;
+    margin: 0 auto var(--space-3);  /* centring moved here from the img */
+}
+
+.avatar img {
+    border-radius: 50%;             /* a square image + 50% = a circle */
 }
 
 .avatar__status {
-   position: absolute;
-   right: 8px;
-   bottom: 8px;
-   width: 18px;
-   height: 18px;
-   border-radius: 50%;
-   background: #22a35a;
-   border: 3px solid #fff;
+    position: absolute;             /* taken out of flow, placed against .avatar */
+    right: 8px;
+    bottom: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--color-success);
+    border: 3px solid var(--color-surface);   /* the ring around the dot */
 }
 
- /* Row Styles */
-/* ---------------------------------------------------------------------
-   SORTABLE TABLE HEADERS (JS track 4)
-   Each <th> contains a <button> so keyboard users can Tab to it.
-   --------------------------------------------------------------------- */
-/* Make the buttons look like plain header text. */
-.data-table th button {
-    all: unset;        /* remove all default button styling */
-    cursor: pointer;
-}
-
-/* The arrows. JS sets aria-sort on the sorted <th>; CSS draws the arrow
-   from that attribute ("JS sets state, CSS owns the visuals").
-   ::after inserts content after the button's text. Screen readers
-   ignore it, which is fine because aria-sort already tells them. */
-.data-table th[aria-sort="ascending"] button::after {
-    content: " ▲";
-}
-
-.data-table th[aria-sort="descending"] button::after {
-    content: " ▼";
-}
-
-/* `all: unset` also removed the focus ring, so add one back.
-   :focus-visible = only for KEYBOARD focus, not mouse clicks. */
-.data-table th button:focus-visible {
-    outline: 1px solid #6b2fb3;
-    outline-offset: 2px;
+/* Shown when search/filter matches nobody. Spans every grid column. */
+.empty {
+    grid-column: 1 / -1;
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--color-muted);
 }
 
 
 /* ---------------------------------------------------------------------
-   EMPLOYEE ROW component (Day 4 exercise, flexbox)
+   EMPLOYEE ROW component (Day 4 challenge, flexbox)
    [avatar] [name / title ........ (grows)] [badge] [⋯]
    --------------------------------------------------------------------- */
 .employee-row {
     display: flex;
-    /* vertically centre all the items in the row */
-    align-items: center;
+    align-items: center;            /* vertically centre all the items */
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: white;
-    border: 1px solid #e3e5ee;
-    border-radius: 12px;
+    margin-top: var(--space-5);
+    padding: 0.75rem var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
 }
 
-/* Truncate long names with "…". All three lines are required. */
-.employee-row__name {
-    font-weight: 600;
-    white-space: nowrap;      /* keep it on one line, never wrap */
-    overflow: hidden;         /* hide whatever doesn't fit */
-    text-overflow: ellipsis;  /* show "…" where it was cut */
-}
-
-/* flex-shrink: 0 → never squash the avatar into an oval */
+/* flex-shrink: 0 → never squash the avatar into an oval. */
 .employee-row__avatar {
     width: 48px;
     height: 48px;
-    border-radius: 50%; /* circle */
+    border-radius: 50%;
     flex-shrink: 0;
 }
 
@@ -346,259 +737,720 @@ main {
     min-width: 0;
 }
 
+.employee-row__info p {
+    margin: 0;
+}
+
+/* Truncate long names with "…". All three lines are required. */
+.employee-row__name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.employee-row__title {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
 
 
-/* Table Styles */
+/* ---------------------------------------------------------------------
+   "⋯" DROPDOWN MENU (Day 5, Challenge 2)
+   The wrapper is the anchor (relative); the list is placed against it
+   (absolute). top: 100% = just below the wrapper's bottom edge;
+   right: 0 = lined up with its right edge. z-index lifts it above the
+   content that comes after it on the page.
+   --------------------------------------------------------------------- */
+.menu {
+    position: relative;
+}
+
+.menu__list {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    min-width: 140px;
+    margin: var(--space-1) 0 0;
+    padding: var(--space-1);
+    list-style: none;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
+.menu__list button {
+    display: block;
+    width: 100%;
+    padding: var(--space-2) 0.75rem;
+    font: inherit;
+    color: var(--color-text);
+    text-align: left;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.menu__list button:hover {
+    background: var(--color-brand-soft);
+}
+
+
 /* ---------------------------------------------------------------------
    PAYROLL TABLE
    --------------------------------------------------------------------- */
 .data-table {
     width: 100%;
-    border-collapse: collapse;   /* single borders between cells */
-    background: white;
+    border-collapse: collapse;      /* single lines between cells */
+    background: var(--color-surface);
 }
 
 .data-table caption {
     text-align: left;
-    padding: 0.5rem 0;
-    color: #6b7085;
+    padding: var(--space-2) 0;
+    color: var(--color-muted);
 }
 
 .data-table th,
 .data-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem var(--space-3);
     text-align: left;
-    border-bottom: 1px solid #e3e5ee;
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Small, uppercase, spaced-out header labels.
-   letter-spacing in em scales with the font size. */
+/* STICKY TABLE HEADER (Day 5, Step 3): header cells stick just below the
+   64px site header while you scroll through the rows.
+   ! Sticky needs a `top` value, or it never sticks.
+   ! It needs a background, or the rows show through it.
+   ! It sticks inside the nearest SCROLLING ancestor. That's why
+   !   .table-scroll only scrolls on small screens (see below): on desktop
+   !   there's no scrolling wrapper, so the header sticks to the page. */
 .data-table th {
     position: sticky;
+    top: var(--header-h);
+    z-index: 1;
+    background: var(--color-surface);
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #6b7085;
+    letter-spacing: 0.05em;         /* em, so it scales with the font size */
+    color: var(--color-muted);
 }
 
-/* :nth-child(even) → every 2nd row (zebra stripes) */
-.data-table tbody tr:nth-child(even) {background: #fafbfd; }
+/* Each header has a <button> (keyboard users can Tab to it). These rules
+   make the button look like plain header text. all: unset also removes
+   the focus ring, but the global :focus-visible rule puts it back. */
+.data-table th button {
+    all: unset;
+    cursor: pointer;
+}
 
-/* any body row with the label is-selected gets a purple background */
-.data-table tbody tr.is-selected { background: #e9ddfb; }
+/* The sort arrows. JS sets aria-sort on the sorted <th>; CSS draws the
+   arrow from that attribute ("JS sets state, CSS owns the visuals").
+   Screen readers ignore ::after content, which is fine: aria-sort already
+   tells them. */
+.data-table th[aria-sort="ascending"] button::after { content: " ▲"; }
+.data-table th[aria-sort="descending"] button::after { content: " ▼"; }
+
+/* Rows are clickable (selection), so show a pointer. */
+.data-table tbody tr {
+    cursor: pointer;
+}
+
+/* :nth-child(even) → every 2nd row (zebra stripes). */
+.data-table tbody tr:nth-child(even) { background: var(--color-surface-alt); }
+
+/* Hover, then selected AFTER it: same specificity, so the later rule wins
+   and a selected row keeps its purple even while hovered. */
+.data-table tbody tr:hover { background: var(--color-brand-soft); }
+.data-table tbody tr.is-selected { background: var(--color-selected); }
 
 /* Compact view: JS toggles class="compact" on <body>, and this
-   descendant selector shrinks the cell padding. */
-.compact .data-table td { padding: 0.25rem 1rem; }
+   descendant selector shrinks every cell's padding. */
+.compact .data-table td { padding: var(--space-1) var(--space-3); }
 
-/* This comes later than the is-selected rule with equal specificity, so
-   hovering a selected row shows the hover colour instead. */
-.data-table tbody tr:hover {background: #f1ecfa;}
-
-/* Numbers: right-aligned, and every digit the same width so columns of
-   numbers line up. Put this class on the CELL (<td>/<th>). */
+/* Numbers: right-aligned, and every digit the same width so amounts line
+   up. Goes on the CELL (<td>/<th>), not on anything inside it. */
 .num {
     text-align: right;
-    font-variant-numeric: tabular-nums;     /* digits line up */
+    font-variant-numeric: tabular-nums;
 }
+
+/* Status badges: small coloured pills (BEM: .badge = the block,
+   .badge--active = a variant). inline-block keeps it in the line of text
+   but makes padding count. 999px radius = fully round ends. */
+.badge {
+    display: inline-block;
+    padding: 0.125rem var(--space-2);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge--active     { background: var(--badge-active-bg);     color: var(--badge-active-fg); }
+.badge--on-leave   { background: var(--badge-leave-bg);      color: var(--badge-leave-fg); }
+.badge--terminated { background: var(--badge-terminated-bg); color: var(--badge-terminated-fg); }
+
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+.table-actions p {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+/* SMALL SCREENS (Day 6, Step 3): the table scrolls sideways inside its
+   wrapper instead of widening the whole page. (A table can't shrink
+   below its content.) */
+@media (max-width: 768px) {
+    .table-scroll {
+        overflow-x: auto;
+    }
+}
+
+/* TABLE AS CARDS ON PHONES (Day 6, Challenge 3)
+   Each row becomes a stacked block; each cell shows its column name
+   (from its data-label attribute) on the left and its value on the right.
+   attr(data-label) reads the attribute's text into `content`.
+   ! Changing a table's display can make some browsers (Safari) drop the
+   ! table semantics for screen readers. Real apps add ARIA roles back;
+   ! this is fine for practice. */
+@media (max-width: 640px) {
+    /* hide the header row visually (same technique as .visually-hidden) */
+    .data-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    /* The caption too: once the table is display: block, a caption left
+       as display: table-caption shrinks to the width of its longest word. */
+    .data-table,
+    .data-table caption,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table tr {
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        text-align: right;
+    }
+
+    .data-table td:last-child {
+        border-bottom: 0;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--color-muted);
+        text-align: left;
+    }
+}
+
 
 /* ---------------------------------------------------------------------
    PROGRESS BAR (JS track 3): a track with a fill inside it.
-   JS sets the CSS variable:  fill.style.setProperty('--progress', '40%')
+   JS sets the CSS variable: fill.style.setProperty('--progress', '40%')
+   var(--progress, 0%) reads it, with 0% as the fallback before it's set.
    --------------------------------------------------------------------- */
 .progress {
     height: 8px;
-    background: #e3e5ee;     /* the empty track */
-    /* a huge radius = fully rounded "pill" ends */
+    margin-top: var(--space-2);
+    background: var(--color-border);    /* the empty track */
     border-radius: 999px;
-    overflow: hidden;        /* keeps the fill inside the rounded corners */
+    overflow: hidden;                   /* keeps the fill inside the round ends */
 }
 
-/* var(--progress, 0%) reads the variable, with 0% as a fallback if it
-   isn't set yet. transition animates width changes over 0.2s. */
 .progress__fill {
     height: 100%;
-    width: var(--progress, 0%);   /* ← the key line */
-    background: #6b2fb3;
+    width: var(--progress, 0%);
+    background: var(--color-brand);
     transition: width 0.2s ease;
 }
 
 
-
-/* Badge, Form Field, and Button Styles */
-/* ---------------------------------------------------------------------
-   BADGES: small coloured status pills.
-   BEM naming: .badge = the block, .badge--active = a variant (modifier).
-   inline-block → sits in a line of text but accepts padding properly.
-   --------------------------------------------------------------------- */
-.badge {
-    display: inline-block;
-    padding: 0.125rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.badge--active { background: #e3f6ea; color: #1b7a3d; }
-.badge--leave { background: #fff4d6; color: #8a5a00; }
-
-/* ---------------------------------------------------------------------
-   FORMS (onboarding.html)
-   --------------------------------------------------------------------- */
+/* =====================================================================
+   7. FORMS (onboarding.html, the modal, the toolbar)
+   ===================================================================== */
 .field {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-3);
 }
 
 .field label {
-    display: block;     /* label sits on its own line above */
+    display: block;                     /* label on its own line above */
     font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-/* .form legend → every <legend> inside the form, including the nested
-   radio-group one. font-weight must be 1–1000 (600 = semi-bold).
-   Contrast check: light grey at 50% opacity on white is roughly 1.7:1,
-   below the WCAG minimum (4.5:1 for normal text, 3:1 for large). A solid
-   grey like #6b7085 passes. */
-.form legend {
-    color: rgb(146, 146, 146, 0.5);    /* add transparent */
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
 }
 
 /* Form controls don't inherit fonts from body by default, hence
-   font: inherit. width: 100% + border-box = exactly fills the field.
-   ! NOTE: tel, number, file and search inputs aren't in this list, so they
-   ! keep the browser's default look. */
+   font: inherit. width: 100% + border-box = exactly fills the field. */
 input[type="text"],
 input[type="email"],
+input[type="tel"],
+input[type="number"],
 input[type="date"],
+input[type="search"],
+input[type="file"],
 select,
 textarea {
     width: 100%;
     padding: 0.625rem 0.75rem;
-    font: inherit;      /* inputs don't inherit fonts by default! */
-    border: 1px solid #c9ccd8;
-    border-radius: 8px;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+}
+
+/* Show an error border only AFTER the user has interacted with the field
+   (Day 6, Step 5). :invalid would paint every empty required field red as
+   soon as the page loads. aria-invalid is set by our own JS checks. */
+input:user-invalid,
+input[aria-invalid="true"] {
+    border-color: var(--color-danger);
+}
+
+/* An inline error message under a field, linked to it with
+   aria-describedby so screen readers read it with the field. */
+.field__error {
+    margin: var(--space-1) 0 0;
+    color: var(--color-danger);
+    font-size: 0.875rem;
+}
+
+.field__hint {
+    margin: var(--space-1) 0 0;
+    color: var(--color-muted);
+    font-size: 0.875rem;
 }
 
 fieldset {
-    border: 1px solid #e3e5ee;
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    margin: 0 0 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-3) 1.25rem;
+    margin: 0 0 var(--space-4);
 }
 
-/* ---------------------------------------------------------------------
-   BUTTONS
-   Padding in em (not rem), so it scales with the button's own text size.
-   --------------------------------------------------------------------- */
-.btn {
-    padding: 0.625em 1.25em;
-    font: inherit;
+/* Legends: a solid muted grey. (The old 50%-transparent grey was about
+   1.7:1 contrast; WCAG asks for at least 4.5:1, or 3:1 for large text.) */
+.form legend {
+    color: var(--color-muted);
+    font-size: 1.25rem;
     font-weight: 600;
-    border: 1px solid #c9ccd8;
-    border-radius: 8px;
-    background: #fff;
+    padding: 0 var(--space-1);
+}
+
+/* The nested radio-group legend is a smaller label, not a section title. */
+.form .radio-group legend {
+    font-size: 1rem;
+    color: var(--color-text);
+}
+
+.radio-group label,
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+
+/* =====================================================================
+   8. MODAL, TOAST, TABS, ACCORDION
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   MODAL (Day 5, Step 5)
+   Two layers: the backdrop (dims the page, catches outside clicks) and
+   the white box inside it.
+   position: fixed + inset: 0 → pinned to all four window edges, so it
+   covers the whole screen and doesn't scroll away.
+   display: grid + place-items: center → the shortest way to centre the
+   box both ways. z-index 100 → above the sticky header (10).
+   --------------------------------------------------------------------- */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: var(--space-3);
+    background: rgb(15 18 35 / 0.5);
+}
+
+/* ! Any display value set in CSS (grid, above) beats the browser's
+   ! built-in [hidden] { display: none }, so it must be restated here, or
+   ! the modal would never hide. Interview favourite. */
+.modal-backdrop[hidden] {
+    display: none;
+}
+
+.modal {
+    width: 100%;                    /* full width on a phone... */
+    max-width: 440px;               /* ...capped on bigger screens */
+    background: var(--color-surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal__header {
+    display: flex;
+    justify-content: space-between; /* title left, × right */
+    align-items: center;
+    padding: var(--space-3) 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal__header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+.modal__close {
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    font-size: 1.5rem;
+    line-height: 1;
     cursor: pointer;
 }
 
-.btn--primary {
-    background: #6b2fb3;
-    border-color: #6b2fb3;
-    color: #fff;
+.modal__body {
+    padding: 1.25rem;
 }
 
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Step 5: INTERACTION STATES
-   · - Buttons: a hover colour, a slight press on :active, and a clearly
-   ·   unavailable look when disabled. Animate the changes smoothly.
-   · - One visible keyboard-focus style for everything focusable.
-   · - Cards lift slightly on hover.
-   · - Inputs show an error border only after the user has interacted.
-   · - Turn the motion off for users who prefer reduced motion.
-   --------------------------------------------------------------------- */
+.modal__actions {
+    display: flex;
+    justify-content: flex-end;      /* Cancel + Add on the right */
+    gap: var(--space-2);
+}
 
 
-/* Card Styles */
 /* ---------------------------------------------------------------------
-   CARD LAYOUT with FLEXBOX (Day 4)
-   This second .card rule ADDS to the first one further up. Both apply.
+   TOAST (Day 5 Challenge 3 + Day 7 morning challenge)
+   .toast-region is an always-present, empty live region fixed to the
+   bottom-right corner. JS adds a .toast inside it; screen readers
+   announce the new text because the REGION already existed.
+   ! A live region added at the same moment as its text often isn't
+   ! announced, which is why the region lives in the HTML from the start.
+
+   Entrance: @keyframes (runs once when the toast is created).
+   Exit: JS adds .is-leaving after 3s; the transition fades it out; JS
+   removes the element when the fade ends.
+   > transition vs animation: a transition animates between two states
+   > when something changes (a class, a hover). An animation runs on its
+   > own from keyframes, can loop and can have many steps.
    --------------------------------------------------------------------- */
-/* A column inside each card, so margin-top: auto can push the last item
-   to the bottom even when the text above wraps. */
-.card {
+.toast-region {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 200;                   /* above the modal too */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: min(320px, calc(100vw - 2rem));
+}
+
+.toast {
+    padding: 0.75rem var(--space-3);
+    color: var(--color-bg);         /* inverted colours stand out in both themes */
+    background: var(--color-text);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    animation: toast-in 200ms ease-out;
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.toast.is-leaving {
+    opacity: 0;
+    transform: translateY(0.5rem);
+}
+
+/* Only a "from" state: the browser animates from it to the element's
+   normal style (fully visible, in place). */
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+}
+
+
+/* ---------------------------------------------------------------------
+   TABS (JS track 5, Part 2)
+   CSS reads the ARIA state (aria-selected), so the underline can never
+   disagree with what screen readers announce.
+   --------------------------------------------------------------------- */
+[role="tablist"] {
+    display: flex;
+    gap: var(--space-1);
+    border-bottom: 1px solid var(--color-border);
+}
+
+[role="tab"] {
+    padding: var(--space-2) var(--space-3);
+    font: inherit;
+    color: var(--color-muted);
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;   /* reserves space for the underline */
+    margin-bottom: -1px;                    /* sits on top of the list's border */
+    cursor: pointer;
+}
+
+[role="tab"][aria-selected="true"] {
+    color: var(--color-brand);
+    border-bottom-color: var(--color-brand);
+    font-weight: 600;
+}
+
+[role="tabpanel"] {
+    padding: var(--space-3) 0;
+}
+
+/* Label/value pairs inside the panels: a description list laid out as a
+   two-column grid (labels sized to content, values take the rest). */
+.details-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+}
+
+.details-list dt { color: var(--color-muted); }
+.details-list dd { margin: 0; }
+
+
+/* ---------------------------------------------------------------------
+   ACCORDION / FAQ (JS track 5, Part 3)
+   Two versions on the page: native <details> (no JS) and our own buttons
+   with aria-expanded. Both get the same look.
+   --------------------------------------------------------------------- */
+/* Subheadings for the two versions: space above, so each version reads
+   as its own group. */
+.faq h3 {
+    margin-top: var(--space-4);
+    font-size: 1rem;
+    color: var(--color-muted);
+}
+
+.faq details,
+.accordion__item {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.faq summary,
+.accordion__trigger {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+/* Remove the browser's default triangle on <summary>... */
+.faq summary {
+    list-style: none;
+}
+
+.faq summary::-webkit-details-marker {
+    display: none;
+}
+
+/* ...and draw the same "+ / −" marker on both versions. The custom
+   version reads aria-expanded; <details> uses its [open] attribute. */
+.faq summary::after,
+.accordion__trigger::after {
+    content: "+";
+    color: var(--color-muted);
+}
+
+.faq details[open] summary::after,
+.accordion__trigger[aria-expanded="true"]::after {
+    content: "−";
+}
+
+.faq details p,
+.accordion__panel {
+    margin: 0 0 0.75rem;
+    color: var(--color-muted);
+}
+
+
+/* =====================================================================
+   9. LOADING STATES (live.html, Day 7)
+   ===================================================================== */
+
+/* SPINNER: a grey ring with one coloured side, rotating forever.
+   animation shorthand = name, duration, timing function, iteration count.
+   linear = constant speed (no easing at the ends). */
+.spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-brand);   /* the "arc" that spins */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+}
+
+/* Only a "to" state: rotate from wherever it is (0°) to a full turn. */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* SKELETON CARDS: grey placeholder shapes in the same place real cards
+   will appear, so the page doesn't jump when data arrives.
+   The gradient is grey → light → grey; background-size: 200% makes it
+   twice as wide as the shape, and the shimmer animation slides it across,
+   which moves the light band over the shape. */
+.skeleton {
+    pointer-events: none;
+}
+
+.skeleton__circle,
+.skeleton__line {
+    background: linear-gradient(90deg,
+        var(--color-border) 25%,
+        var(--color-surface-alt) 50%,
+        var(--color-border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    border-radius: 6px;
+}
+
+.skeleton__circle {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto var(--space-3);
+    border-radius: 50%;
+}
+
+.skeleton__line {
+    width: 80%;
+    height: 12px;
+    margin: 0 auto var(--space-2);
+}
+
+.skeleton__line--short {
+    width: 50%;
+}
+
+@keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+}
+
+/* Live page photos are smaller than the directory's. */
+.card--compact img {
+    width: 72px;
+    height: 72px;
+    margin-bottom: var(--space-3);
+    border-radius: 50%;
+}
+
+/* Status line + Load more button, centred under the grid. */
+.load-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
 }
 
-.card a {
-    margin-top: auto; /* pushes link to the bottom */
+.load-footer p {
+    margin: 0;
+    min-height: 1.5em;              /* stops the button jumping when text appears */
+    color: var(--color-muted);
 }
 
-/*
-   TODO · Day 6, Step 6: LONG EMAILS
-   · Give each card an email link (cardEl() in index.js), then stop long
-   · addresses from breaking the card: one line, cut off with "…". */
-
-/*
-   TODO · Day 5, Step 2 (continued): CARD GRID
-   · Switch .card-list below from flex-wrap to a grid with as many columns
-   · of at least 220px as fit. Compare how a lone card on the last row
-   · behaves in each version.
-   · Challenge 1: a "featured employee" card that spans the full row. */
-
-/* The cards sit in a row and WRAP onto new lines when they run out of
-   room. No media queries needed. */
-.card-list {
-   display: grid;
-   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-   gap: 1.5rem;
+/* Restate display: none for [hidden], because .btn and .pager set their
+   own display (same lesson as the modal). */
+.btn[hidden],
+.pager[hidden] {
+    display: none;
 }
 
-/* flex: grow shrink basis */
-.card-list .card {
-    flex: 1 1 240px; /* grow, shrink, but aim for 240px wide */
-}
-
-.card--featured {
-    grid-column: 1 / -1;
-}
-
-
-/* Toolbar */
-/* ---------------------------------------------------------------------
-   TOOLBAR: search + department + Add button in one row
-   --------------------------------------------------------------------- */
-.toolbar {
+/* Numbered pages: Prev / 1 2 3 4 5 / Next. */
+.pager {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1);
 }
 
-.toolbar input[type="search"] {
-    flex: 1; /* search box takes all leftover width */
-    padding: 0.625rem 0.75rem;
-    font: inherit;
-    border: 1px solid #c9ccd8;
-    border-radius: 8px;
+/* The current page button (aria-current="page" set by JS). */
+.pager [aria-current="page"] {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    color: #fff;
 }
 
-/* margin-left: auto in a flex row = "push me as far right as possible".
-   nowrap stops "Add Employee" breaking onto two lines. */
-.toolbar .btn--primary {
-    margin-left: auto;
-    white-space: nowrap;
+
+/* =====================================================================
+   10. FOOTER AND UTILITIES
+   ===================================================================== */
+
+/* padding = space between the footer's edge and its content (the
+   background fills the padding too). The <p> inside has its own default
+   1em margin, removed so the padding alone controls the spacing. */
+footer {
+    padding: var(--space-3);
+    text-align: center;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
 }
 
-/*
-   > hides text visually but keeps it for screen readers */
-/*
-   > (display: none or visibility: hidden would hide it from screen
-   > readers too.) Used for the search box's <label>. Memorise this one. */
+footer p {
+    margin: 0;
+}
+
+/* Wrapper for content sections at the bottom of the dashboard. */
+.panel {
+    margin-top: var(--space-5);
+}
+
+/* Hides content visually but keeps it for screen readers (used for
+   labels that have no visible text).
+   > display: none or visibility: hidden would hide it from screen
+   > readers too. Memorise this one. */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -607,260 +1459,3 @@ fieldset {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
-
-/* Navbar and Footer Styles */
-/* ---------------------------------------------------------------------
-   TOP NAVBAR: logo on the left, links on the right
-   --------------------------------------------------------------------- */
-.site-header {
-    display: flex;
-    align-items: center; /* vertically center logo + links */
-    justify-content: space-between; /* logo left, nav right */
-    padding: 0 1.5rem;
-    height: 64px;
-    background: #fff;
-    border-bottom: 1px solid #e3e5ee;
-
-    position: sticky;
-    top: 0;
-    z-index: 10; /* stay above cards when scrolling */
-}
-
-.logo {
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: #6b2fb3;
-    text-decoration: none;
-}
-
-/* A <ul> styled as a horizontal row of links. Lists have default
-   bullets, margin and left padding, so all three are removed. */
-.nav-links {
-    display: flex;
-    gap: 0.25rem;
-    list-style: none; /* remove bullets */
-    margin: 0;
-    padding: 0;
-}
-
-/* display: block makes the whole padded area clickable, not just the
-   text. */
-.nav-links a {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    color: #3a3f55;
-    text-decoration: none;
-}
-
-.nav-links a:hover {
-    background: #f1ecfa;
-}
-
-.nav-links a[aria-current="page"] {
-    color: #6b2fb3;
-    font-weight: 600;
-}
-
-/* FOOTER. padding = space between the footer's edge and its content
-   (the grey background fills the padding too). The <p> inside also has
-   its own default 1em top/bottom margin, which adds to this. */
-footer {
-    background: rgb(230, 230, 230);
-    border-top: 1px solid #6b2fb3;
-    text-align: center;
-    padding: 0.25rem;
-}
-
-
-/* =====================================================================
-   DAY 5: POSITIONING COMPONENTS
-   ===================================================================== */
-
-/* ---------------------------------------------------------------------
-   TODO · Day 5, Step 5: ADD EMPLOYEE MODAL
-   · - The backdrop covers the whole window, dims the page, sits above
-   ·   everything and centres the modal box.
-   · - The backdrop must still disappear when it has the hidden attribute.
-   · - The box: white, rounded, shadowed, max 440px wide.
-   · - Header: title on the left, × close button on the right.
-   · - Actions: Cancel and Add aligned to the right.
-   --------------------------------------------------------------------- */
-
-.modal-backdrop {
-   position: fixed;
-   inset: 0; /* top/right/bottom/left: 0 = cover screen */
-   background: rgb(15 18 35 / 0.5);
-   display: grid;
-   place-items: center; /* center the modal */
-   z-index: 100;
-   padding: 1rem;
-}
-
-.modal-backdrop[hidden] {
-   display: none; /* our display:grid would override [hidden]*/
-}
-
-.modal {
-   width: 100%;
-   max-width: 440px;
-   background: #fff;
-   border-radius: 16px;
-   box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
-}
-.modal__header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 1rem 1.25rem;
-   border-bottom: 1px solid #e3e5ee;
-}
-
-.modal__header h2 { margin: 0; font-size: 1.125rem; }
-
-.modal__close {
-   border: 0;
-   background: none;
-   font-size: 1.5rem;
-   cursor: pointer;
-}
-
-.modal__body { padding: 1.25rem; }
-
-.modal__actions {
-
-   display: flex;
-   justify-content: flex-end;
-   gap: 0.5rem;
-}
-
-/* ---------------------------------------------------------------------
-   TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU
-   · A menu that opens just below the ⋯ button, aligned to its right edge,
-   · and shows on top of the content after it.
-   --------------------------------------------------------------------- */
-
-.menu {
-   position: relative;
-}
-
-.menu__list {
-   position: absolute;
-   top: 100%;
-   right: 0;
-   z-index: 20;
-   margin: 0.25rem 0 0;
-   padding: 0.25rem;
-   list-style: none;
-   min-width: 140px;
-   background: #fff;
-   border: 1px solid #e3e5ee;
-   border-radius: 8px;
-   box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
-}
-
-.menu__list button {
-   display: block;
-   width: 100%;
-   padding: 0.5rem 0.75rem;
-   border: 0;
-   background: none;
-   font: inherit;
-   text-align: left;
-   cursor: pointer;
-}
-
-/* ---------------------------------------------------------------------
-   TODO · Day 5, Challenge 3: TOAST
-   · A small notification fixed to the bottom-right corner of the window.
-   · Day 7 morning challenge: make it slide up and fade in when it
-   · appears, and fade out when a class is added from JS.
-   --------------------------------------------------------------------- */
-
-.toast {
-   position: fixed;
-   background: rgba(255, 55, 55);
-   bottom: 1.5rem;
-   right: 1.5rem;
-   width: 100%;
-   max-width: 240px;
-   border-radius: 12px;
-   text-align: center;
-   color: #fff;
-}
-
-
-
-[role="tablist"] {
-   display: flex;
-   gap: 0.25rem;
-   border-bottom: 1px solid var(--color-border, #e3e5ee);
-}
-
-[role="tab"] {
-    padding: 0.5rem 1rem;
-    border: 0;
-    background: none;
-    font: inherit;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-}
-
-[role="tab"][aria-selected="true"] {
-    border-bottom-color: #6b2fb3;
-    color: #6b2fb3;
-    font-weight: 600;
-}
-
-/* =====================================================================
-   DAY 6: RESPONSIVE
-   ===================================================================== */
-
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Step 3: SMALL SCREENS (768px and below)
-   · - The page becomes one column: header, then main. No sidebar.
-   · - Hide the header nav links.
-   · - The toolbar wraps, and the search box gets its own full row.
-   · - The payroll table scrolls sideways inside .table-scroll instead of
-   ·   widening the page.
-   · Test at 375px, 768px and 1280px in DevTools device mode.
-   --------------------------------------------------------------------- */
-
-
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Challenge 1: MOBILE-FIRST
-   · Rewrite the media query above the other way round: single column by
-   · default, and the sidebar column added from 769px up. Compare the
-   · line counts.
-   --------------------------------------------------------------------- */
-
-
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Challenge 2: HAMBURGER BUTTON
-   · Hidden by default, visible only at 768px and below.
-   --------------------------------------------------------------------- */
-
-
-/* ---------------------------------------------------------------------
-   TODO · Day 6, Challenge 3: TABLE AS CARDS ON MOBILE
-   · On small screens each table row becomes a stacked block, and each cell
-   · shows its column name (from its data-label attribute) before its value.
-   --------------------------------------------------------------------- */
-
-
-/* =====================================================================
-   DAY 7: LOADING STATES
-   ===================================================================== */
-
-/* ---------------------------------------------------------------------
-   TODO · Day 7, Morning: SPINNER
-   · A 24px circle with one coloured side that rotates forever.
-   --------------------------------------------------------------------- */
-
-
-/* ---------------------------------------------------------------------
-   TODO · Day 7, Morning: SKELETON CARDS
-   · Grey placeholder shapes (a circle and two lines, one shorter) with a
-   · shimmer that sweeps across them. Stop the animations for users who
-   · prefer reduced motion.
-   --------------------------------------------------------------------- */

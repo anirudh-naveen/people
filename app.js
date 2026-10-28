@@ -2,9 +2,8 @@
 // app.js: JS track 1 exercises (language basics) + shared helpers
 // =====================================================================
 //
-// Loaded by BOTH index.html and onboarding.html, before the page's own
-// script. Anything declared at the top level here (like formatSalary)
-// becomes a global that index.js can call.
+// Loaded by index.html before index.js. Anything declared at the top
+// level here (like formatSalary) becomes a global that index.js can call.
 //
 // > Heads-up: top-level `const` names here (employees, depts, copy) are
 // > shared with the other scripts on the page. If index.js ever declared
@@ -21,15 +20,18 @@ const employees = [
 
 // Average salary: add every salary up, divide by how many there are.
 // for...of loops over the ITEMS of an array.
-// ! NOTE: `total` is never declared with let, so it becomes an accidental
-// ! GLOBAL variable (and would throw in strict mode). Should be
-// ! `let total = 0`.
-// > A loop body without { } only includes the ONE next line.
+// ! Declare accumulators with `let`. Writing `total = 0` without it
+// ! creates an accidental GLOBAL variable (and throws in strict mode).
+// > A loop body without { } only includes the ONE next line, so braces
+// > are used here to make the loop's extent obvious.
+// Empty list → 0 instead of NaN (0 / 0).
 function averageSalary(list) {
-    total = 0
-    for (const item of list)
-        total += item.salary
-    return total/list.length
+    if (list.length === 0) return 0;
+    let total = 0;
+    for (const item of list) {
+        total += item.salary;
+    }
+    return total / list.length;
 }
 
 
@@ -49,12 +51,12 @@ function byDept(list) {
 
 // Employees whose name contains the query.
 // filter keeps the items where the function returns true.
-// ! NOTE: .includes is case-SENSITIVE ('priya' won't find 'Priya'). The
-// ! exercise asked for case-insensitive: lowercase both sides, like
-// ! getVisible() in index.js does.
+// ! .includes is case-SENSITIVE ('priya' won't find 'Priya'), so BOTH
+// ! sides are lowercased before comparing, like getVisible() in index.js.
+// An empty query returns everyone (every string includes '').
 function search(list, query) {
-    if (!query) return null;
-    return list.filter((e) => e.name.includes(query));
+    const q = query.trim().toLowerCase();
+    return list.filter((e) => e.name.toLowerCase().includes(q));
 }
 
 // 1234567 → "$1,234,567.00"

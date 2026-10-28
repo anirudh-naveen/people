@@ -5,7 +5,8 @@
              index.html: the Employee Directory (dashboard) page
              ============================================================
              Most of the visible content (cards, table rows, department
-             options) is EMPTY here and gets filled in by index.js.
+             options, stat numbers) is EMPTY here and gets filled in by
+             index.js from its `state` object.
              To see what JS added, use DevTools → Elements (the live
              DOM), not View Source (the original file).
         -->
@@ -16,56 +17,83 @@
         <!-- viewport: on phones, use the real screen width instead of
              pretending to be a 980px desktop and zooming out -->
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- shown in the browser tab (could be "Employee Directory") -->
-        <title>Document</title>
+        <!-- shown in the browser tab, bookmarks and search results -->
+        <title>People · Directory</title>
 
         <!-- CSS -->
         <link rel="stylesheet" href="styles.css">
+
+        <!-- Apply a saved theme BEFORE the page is drawn (JS track 6).
+             This tiny script is inline and NOT deferred on purpose: if it
+             waited for the page to load, a dark-theme user would see a
+             flash of the light page first. try/catch because
+             localStorage can throw (e.g. in some private-browsing modes). -->
+        <script>
+            try {
+                const saved = localStorage.getItem('theme');
+                if (saved) document.documentElement.dataset.theme = saved;
+            } catch (err) {}
+        </script>
 
         <!-- JavaScript -->
         <!--
              > defer = download now, but RUN only after the whole HTML is
              > parsed (so querySelector can find every element). Deferred
-             > scripts run in the order they're listed: app.js first, so
-             > index.js can use its formatSalary(). -->
+             > scripts run in the order they're listed:
+             >   app.js   → formatSalary() (used by index.js)
+             >   site.js  → header behaviour shared by every page
+             >   index.js → this page -->
         <script src="app.js" defer></script>
+        <script src="site.js" defer></script>
         <script src="index.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
-        <!-- .app = the CSS grid wrapper (header across the top, sidebar
-             on the left, main on the right). See ".app" in styles.css. -->
+        <!-- .app = the CSS grid wrapper. Phones: header, then main.
+             769px and up: header across the top, sidebar on the left,
+             main on the right. See ".app" in styles.css. -->
         <div class="app">
             <!-- <header> = landmark for the site's top banner -->
             <header class="site-header">
                 <a href="index.html" class="logo">People</a>
                 <!-- <nav> = landmark for navigation. aria-label names it,
                      because this page has TWO navs and screen reader
-                     users need to tell them apart. -->
+                     users need to tell them apart.
+                     id="main-nav" lets the hamburger button point at it
+                     with aria-controls. -->
                 <nav aria-label="Main">
                     <!-- links in a list: screen readers announce
-                         "list, 3 items" -->
-                    <ul class="nav-links">
+                         "list, 5 items" -->
+                    <ul class="nav-links" id="main-nav">
                         <!-- aria-current="page" marks the page you're on -->
                         <li><a href="index.html" aria-current="page">Directory</a></li>
                         <li><a href="onboarding.html">Onboarding</a></li>
-                        <li><a href="#">Payroll</a></li>
+                        <li><a href="live.html">Live</a></li>
+                        <li><a href="#payroll-heading">Payroll</a></li>
                         <li><a href="notes.html">Notes</a></li>
                     </ul>
                 </nav>
 
-                <!--
-                     TODO · Day 6, Challenge 2: HAMBURGER BUTTON
-                     · A menu button for small screens, with an accessible
-                     · name. -->
+                <!-- THEME TOGGLE (JS track 6). A toggle button:
+                     aria-pressed="true" means dark mode is on. site.js
+                     flips it and saves the choice in localStorage. The
+                     visible "◐" is decorative (aria-hidden); the
+                     aria-label is what screen readers read. -->
+                <button type="button" id="theme" class="icon-btn"
+                        aria-label="Dark mode" aria-pressed="false">
+                    <span aria-hidden="true">◐</span>
+                </button>
 
-                <!--
-                     TODO · JS track 6: THEME TOGGLE
-                     · A button with id="theme" that switches between light
-                     · and dark. -->
+                <!-- HAMBURGER (Day 6, Challenge 2). Only visible under
+                     769px (CSS). aria-expanded says whether the menu is
+                     open; aria-controls says which element it opens. -->
+                <button type="button" class="icon-btn nav-toggle"
+                        aria-label="Menu" aria-expanded="false" aria-controls="main-nav">
+                    <span aria-hidden="true">☰</span>
+                </button>
             </header>
 
             <!-- <aside> = content related to, but separate from, the main
-                 content -->
+                 content. Hidden on phones by CSS. -->
             <aside class="sidebar">
                 <nav aria-label="Sections">
                     <a href="#">Overview</a>
@@ -77,223 +105,258 @@
 
             <!-- <main> = THE main content. Only one per page. -->
             <main>
-                <div class="stats">
-                    <div class="stat"><span class="stat__label">Headcount</span>
-                        <span class="stat__value">248</span></div>
-                    <div class="stat"><span class="stat__label">New This Month</span>
-                        <span class="stat__value">12</span></div>
-                    <div class="stat"><span class="stat__label">On Leave</span>
-                        <span class="stat__value">5</span></div>
-                    <div class="stat"><span class="stat__label">Open Roles</span>
-                        <span class="stat__value">19</span></div>
-                </div> 
-
                 <!--
                      > exactly one h1 per page; headings go in order
                      > (h1 → h2 → h3) without skipping levels -->
                 <h1>Employee Directory</h1>
                 <p>All the employees at ACME.</p>
 
+                <!-- STAT TILES (Day 5, Step 2). The first three numbers
+                     are calculated from the data by renderStats() in
+                     index.js (the ids are its hooks). "Open roles" isn't
+                     in our data, so it stays hard-coded.
+                     stat--wide spans two columns on wide screens
+                     (Day 5, Challenge 1). -->
+                <div class="stats">
+                    <div class="stat stat--wide"><span class="stat__label">Headcount</span>
+                        <span class="stat__value" id="stat-headcount">0</span></div>
+                    <div class="stat"><span class="stat__label">New this month</span>
+                        <span class="stat__value" id="stat-new">0</span></div>
+                    <div class="stat"><span class="stat__label">On leave</span>
+                        <span class="stat__value" id="stat-leave">0</span></div>
+                    <div class="stat"><span class="stat__label">Open roles</span>
+                        <span class="stat__value">19</span></div>
+                </div>
+
                 <!-- aria-labelledby="team-heading" names this section using
                      the text of the element with id="team-heading". The
                      two values must match exactly. -->
                 <section aria-labelledby="team-heading">
                     <h2 id="team-heading">Team</h2>
-                    <!-- search & filters -->
-                    <!-- .toolbar is a flex row (styles.css) -->
+                    <!-- search & filters. .toolbar is a wrapping flex row. -->
                     <div class="toolbar">
                         <!-- The label is hidden visually but still read by
                              screen readers (.visually-hidden). for="search"
                              links it to id="search". A placeholder is NOT
                              a label: it disappears when you type. -->
-                        <label for="search" class="visually-hidden">Search Employees</label>
+                        <label for="search" class="visually-hidden">Search employees</label>
                         <!-- type="search" gives a clear (×) button and a
                              "search" keyboard on phones -->
-                        <input type="search" id="search" placeholder="Search by name or role...">
+                        <input type="search" id="search" placeholder="Search by name or role…">
+
                         <!-- Only the "All" option is written here. index.js
                              adds one <option> per department from the data.
                              value="All" matches state.dept === 'All'. -->
                         <select id="dept" aria-label="Filter by department">
-                            <option value="All">All Departments</option>
+                            <option value="All">All departments</option>
                         </select>
+
+                        <!-- the values ("name", "newest") are what
+                             state.sort gets set to -->
+                        <select id="sort" aria-label="Sort by">
+                            <option value="name">Name A–Z</option>
+                            <option value="newest">Newest hire</option>
+                        </select>
+
                         <!--
-                             > type="button": a plain button. (A <button> inside a
-                             > form defaults to type="submit".) -->
-                        <button type="button" class="btn btn--primary">Add Employee</button>
-                        <!-- aria-live="polite": screen readers announce changes
-                             to this text ("3 of 8 people") when they're
-                             idle, without moving focus -->
+                             > type="button": a plain button. (A <button>
+                             > inside a form defaults to type="submit".)
+                             This one opens the Add employee modal. -->
+                        <button type="button" class="btn btn--primary" id="add-employee">+ Add employee</button>
+
+                        <!-- aria-live="polite": screen readers announce
+                             changes ("3 of 18 people") when they're idle,
+                             without moving focus -->
                         <p id="result-count" aria-live="polite"></p>
                     </div>
 
-                    <!-- employee cards -->
-                    <!-- the values ("name", "newest") are what state.sort
-                         gets set to -->
-                    <select id="sort" aria-label="Sort by">
-                        <option value="name">Name A-Z</option>
-                        <option value="newest">Newest Hire</option>
-                    </select>
                     <!-- Leave EMPTY: render() replaces everything inside it
                          on every update, so anything written here would be
                          deleted. -->
                     <div class="card-list"></div>
                 </section>
 
-                
-                <!-- employee bars -->
-                <!-- Day 4 exercise: the flexbox "employee row" component.
+                <!-- EMPLOYEE ROW (Day 4 challenge): the flexbox component.
                      BEM class names: employee-row = block,
                      employee-row__name = an element (part) of it. -->
-                
                 <div class="employee-row">
                     <!-- alt="" = decorative: the name is right next to it -->
-                    <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="">
+                    <img class="employee-row__avatar" src="https://i.pravatar.cc/96?img=5" alt="" width="48" height="48">
                     <div class="employee-row__info">
                         <p class="employee-row__name">Priya Shah</p>
                         <p class="employee-row__title">Senior Engineer</p>
                     </div>
                     <span class="badge badge--active">Active</span>
-                    <!-- aria-label gives the icon-only button a real name;
-                         otherwise it's read as "horizontal ellipsis" -->
 
-                    
-                    <!--
-                         TODO · Day 5, Challenge 2: "⋯" DROPDOWN MENU
-                         · Clicking ⋯ opens a small menu of actions (e.g. Edit,
-                         · Remove) positioned against this button. The button
-                         · should tell screen readers whether the menu is
-                         · open. -->
-
+                    <!-- "⋯" DROPDOWN MENU (Day 5, Challenge 2).
+                         .menu is the position: relative anchor; the list
+                         is position: absolute against it.
+                         aria-expanded tells screen readers whether the menu
+                         is open; aria-controls points at the list.
+                         aria-label gives the icon-only button a real name
+                         (otherwise it's read as "horizontal ellipsis"). -->
                     <div class="menu">
-                         <button type="button" class="btn"
-                              aria-label="More actions for Priya Shah"
-                              aria-expanded="false"
-                              aria-controls="row-menu">⋯</button>
-                         <ul class="menu__list" id="row-menu" hidden>
-                              <li><button type="button">Edit</button></li>
-                              <li><button type="button">Remove</button></li>
-                         </ul>
+                        <button type="button" class="btn"
+                                aria-label="More actions for Priya Shah"
+                                aria-expanded="false"
+                                aria-controls="row-menu">⋯</button>
+                        <ul class="menu__list" id="row-menu" hidden>
+                            <li><button type="button" data-menu-action="Edit">Edit</button></li>
+                            <li><button type="button" data-menu-action="Remove">Remove</button></li>
+                        </ul>
                     </div>
-
                 </div>
-               
 
-
-                <!-- payroll -->
+                <!-- PAYROLL -->
                 <section aria-labelledby="payroll-heading">
                     <h2 id="payroll-heading">Payroll</h2>
-                    <!--
-                         TODO · Day 6, Step 3: wrap the table in a
-                         · <div class="table-scroll"> so it can scroll
-                         · sideways on small screens. -->
-                    <table class="data-table">
-                        <!-- <caption> = the table's title, read by screen
-                             readers when they enter the table -->
-                        <caption>October 2026 pay run</caption>
-                        <!-- <thead> = header rows, stays hard-coded -->
-                        <thead>
-                            <tr>
-                                <!-- <th scope="col"> = header cell for its
-                                     COLUMN.
-                                     data-key = which employee property
-                                     this column sorts by (read in JS as
-                                     th.dataset.key).
-                                     The <button> makes it keyboard-
-                                     clickable (Tab + Enter).
-                                     index.js adds aria-sort to the sorted
-                                     <th>, and CSS draws ▲/▼ from it. -->
-                                <th scope="col" data-key="name"><button type="button">Name</button></th>
-                                <th scope="col" data-key="dept"><button type="button">Department</button></th>
-                                <th scope="col" data-key="status"><button type="button">Status</button></th>
-                                <!-- class="num" right-aligns the header
-                                     above the right-aligned numbers -->
-                                <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
-                            </tr>
-                        </thead>
+                    <p>Click a row to select it. Click a column header to sort.</p>
+                    <!-- .table-scroll lets the table scroll sideways on small
+                         screens instead of widening the whole page
+                         (Day 6, Step 3). -->
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <!-- <caption> = the table's title, read by screen
+                                 readers when they enter the table -->
+                            <caption>October 2026 pay run</caption>
+                            <!-- <thead> = header row, stays hard-coded -->
+                            <thead>
+                                <tr>
+                                    <!-- <th scope="col"> = header cell for its
+                                         COLUMN.
+                                         data-key = which employee property
+                                         this column sorts by (read in JS as
+                                         th.dataset.key).
+                                         The <button> makes it keyboard-
+                                         clickable (Tab + Enter).
+                                         index.js adds aria-sort to the sorted
+                                         <th>, and CSS draws ▲/▼ from it. -->
+                                    <th scope="col" data-key="name"><button type="button">Name</button></th>
+                                    <th scope="col" data-key="dept"><button type="button">Department</button></th>
+                                    <th scope="col" data-key="status"><button type="button">Status</button></th>
+                                    <!-- class="num" right-aligns the header
+                                         above the right-aligned numbers -->
+                                    <th scope="col" data-key="salary" class="num"><button type="button">Salary</button></th>
+                                </tr>
+                            </thead>
 
-                        <!-- <tbody> = data rows. Empty on purpose: render()
-                             fills it from state.employees. -->
-                        <tbody></tbody>
-                    </table>
+                            <!-- <tbody> = data rows. Empty on purpose: render()
+                                 fills it from state.employees. -->
+                            <tbody></tbody>
+                        </table>
+                    </div>
 
-                    <!-- aria-pressed="false" makes this a TOGGLE button for
-                         screen readers. JS flips it to "true" when on. -->
-                    <button type="button" id="density" class="btn" aria-pressed="false">Compact View</button>
-                    <p id="selected-count">Selected: 0</p>
+                    <div class="table-actions">
+                        <!-- aria-pressed="false" makes this a TOGGLE button for
+                             screen readers. JS flips it to "true" when on. -->
+                        <button type="button" id="density" class="btn" aria-pressed="false">Compact view</button>
+                        <p id="selected-count">Selected: 0</p>
+                    </div>
 
-                    <!-- Progress bar: the outer div is the grey track, the
-                         inner div is the purple fill whose width comes
+                    <!-- PROGRESS BAR (JS track 3): the outer div is the grey
+                         track, the inner div is the fill whose width comes
                          from the --progress CSS variable set by JS.
-                         Optional a11y upgrade: role="progressbar" +
-                         aria-label + aria-valuenow on the outer div. -->
-                    <div class="progress">
+                         role="progressbar" + aria-valuenow (set by JS) let
+                         screen readers read it as "Rows selected, 25%". -->
+                    <div class="progress" role="progressbar" aria-label="Rows selected"
+                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                         <div class="progress__fill"></div>
                     </div>
                 </section>
 
-                <aside class="upcoming-birthdays">
-                    <h2 id="birthdays-heading">Upcoming Birthdays</h2>
-                    <!--
-                         > Tip: aria-labelledby usually goes on the landmark
-                         > (the <aside>), like the <section>s above. -->
-                    <ul aria-labelledby="birthdays-heading">
+                <!-- aria-labelledby on the landmark itself names it
+                     "Upcoming birthdays" for screen reader users. -->
+                <aside class="panel" aria-labelledby="birthdays-heading">
+                    <h2 id="birthdays-heading">Upcoming birthdays</h2>
+                    <ul>
                         <!-- <time datetime="..."> = a machine-readable date
                              (YYYY-MM-DD) behind the human-friendly text -->
-                        <li><time datetime="2026-10-20">Oct 20</time> Ben Reilly</li>
                         <li><time datetime="2026-11-15">Nov 15</time> Haley Stardew</li>
                         <li><time datetime="2026-12-30">Dec 30</time> Sleuth Lady</li>
+                        <li><time datetime="2027-01-20">Jan 20</time> Ben Reilly</li>
                     </ul>
                 </aside>
 
-                <!--
-                     TODO · JS track 5, Part 2: TABS
-                     · An employee section with three tabs (Profile, Pay,
-                     · Documents), each showing its own panel. Use the tab
-                     · roles and states so screen readers announce which
-                     · tab is selected. -->
+                <!-- TABS (JS track 5, Part 2).
+                     Each tab: role="tab", aria-controls = the id of its panel,
+                     aria-selected = whether it's the chosen one.
+                     Each panel: role="tabpanel", aria-labelledby = its tab.
+                     tabindex="-1" on unselected tabs = the "roving tabindex"
+                     pattern: one Tab press moves past the whole tab list,
+                     and the arrow keys move between tabs (index.js). -->
+                <section class="panel" aria-labelledby="profile-heading">
+                    <h2 id="profile-heading">Employee profile: Priya Shah</h2>
+                    <div class="tabs">
+                        <div role="tablist" aria-label="Employee details">
+                            <button type="button" role="tab" id="t1" aria-controls="p1" aria-selected="true">Profile</button>
+                            <button type="button" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1">Pay</button>
+                            <button type="button" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1">Documents</button>
+                        </div>
 
-               <div class="tabs">
-                    <div role="tablist" aria-label="Employee">
-                         <button role="tab" id="t1" aria-controls="p1" aria-selected="true">Profile</button>
-                         <button role="tab" id="t2" aria-controls="p2" aria-selected="false"tabindex="-1">Pay</button>
-                         <button role="tab" id="t3" aria-controls="p3" aria-selected="false"tabindex="-1">Documents</button>
+                        <!-- <dl> = a description list: label/value pairs -->
+                        <div role="tabpanel" id="p1" aria-labelledby="t1">
+                            <dl class="details-list">
+                                <dt>Role</dt><dd>Senior Engineer</dd>
+                                <dt>Department</dt><dd>Engineering</dd>
+                                <dt>Start date</dt><dd><time datetime="2022-03-01">Mar 1, 2022</time></dd>
+                            </dl>
+                        </div>
+                        <div role="tabpanel" id="p2" aria-labelledby="t2" hidden>
+                            <dl class="details-list">
+                                <dt>Salary</dt><dd>$115,000</dd>
+                                <dt>Pay schedule</dt><dd>Monthly</dd>
+                            </dl>
+                        </div>
+                        <div role="tabpanel" id="p3" aria-labelledby="t3" hidden>
+                            <ul>
+                                <li><a href="#">Offer letter.pdf</a></li>
+                                <li><a href="#">Handbook acknowledgement.pdf</a></li>
+                            </ul>
+                        </div>
                     </div>
+                </section>
 
-                    <section role="tabpanel" id="p1" aria-labelledby="t1">Profile</section>
-                    <section role="tabpanel" id="p2" aria-labelledby="t2" hidden>Pay Content</section>
-                    <section role="tabpanel" id="p3" aria-labelledby="t3" hidden>Document Content</section>
-               </div>
+                <!-- ACCORDION / FAQ (JS track 5, Part 3), built two ways. -->
+                <section class="panel faq" aria-labelledby="faq-heading">
+                    <h2 id="faq-heading">FAQ</h2>
 
-                <!--
-                     TODO · JS track 5, Part 3: ACCORDION (FAQ)
-                     · A few questions whose answers expand and collapse.
-                     · First build it with no JS, then build your own
-                     · version with buttons where only one answer is open
-                     · at a time. -->
+                    <!-- Version 1: native <details>/<summary>. Zero JS, fully
+                         keyboard-accessible. Several can be open at once. -->
+                    <h3>Built with &lt;details&gt; (no JavaScript)</h3>
                     <details>
-                         <summary>How do I request time off?</summary>
-                         <p>Go to Time off → New request.</p>
+                        <summary>How do I request time off?</summary>
+                        <p>Go to Time off → New request.</p>
                     </details>
                     <details>
-                         <summary>When is payday?</summary>
-                         <p>The last business day of the month.</p>
+                        <summary>When is payday?</summary>
+                        <p>The last business day of the month.</p>
                     </details>
                     <details>
-                         <summary>How do I update my direct deposit?</summary>
-                         <p>Open Payroll and choose Payment method.</p>
+                        <summary>How do I update my direct deposit?</summary>
+                        <p>Open Payroll and choose Payment method.</p>
                     </details>
 
+                    <!-- Version 2: our own, where only ONE answer is open at a
+                         time. Each question is a real <button> with
+                         aria-expanded (open or not) and aria-controls (which
+                         answer it opens). Answers start hidden, except the
+                         first. Wired in index.js. -->
+                    <h3>Built with buttons (one open at a time)</h3>
                     <div class="accordion">
-                         <button type="button" aria-expanded="true" aria-controls="a1">How do I request time off?</button>
-                         <p id="a1">Go to Time off → New request.</p>
-
-                         <button type="button" aria-expanded="false" aria-controls="a2">When is payday?</button>
-                         <p id="a2" hidden>The last business day of the month.</p>
-
-                         <button type="button" aria-expanded="false" aria-controls="a3">How do I update my direct deposit?</button>
-                         <p id="a3" hidden>Open Payroll and choose Payment method.</p>
+                        <div class="accordion__item">
+                            <button type="button" class="accordion__trigger" aria-expanded="true" aria-controls="a1">How do I request time off?</button>
+                            <p class="accordion__panel" id="a1">Go to Time off → New request.</p>
+                        </div>
+                        <div class="accordion__item">
+                            <button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="a2">When is payday?</button>
+                            <p class="accordion__panel" id="a2" hidden>The last business day of the month.</p>
+                        </div>
+                        <div class="accordion__item">
+                            <button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="a3">How do I update my direct deposit?</button>
+                            <p class="accordion__panel" id="a3" hidden>Open Payroll and choose Payment method.</p>
+                        </div>
                     </div>
-
+                </section>
             </main>
         </div>
 
@@ -303,55 +366,56 @@
             <p>&copy; 2026 ACME, Inc.</p>
         </footer>
 
-        <!--
-             TODO · Day 5, Step 5: ADD EMPLOYEE MODAL
-             · A backdrop (id="add-modal", hidden by default) holding a
-             · dialog box with: a title, a × close button, and a form with
-             · Full name and Role fields plus Cancel and Add buttons.
-             · Screen readers should know it's a modal dialog and read its
-             · title as its name. Remove "hidden" temporarily while you
-             · style it. -->
-        
-          <div class="modal-backdrop" id="add-modal" hidden>
-               <div class="modal" role="dialog" aria-modal="true"aria-labelledby="modal-title">
-                    <header class="modal__header">
-                         <h2 id="modal-title">Add Employee</h2>
-                         <button type="button" class="modal__close" aria-label="Close">&times;</button>
-                    </header>
+        <!-- ADD EMPLOYEE MODAL (Day 5, Step 5 + JS track 5, Part 1).
+             Two layers: the backdrop (dims the page; clicking it closes the
+             modal) and the white dialog box inside it.
+             hidden = closed by default; JS removes/adds the attribute.
+             role="dialog" aria-modal="true" → screen readers treat it as
+             a dialog and the rest of the page as inert while it's open.
+             aria-labelledby → the dialog's name is its heading text. -->
+        <div class="modal-backdrop" id="add-modal" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <header class="modal__header">
+                    <h2 id="modal-title">Add employee</h2>
+                    <!-- "×" alone would be read as "times", so it needs a label -->
+                    <button type="button" class="modal__close" aria-label="Close">&times;</button>
+                </header>
 
-                    <form class="modal__body">
-                         <div class="field">
-                              <label for="m-name">Full Name</label>
-                              <input id="m-name" type="text" required />
-                         </div>
-                         <div class="field">
-                              <label for="m-role">Role</label>
-                              <input id="m-role" type="text" required />
-                         </div>
-                         <div class="field">
-                              <label for="m-dept">Department</label>
-                              <input id="m-dept" type="text" required />
-                         </div>
-                         <div class="field">
-                              <label for="m-salary">Salary</label>
-                              <input id="m-salary" type="number" required />
-                         </div>
-                         <div class="modal__actions">
-                              <button type="button" class="btn">Cancel</button>
-                              <button type="submit" class="btn btn--primary">Add</button>
-                         </div>
-                    </form>
-               </div>
-          </div>
+                <form class="modal__body">
+                    <div class="field">
+                        <label for="m-name">Full name</label>
+                        <input id="m-name" type="text" required minlength="2" autocomplete="off">
+                    </div>
+                    <div class="field">
+                        <label for="m-role">Role</label>
+                        <input id="m-role" type="text" required>
+                    </div>
+                    <!-- Options are filled from the data by index.js, the
+                         same way as the toolbar filter. -->
+                    <div class="field">
+                        <label for="m-dept">Department</label>
+                        <select id="m-dept" required>
+                            <option value="">Choose one…</option>
+                        </select>
+                    </div>
+                    <!-- min / max / step → the browser rejects anything
+                         outside 30,000–500,000 or not a multiple of 1,000 -->
+                    <div class="field">
+                        <label for="m-salary">Salary</label>
+                        <input id="m-salary" type="number" required min="30000" max="500000" step="1000">
+                    </div>
+                    <div class="modal__actions">
+                        <button type="button" class="btn" data-close>Cancel</button>
+                        <button type="submit" class="btn btn--primary">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        <!--
-             TODO · Day 5, Challenge 3: TOAST
-             · A container for a short message that appears in the
-             · bottom-right corner and is announced to screen readers. -->
-               <div class="toast" id="toast" hidden>
-                    <header class="toast-header">
-                         <p id="toast-text" aria-live="polite"> Notification Text.</p>
-                    </header>
-               </div>
+        <!-- TOAST REGION (Day 5 Challenge 3 + Day 7 morning challenge).
+             An always-present, empty live region. showToast() in index.js
+             adds a message inside it, and because the region already
+             existed, screen readers announce the new text. -->
+        <div class="toast-region" id="toasts" role="status" aria-live="polite"></div>
     </body>
 </html>

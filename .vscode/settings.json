@@ -2,7 +2,7 @@
     // Better Comments: colours a comment line by the tag it starts with.
     //   TODO  (orange, bold) = the first line of something to build
     //   ·     (orange)       = the rest of that TODO's lines
-    //   !     (red)          = a known bug in the code to fix
+    //   !     (red)          = watch out: a common mistake / gotcha
     //   >     (blue)         = general info, tips and gotchas
     //   (no tag)             = describes the code next to it
     //                          (your theme's normal comment colour)

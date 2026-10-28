@@ -3,147 +3,167 @@
 // =====================================================================
 //
 // Loaded by onboarding.html with <script src="onboarding.js" defer>.
-// Remember: a <script> with a src="" IGNORES any code written between
-// its tags, so all the code must live in this file.
+// > A <script> with a src="" IGNORES any code written between its tags,
+// > so all the code must live in this file.
 //
 // What this page does, with no page reload:
 //   - submit → validate, add the new hire to a list, show a message
-//   - live "N/200" character counter under the notes textarea
-//   - Submit button disabled until "I agree" is checked
+//   - an inline error under the email field (must end in @acme.com)
+//   - a live "N/200" character counter under the notes textarea
+//   - the Submit button stays disabled until "I agree" is checked
 //   - each new hire gets a Remove button
 
-// > with no #, query selector looks for an element named 'name'
-// > with #, query selector looks for an element with the id 'name'
-// > (and with a dot, .name, it looks for an element with class="name")
-
+// > querySelector takes a CSS selector:
+// >   'x'  → an element named <x> (a tag)
+// >   '#x' → the element with id="x"
+// >   '.x' → an element with class="x"
 const form = document.querySelector('.form');
-// ! NOTE: despite its name, `newHires` is the <p id="status"> message
-// ! paragraph, not the list. Renaming it to `status` would be clearer.
 // role="status" in the HTML makes screen readers announce its changes.
-const newHires = document.querySelector('#status')
-const list = document.querySelector('#new-hires')
+const status = document.querySelector('#status');
+const list = document.querySelector('#new-hires');
 
-const field = document.querySelector('#notes')
-const counter = document.querySelector('#notes-count')
-const submitBtn = document.querySelector('#submit-btn')
+const notes = document.querySelector('#notes');
+const counter = document.querySelector('#notes-count');
+const submitBtn = document.querySelector('#submit-btn');
 const agree = document.querySelector('#agree');
+const emailInput = document.querySelector('#email');
+const emailError = document.querySelector('#email-error');
+
+
+// ---------------------------------------------------------------------
+// EMAIL CHECK (JS track 2, exercise 4)
+// ---------------------------------------------------------------------
+// The browser already checks the email FORMAT (type="email"). This adds
+// our own rule: it must be an @acme.com address.
+// Returns true/false and shows or hides the inline error.
+//   aria-invalid="true" → screen readers announce "invalid entry", and
+//                         CSS gives the input a red border
+//   the error <p> is linked with aria-describedby (in the HTML), so it's
+//   read out whenever the field is focused
+function checkEmail() {
+    const value = emailInput.value.trim();
+    // Only complain once something's been typed: an empty required field
+    // is the browser's job.
+    const ok = value === '' || value.toLowerCase().endsWith('@acme.com');
+    emailError.hidden = ok;
+    emailInput.setAttribute('aria-invalid', !ok);
+    return ok;
+}
+
+// 'blur' fires when focus LEAVES the field: check once the user is done,
+// rather than shouting at them on every keystroke.
+emailInput.addEventListener('blur', checkEmail);
+// But once an error is showing, re-check as they type so it disappears
+// as soon as it's fixed.
+emailInput.addEventListener('input', () => {
+    if (!emailError.hidden) checkEmail();
+});
+
 
 // ---------------------------------------------------------------------
 // SUBMIT: runs when the form is submitted (button click or Enter).
 // The browser's built-in validation (required, type="email", min/max...)
 // runs FIRST. This only fires if every field passes.
 // ---------------------------------------------------------------------
-/// <summary>
-/// Handles form submission.
-/// </summary>
 form.addEventListener('submit', (event) => {
-    event.preventDefault(); // prevent default form submission
-    // (Without preventDefault the browser would send the form and reload
-    // the page, wiping out everything we're about to add.)
+    // Without preventDefault the browser would send the form and reload
+    // the page, wiping out everything we're about to add.
+    event.preventDefault();
 
     // FormData reads every field by its name="..." attribute.
     // data.get('fullName') → the value of <input name="fullName">.
     const data = new FormData(form);
     const name = data.get('fullName').trim();
-    const email = data.get('email').trim();
-    // ! NOTE: the form has no field with name="department", so this is
-    // ! null and the list shows "Name - null". Add a
-    // ! <select name="department"> to the form to fix it.
     const dept = data.get('department');
 
-    // Extra validation. `return` stops the function early, so nothing
-    // below runs and nothing gets added.
+    // Our own checks. `return` stops the function early, so nothing below
+    // runs and nothing gets added.
     if (name.length < 2) {
-        newHires.textContent = 'Please enter a full name.'
+        status.textContent = 'Please enter a full name.';
+        return;
+    }
+    if (!checkEmail()) {
+        status.textContent = 'Please use your @acme.com email address.';
+        emailInput.focus();                 // take the user straight to the problem
         return;
     }
 
-    if (!email.endsWith('@acme.com')) {
-        newHires.textContent = 'Please enter a valid ACME email address.'
-        return;
-    }
-
-    // Build the list item: create → fill → append.
-    // textContent is safe: a name containing <script> shows as text.
-    // Order matters: set textContent BEFORE appending the button,
-    // because setting textContent replaces everything inside, including
-    // child elements.
+    // Build the list item: CREATE → FILL → APPEND.
+    // textContent is safe: a name containing <script> shows as plain text.
+    // ! Order matters: set the li's textContent BEFORE appending the
+    // ! button, because setting textContent replaces everything inside,
+    // ! including child elements.
     const li = document.createElement('li');
-    li.textContent = `${name} - ${dept}`;
-    list.append(li);
+    li.textContent = `${name} — ${dept} `;
 
     const removeBtn = document.createElement('button');
-    // defaults to type="submit"
-    removeBtn.type = 'button';
+    removeBtn.type = 'button';              // buttons default to type="submit"
+    removeBtn.className = 'btn';
     removeBtn.textContent = 'Remove';
-    // Without this, a screen reader hears "Remove, Remove, Remove" with
-    // no idea which person each button is for.
+    // Without this, a screen reader hears "Remove, Remove, Remove" with no
+    // idea which person each button is for.
     removeBtn.setAttribute('aria-label', `Remove ${name}`);
-    li.append(removeBtn);
 
     // CLOSURE: this arrow function "remembers" the `li` from THIS run of
     // the submit handler, so each button removes only its own item.
-    // It has to be inside the handler: removeBtn and li are block-scoped
-    // (declared with const inside these { }) and don't exist outside.
-    removeBtn.addEventListener('click', (event) => {
+    // It has to be created in here: li and removeBtn are block-scoped
+    // (const inside these { }) and don't exist outside.
+    removeBtn.addEventListener('click', () => {
         li.remove();
+        status.textContent = `Removed ${name}.`;
     });
 
-    newHires.textContent = `Added ${name}.`;
-    // form.reset() clears every field and fires the 'reset' event
-    // (handled below) immediately, before the next line runs.
-    // ! NOTE: the Clear button in the HTML has id="reset". An element with
-    // ! that id inside a form REPLACES form.reset, so this line throws
-    // ! "form.reset is not a function". Rename that id (e.g. "clear-btn").
+    li.append(removeBtn);
+    list.append(li);
+
+    // form.reset() clears every field AND fires the 'reset' event (handled
+    // below) immediately. The reset handler clears the status line, so the
+    // success message is written AFTER reset, or it would be wiped at once.
     form.reset();
+    status.textContent = `Added ${name}.`;
     // Put the cursor back in the first field, ready for the next hire.
     form.querySelector('input').focus();
 });
 
 
-
 // ---------------------------------------------------------------------
 // RESET: runs on the Clear button AND on form.reset() above.
-// Resetting the form does NOT fire 'input' or 'change' events, so the
-// counter and the button would get stuck without this.
+// > form.reset() does NOT fire 'input' or 'change' events, so without
+// > this the counter and the button would be stuck on their old values.
+// > The 'reset' event fires BEFORE the fields are actually cleared, so
+// > we set fixed values here instead of reading the fields.
 // ---------------------------------------------------------------------
 form.addEventListener('reset', () => {
-    submitBtn.disabled = true;
+    submitBtn.disabled = true;              // "I agree" will be unchecked
     counter.textContent = '0/200';
-    // ! NOTE: this also wipes "Added <name>." right after a successful
-    // ! submit (because submit calls form.reset()). Remove this line if
-    // ! you want the success message to stay.
-    newHires.textContent = '';
+    status.textContent = '';
+    emailError.hidden = true;
+    emailInput.removeAttribute('aria-invalid');
 });
 
 
 // ---------------------------------------------------------------------
-// "I agree" checkbox → enable/disable Submit (exercise 2)
+// "I AGREE" CHECKBOX → enable/disable Submit (exercise 2)
 // 'change' fires when a checkbox is checked or unchecked.
 // .checked is true/false; `!` flips it, so:
 //   checked   → disabled = false (button works)
 //   unchecked → disabled = true
+// > The listener is on the checkbox itself. A listener on the whole form
+// > would also fire for the radios and the textarea.
 // > This is a UX nicety, NOT security: anyone can re-enable a button in
 // > DevTools, and the checkbox's `required` does the real validation.
 // ---------------------------------------------------------------------
-/// <summary>
-/// Handles submit button state.
-/// </summary>
-agree.addEventListener('change', (event) => {
+agree.addEventListener('change', () => {
     submitBtn.disabled = !agree.checked;
 });
 
 
 // ---------------------------------------------------------------------
-// Live character counter (exercise 1)
-// 'input' fires on every keystroke, paste and delete. ('change' would
-// only fire when the field loses focus.) maxlength="200" in the HTML
-// stops the user typing more.
+// LIVE CHARACTER COUNTER (exercise 1)
+// 'input' fires on every keystroke, paste and delete ('change' would only
+// fire when the field loses focus). maxlength="200" in the HTML stops
+// the user typing more.
 // ---------------------------------------------------------------------
-/// <summary>
-/// Tracks characters typed in the notes field.
-/// </summary>
-field.addEventListener('input', (event) => {
-    const length = field.value.length;
-    counter.textContent = `${length}/200`;
+notes.addEventListener('input', () => {
+    counter.textContent = `${notes.value.length}/200`;
 });

@@ -8,52 +8,68 @@
              ============================================================ -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>People · Onboarding</title>
 
         <!-- CSS -->
         <link rel="stylesheet" href="styles.css">
 
+        <!-- Apply a saved theme before the page is drawn (see index.html). -->
+        <script>
+            try {
+                const saved = localStorage.getItem('theme');
+                if (saved) document.documentElement.dataset.theme = saved;
+            } catch (err) {}
+        </script>
+
         <!-- JavaScript -->
-        <!--
-             > defer = run after the HTML is parsed, in this order.
-             > A <script> with src="" ignores any code between its tags. -->
-        <script src="app.js" defer></script>
+        <!-- defer = run after the HTML is parsed, in this order.
+             A <script> with src="" ignores any code between its tags. -->
+        <script src="site.js" defer></script>
         <script src="onboarding.js" defer></script>
     </head>
     <body>          <!-- everything visible goes here -->
+        <!-- The same header as every page (no .app grid on this page, so
+             it's just a sticky bar on top). -->
         <header class="site-header">
             <a href="index.html" class="logo">People</a>
             <nav aria-label="Main">
-                <ul class="nav-links">
-                    <!--
-                         ! NOTE: aria-current="page" should be on the
-                         ! Onboarding link on THIS page, not Directory. -->
-                    <li><a href="index.html" aria-current="page">Directory</a></li>
-                    <li><a href="onboarding.html">Onboarding</a></li>
-                    <li><a href="#">Payroll</a></li>
+                <ul class="nav-links" id="main-nav">
+                    <li><a href="index.html">Directory</a></li>
+                    <!-- aria-current="page" goes on THIS page's link -->
+                    <li><a href="onboarding.html" aria-current="page">Onboarding</a></li>
+                    <li><a href="live.html">Live</a></li>
+                    <li><a href="index.html#payroll-heading">Payroll</a></li>
                     <li><a href="notes.html">Notes</a></li>
                 </ul>
             </nav>
+            <button type="button" id="theme" class="icon-btn"
+                    aria-label="Dark mode" aria-pressed="false">
+                <span aria-hidden="true">◐</span>
+            </button>
+            <button type="button" class="icon-btn nav-toggle"
+                    aria-label="Menu" aria-expanded="false" aria-controls="main-nav">
+                <span aria-hidden="true">☰</span>
+            </button>
         </header>
 
         <main>
-            <h1>New Hire Onboarding</h1>
+            <h1>New hire onboarding</h1>
 
             <!--
-                 > 'action' designated the destination link after completing a form
+                 > 'action' = where the form data is sent when submitted
                  >     # means it stays on the same page
-                 > 'method' defines how a form sends its data
-                 >     GET: default; appends data to the URL
-                 >     POST: sends data in the request body
-                 >     DIALOG: opens a dialog box for user input
-            -->
-            <!-- class="form" is how onboarding.js finds it:
+                 > 'method' = how the form sends its data
+                 >     GET: default; appends data to the URL (searches)
+                 >     POST: sends data in the request body (creating things)
+                 >     DIALOG: closes the <dialog> the form is inside
+                 onboarding.js intercepts the submit, so nothing is sent.
+                 class="form" is how onboarding.js finds it:
                  document.querySelector('.form') -->
             <form class="form" action="#" method="post">
                 <!-- <fieldset> groups related fields; its <legend> is the
                      group's title, read before each field inside it -->
                 <fieldset>
-                    <legend>Personal Details</legend>
+                    <legend>Personal details</legend>
                     <!--
                          > Every field follows the same pattern:
                          >   <label for="X"> ↔ <input id="X">  links the label
@@ -66,37 +82,64 @@
                          >   type="..."  picks the right control/keyboard and
                          >     adds built-in validation (email, number...) -->
                     <div class="field">
-                        <label for="profile">Profile Picture</label>
-                        <!-- accept="image/*" = only offer image files -->
-                        <input id="profile" name ="profile" type="file" accept="image/*" required/>
-                    </div>
-
-                    <div class="field">
-                        <label for="full-name">Full Name</label>
+                        <label for="full-name">Full name</label>
                         <!-- autocomplete="name" lets the browser offer the
                              user's saved name -->
-                        <input id="full-name" name ="fullName" type="text" required autocomplete="name"/>
+                        <input id="full-name" name="fullName" type="text" required minlength="2" autocomplete="name">
                     </div>
 
-                    <!--
-                         ! NOTE: autocomplete takes TOKENS like "email" or
-                         ! "tel", not example values. The examples you wrote
-                         ! here belong in placeholder="...". -->
+                    <!-- The work email field has an inline error message
+                         (JS track 2, exercise 4). aria-describedby links
+                         the message to the input, so screen readers read
+                         it along with the field. The message starts
+                         hidden; onboarding.js shows it.
+                         ! autocomplete takes TOKENS ("email", "tel"), not
+                         ! example values; examples go in placeholder. -->
                     <div class="field">
-                        <label for="email">Work Email</label>
-                        <input id="email" name ="email" type="email" required autocomplete="you@acme.com"/>
+                        <label for="email">Work email</label>
+                        <input id="email" name="email" type="email" required
+                               autocomplete="email" placeholder="you@acme.com"
+                               aria-describedby="email-error">
+                        <p class="field__error" id="email-error" hidden>Use your @acme.com address.</p>
                     </div>
 
                     <div class="field">
-                        <label for="phone">Phone Number</label>
-                        <input id="phone" name ="phone" type="tel" required autocomplete="123-456-7890"/>
+                        <label for="phone">Phone number</label>
+                        <!-- type="tel" doesn't validate (phone formats vary)
+                             but shows a number keypad on phones -->
+                        <input id="phone" name="phone" type="tel" required
+                               autocomplete="tel" placeholder="123-456-7890">
                     </div>
 
                     <div class="field">
-                        <label for="start">Start Date</label>
+                        <label for="profile">Profile picture</label>
+                        <!-- accept="image/*" = only offer image files -->
+                        <input id="profile" name="profile" type="file" accept="image/*">
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Role</legend>
+                    <!-- name="department" is what onboarding.js reads with
+                         data.get('department'). The empty first option +
+                         required forces the user to pick one. -->
+                    <div class="field">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" required>
+                            <option value="">Choose one…</option>
+                            <option>Design</option>
+                            <option>Engineering</option>
+                            <option>Finance</option>
+                            <option>People</option>
+                            <option>Sales</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="start">Start date</label>
                         <!-- type="date" shows a date picker; its value is
                              always "YYYY-MM-DD" -->
-                        <input id="start" name ="startDate" type="date" required/>
+                        <input id="start" name="startDate" type="date" required>
                     </div>
 
                     <div class="field">
@@ -104,29 +147,25 @@
                         <!-- min / max / step = allowed range and increments.
                              The browser blocks submit if the value is
                              outside them (e.g. 30500 isn't a step of 1000). -->
-                        <input id="salary" name ="salary" type="number"
-                            min="30000" max="500000" step="1000"
-                            required autocomplete="off"/>
+                        <input id="salary" name="salary" type="number"
+                               min="30000" max="500000" step="1000"
+                               required autocomplete="off">
                     </div>
 
-                    <!-- Radio buttons: the same name="type" makes them ONE
+                    <!-- RADIO GROUP: the same name="type" makes them ONE
                          group (only one can be picked). value = what gets
                          submitted. checked = the default choice.
-                         Wrapping the input inside its <label> links them
-                         without needing for/id.
-                         ! NOTE: a group of radios should be named by a
-                         ! <fieldset> + <legend>, not a <label> (a label
-                         ! without for="" isn't linked to anything). Move
-                         ! "Employment Type" into a <legend> inside the
-                         ! radio-group fieldset. -->
-                    <div class="field">
-                        <label>Employment Type</label>
-                        <fieldset class="radio-group">
-                            <label><input type="radio" name="type" value="full-time" checked /> Full-time</label>
-                            <label><input type="radio" name="type" value="part-time" /> Part-time</label>
-                            <label><input type="radio" name="type" value="contractor" /> Contractor</label>
-                        </fieldset>
-                    </div>
+                         The group is named by <fieldset> + <legend>, so
+                         screen readers say "Employment type, Full-time,
+                         radio button, 1 of 3".
+                         Wrapping each input inside its <label> links them
+                         without needing for/id. -->
+                    <fieldset class="radio-group">
+                        <legend>Employment type</legend>
+                        <label><input type="radio" name="type" value="full-time" checked> Full-time</label>
+                        <label><input type="radio" name="type" value="part-time"> Part-time</label>
+                        <label><input type="radio" name="type" value="contractor"> Contractor</label>
+                    </fieldset>
 
                     <!-- maxlength stops typing at 200 characters.
                          aria-describedby="notes-count" makes screen readers
@@ -135,23 +174,26 @@
                     <div class="field">
                         <label for="notes">Anything we should know?</label>
                         <textarea id="notes" name="notes" rows="4" maxlength="200" aria-describedby="notes-count"></textarea>
-                        <p id="notes-count">0/200</p>
+                        <p class="field__hint" id="notes-count">0/200</p>
                     </div>
 
                     <label class="checkbox">
-                        <input id="agree" type="checkbox" name="agree" required /> I agree to the handbook policies.
+                        <input id="agree" type="checkbox" name="agree" required> I agree to the handbook policies.
                     </label>
                 </fieldset>
 
-                <!-- Starts disabled. onboarding.js enables it when "I agree"
-                     is checked. -->
-                <button id="submit-btn" type="submit" class="btn btn--primary" disabled>Submit</button>
-                <!-- type="reset" clears the whole form.
-                     ! NOTE: id="reset" REPLACES the form's built-in
-                     ! form.reset() method (any control's id/name becomes a
-                     ! property of its form), which breaks form.reset() in
-                     ! onboarding.js. Rename it, e.g. id="clear-btn". -->
-                <button id="reset" type="reset" class="btn">Clear</button>
+                <div class="form-actions">
+                    <!-- Starts disabled. onboarding.js enables it when
+                         "I agree" is checked. -->
+                    <button id="submit-btn" type="submit" class="btn btn--primary" disabled>Submit</button>
+                    <!-- type="reset" clears the whole form.
+                         ! Never give a form control id/name "reset" or
+                         ! "submit": any control's id/name becomes a property
+                         ! of its form, so id="reset" would REPLACE the
+                         ! form.reset() method ("form.reset is not a
+                         ! function"). Hence id="clear-btn". -->
+                    <button id="clear-btn" type="reset" class="btn">Clear</button>
+                </div>
             </form>
 
             <!-- role="status": screen readers announce new messages here
@@ -162,6 +204,4 @@
             <ul id="new-hires"></ul>
         </main>
     </body>
-<!--
-     ! NOTE: the closing </html> tag is missing. Browsers forgive it, but
-     ! add it for completeness. -->
+</html>
