@@ -239,9 +239,20 @@
         </details>
 
         <details class="note" open>
+            <summary>Naming sections, and role fallbacks</summary>
+            <ul>
+                <li>A <code>&lt;section&gt;</code>'s heading does <strong>not</strong> automatically become its name. Link them: <code>&lt;section aria-labelledby="team-heading"&gt;</code> + <code>&lt;h2 id="team-heading"&gt;</code>. Only a <em>named</em> section becomes a "region" landmark that screen readers can jump to.</li>
+                <li><code>section</code>, <code>article</code>, <code>aside</code> and <code>nav</code> are <strong>sectioning content</strong>. (A "sectioning root" is a different thing: <code>body</code>, <code>blockquote</code>, <code>details</code>, <code>fieldset</code>, <code>figure</code>, <code>td</code>.)</li>
+                <li>If you can't use the element, a <code>role</code> gives the same meaning: <code>role="article"</code>, <code>role="complementary"</code> (= aside), <code>role="region"</code> + a label (= named section), <code>role="figure"</code>. Prefer the real element; ARIA is the fallback.</li>
+                <li><code>&lt;figcaption&gt;</code> has no role equivalent. With <code>role="figure"</code>, name it with <code>aria-labelledby</code> pointing at your caption text instead.</li>
+                <li>Why it matters: far more people rely on accessible HTML (screen readers, keyboards, voice control) than use any single non-Chrome browser, and the structure is the only way they can navigate.</li>
+            </ul>
+        </details>
+
+        <details class="note" open>
             <summary>figure, figcaption, time, address</summary>
             <ul>
-                <li><code>&lt;figure&gt;</code> + <code>&lt;figcaption&gt;</code>: an image, chart or code sample with a caption.</li>
+                <li><code>&lt;figure&gt;</code> + <code>&lt;figcaption&gt;</code>: something that <em>illustrates</em> the surrounding content (an image, chart, diagram or code sample), with a caption. It could move elsewhere on the page without breaking the text.</li>
                 <li><code>&lt;time datetime="2026-10-20"&gt;Oct 20&lt;/time&gt;</code>: a human date with a machine-readable value.</li>
                 <li><code>&lt;address&gt;</code>: contact information for the page or article author.</li>
             </ul>
